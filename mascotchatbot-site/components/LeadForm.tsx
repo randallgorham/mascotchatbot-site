@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-// 1) Go to https://web3forms.com, enter your email, copy the Access Key.
-// 2) Paste it here. Submissions will be emailed to that address. No account/login needed.
-const ACCESS_KEY = "REPLACE_WITH_YOUR_WEB3FORMS_ACCESS_KEY";
+// Leads are sent to the MascotChatbot location in GoHighLevel via this inbound webhook.
+const GHL_WEBHOOK =
+  "https://services.leadconnectorhq.com/hooks/tdPvZCqogPax3pstSXA8/webhook-trigger/2fe7d360-4cc7-4101-bde1-b3588511d8eb";
 
 export default function LeadForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
@@ -13,18 +13,15 @@ export default function LeadForm() {
     e.preventDefault();
     setStatus("sending");
     const form = e.currentTarget;
-    const data = new FormData(form);
-    data.append("access_key", ACCESS_KEY);
-    data.append("subject", "New MascotChatbot demo request");
-    data.append("from_name", "MascotChatbot website");
+    const fd = new FormData(form);
+    const body = new URLSearchParams();
+    body.set("email", String(fd.get("email") || ""));
+    body.set("business", String(fd.get("business") || ""));
+    body.set("source", "mascotchatbot.com");
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        body: data,
-      });
-      const json = await res.json();
-      setStatus(json.success ? "done" : "error");
-      if (json.success) form.reset();
+      await fetch(GHL_WEBHOOK, { method: "POST", mode: "no-cors", body });
+      setStatus("done");
+      form.reset();
     } catch {
       setStatus("error");
     }
@@ -61,7 +58,7 @@ export default function LeadForm() {
         {status === "sending" ? "Sending…" : "Get my free demo"}
       </button>
       {status === "error" && (
-        <span className="text-sm text-smoke">Something went wrong — try again or email us.</span>
+        <span className="text-sm text-smoke">Something went wrong — try again.</span>
       )}
     </form>
   );
