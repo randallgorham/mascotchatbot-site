@@ -31,7 +31,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b-2 border-ink bg-paper/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <a href="#top" className="flex items-center gap-2 text-lg font-bold tracking-tightest">
-            <svg width="30" height="30" viewBox="0 0 200 200" aria-hidden="true">
+            <svg width="60" height="60" viewBox="0 0 200 200" aria-hidden="true">
               <line x1="100" y1="22" x2="100" y2="6" stroke="#0A0A0A" strokeWidth="8" strokeLinecap="round" />
               <circle cx="100" cy="5" r="8" fill="#0A0A0A" />
               <rect x="20" y="22" width="160" height="126" rx="36" fill="#0A0A0A" />
