@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import MrAmp from "@/components/MrAmp";
 
 export const metadata: Metadata = {
   title: "MascotChatbot — Your brand, talking.",
@@ -20,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">{children}<MrAmp /></body>
     </html>
   );
 }

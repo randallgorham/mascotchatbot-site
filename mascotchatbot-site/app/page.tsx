@@ -1,4 +1,6 @@
 import MascotMock from "@/components/MascotMock";
+import LeadForm from "@/components/LeadForm";
+import OpenMascot from "@/components/OpenMascot";
 
 const NICHES = [
   "Electricians","Realtors","HVAC","Dentists","Law firms","Med-spas",
@@ -30,7 +32,7 @@ export default function Home() {
       {/* NAV */}
       <header className="sticky top-0 z-50 border-b-2 border-ink bg-paper/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-          <a href="#top" className="flex items-center gap-2 text-lg font-bold tracking-tightest">
+          <a href="#top" className="flex items-center gap-3 text-2xl font-bold tracking-tightest">
             <svg width="60" height="60" viewBox="0 0 200 200" aria-hidden="true">
               <line x1="100" y1="22" x2="100" y2="6" stroke="#0A0A0A" strokeWidth="8" strokeLinecap="round" />
               <circle cx="100" cy="5" r="8" fill="#0A0A0A" />
@@ -70,9 +72,9 @@ export default function Home() {
             <a href="#cta" className="rounded-full bg-ink px-7 py-3 font-semibold text-paper transition hover:opacity-80">
               Get your mascot →
             </a>
-            <a href="#demos" className="rounded-full border-2 border-ink px-7 py-3 font-semibold transition hover:bg-ink hover:text-paper">
+            <OpenMascot className="rounded-full border-2 border-ink px-7 py-3 font-semibold transition hover:bg-ink hover:text-paper">
               See it talk
-            </a>
+            </OpenMascot>
           </div>
         </div>
         <div className="flex justify-center md:justify-end">
@@ -112,21 +114,33 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 py-24">
           <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
             <h2 className="text-4xl font-bold tracking-tightest md:text-6xl">Meet a few.</h2>
-            <p className="max-w-sm text-smoke">Every mascot is custom — your character, your voice, your business. Tap one to chat (live demos coming).</p>
+            <p className="max-w-sm text-smoke"><b className="text-ink">Mr Amp is live right now</b> — click him in the bottom-right corner (turn your sound on), or tap his card. Every mascot is custom to your brand, voice, and business.</p>
           </div>
           <div className="grid gap-px border-2 border-ink bg-ink sm:grid-cols-2 lg:grid-cols-4">
-            {DEMOS.map((d) => (
-              <div key={d.name} className="group flex aspect-[3/4] flex-col justify-between bg-paper p-6 transition hover:bg-ink hover:text-paper">
-                <span className="text-xs font-semibold uppercase tracking-widest text-smoke group-hover:text-paper">{d.tag}</span>
-                <div className="flex flex-1 items-center justify-center">
-                  <div className="h-24 w-24 rounded-full border-2 border-current animate-floaty" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xl font-bold">{d.name}</span>
-                  <span className="text-sm opacity-60">chat →</span>
-                </div>
-              </div>
-            ))}
+            {DEMOS.map((d) => {
+              const live = d.name === "Mr Amp";
+              const inner = (
+                <>
+                  <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-smoke group-hover:text-paper">
+                    {d.tag}
+                    {live && <span className="rounded-full bg-[#e3342b] px-2 py-0.5 text-[10px] text-paper">LIVE</span>}
+                  </span>
+                  <span className="flex flex-1 items-center justify-center">
+                    <span className="h-24 w-24 rounded-full border-2 border-current animate-floaty" />
+                  </span>
+                  <span className="flex items-center justify-between">
+                    <span className="text-xl font-bold">{d.name}</span>
+                    <span className="text-sm opacity-60">{live ? "talk →" : "soon"}</span>
+                  </span>
+                </>
+              );
+              const cls = "group flex aspect-[3/4] w-full flex-col justify-between bg-paper p-6 text-left transition hover:bg-ink hover:text-paper";
+              return live ? (
+                <OpenMascot key={d.name} className={cls}>{inner}</OpenMascot>
+              ) : (
+                <div key={d.name} className={cls + " opacity-70"}>{inner}</div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -169,17 +183,7 @@ export default function Home() {
           <p className="mx-auto mt-7 max-w-xl text-lg text-smoke">
             Tell us your business. We'll build a talking demo of your own mascot — free — before you pay a cent.
           </p>
-          <form className="mx-auto mt-10 flex max-w-md flex-col gap-3 sm:flex-row">
-            <input
-              type="email"
-              required
-              placeholder="you@business.com"
-              className="flex-1 rounded-full border-2 border-paper bg-transparent px-5 py-3 text-paper placeholder:text-smoke focus:outline-none"
-            />
-            <button className="rounded-full bg-paper px-7 py-3 font-semibold text-ink transition hover:opacity-80">
-              Get my free demo
-            </button>
-          </form>
+          <LeadForm />
         </div>
       </section>
 
