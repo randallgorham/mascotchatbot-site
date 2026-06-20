@@ -1,6 +1,7 @@
 import MascotMock from "@/components/MascotMock";
 import LeadForm from "@/components/LeadForm";
 import OpenMascot from "@/components/OpenMascot";
+import MobileNav from "@/components/MobileNav";
 
 const NICHES = [
   "Electricians","Realtors","HVAC","Dentists","Law firms","Med-spas",
@@ -69,9 +70,35 @@ const FAQS = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-paper text-ink">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                name: "MascotChatbot",
+                url: "https://mascotchatbot.com",
+                logo: "https://mascotchatbot.com/icon.svg",
+                description: "Custom animated AI mascots that greet website visitors, answer their questions, and book jobs 24/7.",
+              },
+              { "@type": "WebSite", name: "MascotChatbot", url: "https://mascotchatbot.com" },
+              {
+                "@type": "FAQPage",
+                mainEntity: FAQS.map((f) => ({
+                  "@type": "Question",
+                  name: f.q,
+                  acceptedAnswer: { "@type": "Answer", text: f.a },
+                })),
+              },
+            ],
+          }),
+        }}
+      />
       {/* NAV */}
       <header className="sticky top-0 z-50 border-b-2 border-ink bg-paper/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <a href="#top" className="flex items-center gap-3 text-2xl font-bold tracking-tightest">
             <svg width="60" height="60" viewBox="0 0 200 200" aria-hidden="true">
               <line x1="100" y1="22" x2="100" y2="6" stroke="#0A0A0A" strokeWidth="8" strokeLinecap="round" />
@@ -90,9 +117,10 @@ export default function Home() {
             <a href="#pricing" className="hover:opacity-60">Pricing</a>
             <a href="#faq" className="hover:opacity-60">FAQ</a>
           </nav>
-          <a href="#cta" className="rounded-full border-2 border-ink bg-ink px-5 py-2 text-sm font-semibold text-paper transition hover:bg-paper hover:text-ink">
+          <a href="#cta" className="hidden rounded-full border-2 border-ink bg-ink px-5 py-2 text-sm font-semibold text-paper transition hover:bg-paper hover:text-ink md:inline-block">
             Book a demo
           </a>
+          <MobileNav />
         </div>
       </header>
 
@@ -135,7 +163,7 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how" className="mx-auto max-w-7xl px-5 py-24">
+      <section id="how" className="mx-auto max-w-7xl scroll-mt-24 px-5 py-24">
         <h2 className="mb-14 max-w-2xl text-4xl font-bold tracking-tightest md:text-6xl">
           A salesperson that never sleeps.
         </h2>
@@ -151,7 +179,7 @@ export default function Home() {
       </section>
 
       {/* WHY A MASCOT */}
-      <section id="why" className="border-t-2 border-ink bg-paper">
+      <section id="why" className="scroll-mt-24 border-t-2 border-ink bg-paper">
         <div className="mx-auto max-w-7xl px-5 py-24">
           <h2 className="mb-3 max-w-3xl text-4xl font-bold tracking-tightest md:text-6xl">
             A mascot converts. A chat box doesn&apos;t.
@@ -196,7 +224,7 @@ export default function Home() {
       </section>
 
       {/* DEMOS / GALLERY */}
-      <section id="demos" className="border-t-2 border-ink bg-paper">
+      <section id="demos" className="scroll-mt-24 border-t-2 border-ink bg-paper">
         <div className="mx-auto max-w-7xl px-5 py-24">
           <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
             <h2 className="text-4xl font-bold tracking-tightest md:text-6xl">Meet the family.</h2>
@@ -260,7 +288,7 @@ export default function Home() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="border-t-2 border-ink">
+      <section id="pricing" className="scroll-mt-24 border-t-2 border-ink">
         <div className="mx-auto max-w-7xl px-5 py-24">
           <h2 className="mb-3 text-4xl font-bold tracking-tightest md:text-6xl">Simple pricing.</h2>
           <p className="mb-14 max-w-lg text-smoke">A one-time build, then a flat monthly to host, monitor, and keep it sharp. Cancel anytime.</p>
@@ -319,7 +347,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="border-t-2 border-ink bg-paper">
+      <section id="faq" className="scroll-mt-24 border-t-2 border-ink bg-paper">
         <div className="mx-auto max-w-3xl px-5 py-24">
           <h2 className="mb-14 text-4xl font-bold tracking-tightest md:text-6xl">Questions, answered.</h2>
           <div className="divide-y divide-ink/10 border-y border-ink/10">
@@ -337,7 +365,7 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section id="cta" className="bg-ink text-paper">
+      <section id="cta" className="scroll-mt-24 bg-ink text-paper">
         <div className="mx-auto max-w-7xl px-5 py-28 text-center">
           <h2 className="mx-auto max-w-4xl text-5xl font-bold leading-[0.9] tracking-tightest md:text-8xl">
             Put a mascot on your site.
