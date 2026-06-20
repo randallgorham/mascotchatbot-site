@@ -13,11 +13,26 @@ const STEPS = [
   { n: "03", t: "We host it on your site", d: "One line of code. It captures leads and books jobs 24/7. You do nothing." },
 ];
 
-const DEMOS = [
-  { name: "Mr Amp", tag: "Electrician" },
-  { name: "Ava", tag: "Realtor" },
-  { name: "Dr. Bright", tag: "Dental" },
-  { name: "Coach Rex", tag: "Fitness" },
+// Full character roster shown in the gallery. Mr Amp is the live, click-to-talk demo.
+const CHARACTERS = [
+  { img: "01-realtor-female-classic", name: "Ava", niche: "Realtor" },
+  { img: "02-realtor-female-glam", name: "Bianca", niche: "Realtor" },
+  { img: "03-realtor-male", name: "Marcus", niche: "Realtor" },
+  { img: "04-dentist-male", name: "Dr. Bright", niche: "Dental" },
+  { img: "12-dentist-female", name: "Dr. Dana", niche: "Dental" },
+  { img: "10-doctor-male", name: "Dr. Cole", niche: "Medical" },
+  { img: "13-doctor-female", name: "Dr. Maya", niche: "Medical" },
+  { img: "16-nurse-female", name: "Nina", niche: "Nursing" },
+  { img: "15-medspa-female", name: "Skye", niche: "Med-spa" },
+  { img: "05-fitness-coach-male", name: "Coach Rex", niche: "Fitness" },
+  { img: "14-fitness-coach-female", name: "Coach Tara", niche: "Fitness" },
+  { img: "18-gym-instructor-female-blonde", name: "Brooke", niche: "Gym" },
+  { img: "06-plumber-home-services-male", name: "Max", niche: "Home Services" },
+  { img: "08-electrician-male", name: "Sparky", niche: "Electrician" },
+  { img: "19-mechanic-male", name: "Gus", niche: "Auto Repair" },
+  { img: "09-contractor-male-cap-vest", name: "Bo", niche: "Contractor" },
+  { img: "11-general-contractor-male", name: "Hank", niche: "General Contractor" },
+  { img: "20-attorney-male", name: "Vance", niche: "Law Firm" },
 ];
 
 const TIERS = [
@@ -109,39 +124,55 @@ export default function Home() {
         </div>
       </section>
 
-      {/* DEMOS */}
+      {/* DEMOS / GALLERY */}
       <section id="demos" className="border-t-2 border-ink bg-paper">
         <div className="mx-auto max-w-7xl px-5 py-24">
           <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
-            <h2 className="text-4xl font-bold tracking-tightest md:text-6xl">Meet a few.</h2>
-            <p className="max-w-sm text-smoke"><b className="text-ink">Mr Amp is live right now</b> — click him in the bottom-right corner (turn your sound on), or tap his card. Every mascot is custom to your brand, voice, and business.</p>
+            <h2 className="text-4xl font-bold tracking-tightest md:text-6xl">Meet the family.</h2>
+            <p className="max-w-sm text-smoke"><b className="text-ink">Mr Amp is live right now</b> — click him in the bottom-right corner (turn your sound on), or tap his card. Every mascot below is custom to a brand, voice, and business.</p>
           </div>
-          <div className="grid gap-px border-2 border-ink bg-ink sm:grid-cols-2 lg:grid-cols-4">
-            {DEMOS.map((d) => {
-              const live = d.name === "Mr Amp";
-              const inner = (
-                <>
-                  <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-smoke group-hover:text-paper">
-                    {d.tag}
-                    {live && <span className="rounded-full bg-[#e3342b] px-2 py-0.5 text-[10px] text-paper">LIVE</span>}
-                  </span>
-                  <span className="flex flex-1 items-center justify-center">
-                    <span className="h-24 w-24 rounded-full border-2 border-current animate-floaty" />
-                  </span>
-                  <span className="flex items-center justify-between">
-                    <span className="text-xl font-bold">{d.name}</span>
-                    <span className="text-sm opacity-60">{live ? "talk →" : "soon"}</span>
-                  </span>
-                </>
-              );
-              const cls = "group flex aspect-[3/4] w-full flex-col justify-between bg-paper p-6 text-left transition hover:bg-ink hover:text-paper";
-              return live ? (
-                <OpenMascot key={d.name} className={cls}>{inner}</OpenMascot>
-              ) : (
-                <div key={d.name} className={cls + " opacity-70"}>{inner}</div>
-              );
-            })}
+
+          {/* Mr Amp — live demo */}
+          <OpenMascot className="group mb-10 flex w-full items-center gap-6 rounded-3xl border-2 border-ink bg-ink p-6 text-left text-paper transition hover:opacity-90 md:p-8">
+            <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-[#e3342b]">
+              <svg width="58" height="58" viewBox="0 0 200 200" aria-hidden="true">
+                <line x1="100" y1="22" x2="100" y2="6" stroke="#fff" strokeWidth="8" strokeLinecap="round" />
+                <circle cx="100" cy="5" r="8" fill="#fff" />
+                <rect x="20" y="22" width="160" height="126" rx="36" fill="#fff" />
+                <path d="M50 134 L50 180 L94 140 Z" fill="#fff" />
+                <circle cx="74" cy="76" r="13" fill="#e3342b" />
+                <circle cx="128" cy="76" r="13" fill="#e3342b" />
+                <path d="M70 104 q31 26 62 0" stroke="#e3342b" strokeWidth="11" fill="none" strokeLinecap="round" />
+              </svg>
+            </span>
+            <span className="flex-1">
+              <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-smoke">
+                Electrician <span className="rounded-full bg-[#e3342b] px-2 py-0.5 text-[10px] text-paper">LIVE</span>
+              </span>
+              <span className="mt-1 block text-3xl font-bold tracking-tight">Mr Amp</span>
+              <span className="mt-1 block text-smoke">The fully animated, talking demo — click to hear him pitch.</span>
+            </span>
+            <span className="hidden shrink-0 text-lg font-semibold md:block">talk to him →</span>
+          </OpenMascot>
+
+          {/* Full roster */}
+          <div className="grid grid-cols-2 gap-px border-2 border-ink bg-ink sm:grid-cols-3 lg:grid-cols-6">
+            {CHARACTERS.map((c) => (
+              <div key={c.img} className="group flex aspect-[3/4] flex-col bg-paper p-3 text-left transition hover:bg-black/5">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-smoke">{c.niche}</span>
+                <span className="flex flex-1 items-center justify-center">
+                  <img
+                    src={`/mascots/${c.img}.jpg`}
+                    alt={`${c.name} — ${c.niche} mascot`}
+                    loading="lazy"
+                    className="max-h-full w-auto object-contain mix-blend-multiply"
+                  />
+                </span>
+                <span className="text-lg font-bold">{c.name}</span>
+              </div>
+            ))}
           </div>
+          <p className="mt-6 text-sm text-smoke">Don&apos;t see your industry? We build any character for any business — that&apos;s the whole point.</p>
         </div>
       </section>
 
@@ -150,22 +181,31 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 py-24">
           <h2 className="mb-3 text-4xl font-bold tracking-tightest md:text-6xl">Simple pricing.</h2>
           <p className="mb-14 max-w-lg text-smoke">A one-time build, then a flat monthly to host, monitor, and keep it sharp. Cancel anytime.</p>
-          <div className="grid gap-px border-2 border-ink bg-ink md:grid-cols-3">
+          <div className="grid items-start gap-6 md:grid-cols-3">
             {TIERS.map((t) => (
-              <div key={t.name} className={`flex flex-col bg-paper p-8 ${t.featured ? "md:-my-4 md:border-2 md:border-ink md:shadow-[10px_10px_0_0_#0a0a0a]" : ""}`}>
-                {t.featured && <span className="mb-4 inline-block w-fit bg-ink px-3 py-1 text-xs font-bold uppercase tracking-widest text-paper">Most popular</span>}
+              <div key={t.name} className={`flex h-full flex-col rounded-3xl border p-8 transition ${t.featured ? "border-ink bg-ink text-paper shadow-xl md:-mt-3 md:scale-[1.03]" : "border-ink/15 bg-paper shadow-sm hover:-translate-y-1 hover:shadow-md"}`}>
+                {t.featured
+                  ? <span className="mb-4 inline-block w-fit rounded-full bg-paper px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-ink">Most popular</span>
+                  : <span className="mb-4 inline-block w-fit rounded-full border border-ink/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-smoke">{t.name === "Starter" ? "Get started" : "Premium"}</span>}
                 <h3 className="text-2xl font-bold tracking-tight">{t.name}</h3>
                 <div className="mt-4 flex items-end gap-1">
-                  <span className="text-5xl font-bold tracking-tightest">{t.price}</span>
-                  <span className="mb-1 text-smoke">/mo</span>
+                  <span className="text-6xl font-bold tracking-tightest">{t.price}</span>
+                  <span className={`mb-2 ${t.featured ? "text-paper/60" : "text-smoke"}`}>/mo</span>
                 </div>
-                <p className="mt-1 text-sm text-smoke">{t.setup} setup</p>
-                <ul className="mt-6 flex-1 space-y-3 text-sm">
+                <p className={`mt-1 text-sm ${t.featured ? "text-paper/60" : "text-smoke"}`}>{t.setup} one-time setup</p>
+                <div className={`my-6 h-px w-full ${t.featured ? "bg-paper/20" : "bg-ink/10"}`} />
+                <ul className="flex-1 space-y-3.5 text-sm">
                   {t.feats.map((f) => (
-                    <li key={f} className="flex gap-2"><span className="font-bold">—</span>{f}</li>
+                    <li key={f} className="flex items-start gap-2.5">
+                      <svg width="18" height="18" viewBox="0 0 20 20" className="mt-0.5 shrink-0" aria-hidden="true">
+                        <circle cx="10" cy="10" r="10" fill={t.featured ? "#ffffff" : "#0A0A0A"} />
+                        <path d="M5.5 10.5l2.8 2.8 6-6.4" fill="none" stroke={t.featured ? "#0A0A0A" : "#ffffff"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      {f}
+                    </li>
                   ))}
                 </ul>
-                <a href="#cta" className={`mt-8 rounded-full px-6 py-3 text-center font-semibold transition ${t.featured ? "bg-ink text-paper hover:opacity-80" : "border-2 border-ink hover:bg-ink hover:text-paper"}`}>
+                <a href="#cta" className={`mt-8 rounded-full px-6 py-3.5 text-center font-semibold transition ${t.featured ? "bg-paper text-ink hover:opacity-90" : "bg-ink text-paper hover:opacity-90"}`}>
                   Choose {t.name}
                 </a>
               </div>
@@ -181,7 +221,7 @@ export default function Home() {
             Put a mascot on your site.
           </h2>
           <p className="mx-auto mt-7 max-w-xl text-lg text-smoke">
-            Tell us your business. We'll build a talking demo of your own mascot — free — before you pay a cent.
+            Tell us your business. We&apos;ll build a talking demo of your own mascot — free — before you pay a cent.
           </p>
           <LeadForm />
         </div>
