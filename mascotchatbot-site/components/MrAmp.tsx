@@ -12,29 +12,53 @@ export default function MrAmp() {
 
     const CFG = {
       greeting:
-        "Hey! I'm a MascotChatbot demo. This is exactly what we put on your site — a talking mascot that answers visitors and books jobs. Ask me anything!",
+        "Hey! I'm Mr Amp — a live MascotChatbot demo. This is exactly what we put on your site: a talking mascot that answers visitors and books jobs. Ask me anything!",
       quick: ["What is this?", "How much?", "How does it work?", "Book a demo"],
+      // Offline fallback answers (used only if the AI brain can't be reached)
       answers: [
         { k: ["what", "this", "who are you", "explain"], a: "We design a custom animated mascot for your brand, give it an AI brain trained on your business, and host it on your site. It chats with visitors 24/7, captures leads, and books appointments — done for you." },
-        { k: ["how much", "price", "pricing", "cost", "rates"], a: "Plans start around $300 a month with a one-time setup. Most businesses pick the Pro plan at about $600 a month. One extra booked job usually covers it. Want the details?" },
-        { k: ["how", "work", "works", "build", "setup"], a: "Three steps: we design the mascot (your character or one we make), train it on your business so answers are accurate, then drop it on your site with one line of code. You do nothing." },
+        { k: ["how much", "price", "pricing", "cost", "rates"], a: "Plans start around $300 a month with a one-time setup. Most businesses pick the Pro plan at about $600 a month. One extra booked job usually covers it." },
+        { k: ["how", "work", "works", "build", "setup"], a: "Three steps: we design the mascot, train it on your business so answers are accurate, then drop it on your site with one line of code. You do nothing." },
         { k: ["book", "demo", "call", "talk to", "human", "contact", "start"], a: "Love it. Scroll down and drop your email in the form — we'll build a free talking demo of YOUR mascot before you pay a cent. ⚡" },
-        { k: ["realtor", "electrician", "dentist", "who is it for", "industries", "niche"], a: "Home services, real estate, dental, med-spas, law firms — anyone with a website who wants to turn visitors into booked jobs. If you've got traffic, a mascot converts more of it." },
-        { k: ["voice", "talk", "speak", "sound"], a: "Yep — I can talk out loud with a real voice and my mouth moves in sync. That's the Voice tier. Turn your sound on and ask me again!" },
-        { k: ["thanks", "cool", "awesome", "great", "nice"], a: "Anytime! ⚡ Want me to point you to the demo signup?" },
-        { k: ["hi", "hey", "hello", "yo"], a: "Hey there! ⚡ I'm the MascotChatbot demo — ask me what we do, pricing, or how to get one." },
+        { k: ["hi", "hey", "hello", "yo"], a: "Hey there! ⚡ Ask me what we do, pricing, or how to get one." },
       ],
-      fallback:
-        "Good question! I can tell you what MascotChatbot does, pricing, how it works, or get you a free demo. What would you like?",
+      fallback: "Good question! I can tell you what MascotChatbot does, pricing, how it works, or get you a free demo. What would you like?",
     };
 
     const W = r;
     const STAGE = $("#amp-stage"), BODY = $("#amp-body"), JAW = $("#amp-jaw"),
-      BUBBLE = $("#amp-bubble"), SAY = $("#amp-say"), YOU = $("#amp-you"),
+      SAY = $("#amp-say"), YOU = $("#amp-you"),
       QUICK = $("#amp-quick"), FORM = $("#amp-form") as HTMLFormElement | null,
       TEXT = $("#amp-text") as HTMLInputElement | null, MUTE = $("#amp-mute"),
-      LIDR = $("#amp-lid-r"), HINT = $("#amp-hint");
-    let started = false, muted = false, speaking = false, voice: SpeechSynthesisVoice | null = null, hintTimer: number;
+      MIC = $("#amp-mic"), LIDR = $("#amp-lid-r"), HINT = $("#amp-hint");
+    let started = false, muted = false, speaking = false, listening = false, hintTimer: number;
+    let voice: SpeechSynthesisVoice | null = null;
+    const history: { role: string; content: string }[] = [];
+
+    // ---- audio + lip sync ----
+    let audioCtx: AudioContext | null = null;
+    let analyser: AnalyserNode | null = null;
+    let curAudio: HTMLAudioElement | null = null;
+    function ensureCtx() {
+      try {
+        const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (AC && !audioCtx) audioCtx = new AC();
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      } catch {}
+    }
+    function stopAudio() {
+      if (curAudio) { try { curAudio.pause(); } catch {} curAudio = null; }
+    }
+    function lipLoop() {
+      if (!speaking || !analyser) return;
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(data);
+      let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i];
+      const avg = sum / data.length;
+      const open = Math.max(0, Math.min(13, (avg - 6) / 9));
+      if (JAW) JAW.style.transform = "translateY(" + open.toFixed(1) + "px)";
+      requestAnimationFrame(lipLoop);
+    }
 
     function pickVoice() {
       const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
@@ -52,36 +76,65 @@ export default function MrAmp() {
       window.setTimeout(loopJaw, 65 + Math.random() * 70);
     }
     function talkJaw(on: boolean) {
-      if (on) { speaking = true; BODY?.classList.add("amp-talking"); loopJaw(); }
+      if (on) { speaking = true; BODY?.classList.add("amp-talking"); }
       else { speaking = false; BODY?.classList.remove("amp-talking"); if (JAW) JAW.style.transform = "translateY(0)"; }
     }
     function wink() { LIDR?.classList.add("amp-winking"); window.setTimeout(() => LIDR?.classList.remove("amp-winking"), 230); }
     function nod() { BODY?.classList.remove("amp-nodding"); void BODY?.offsetWidth; BODY?.classList.add("amp-nodding"); window.setTimeout(() => BODY?.classList.remove("amp-nodding"), 620); }
 
-    function flapFor(t: string) { talkJaw(true); window.setTimeout(() => talkJaw(false), Math.max(900, t.length * 42)); }
-    function say(text: string) {
+    function flapFor(t: string) { talkJaw(true); loopJaw(); window.setTimeout(() => talkJaw(false), Math.max(900, t.length * 42)); }
+
+    function speakBrowser(text: string) {
+      if (!window.speechSynthesis) { flapFor(text); return; }
+      try {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        if (voice) u.voice = voice; u.rate = 1.04;
+        u.onstart = () => { talkJaw(true); loopJaw(); }; u.onend = () => talkJaw(false); u.onerror = () => talkJaw(false);
+        speechSynthesis.speak(u);
+      } catch { flapFor(text); }
+    }
+
+    async function say(text: string) {
       if (SAY) SAY.textContent = text; nod();
-      if (/thanks|anytime|love it|hey there/i.test(text)) window.setTimeout(wink, 260);
-      if (window.speechSynthesis && !muted) {
+      if (/thanks|anytime|love it|hey there|let's/i.test(text)) window.setTimeout(wink, 260);
+      if (muted) { flapFor(text); return; }
+      ensureCtx();
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }),
+        });
+        if (!res.ok || res.status === 204) { speakBrowser(text); return; }
+        const buf = await res.arrayBuffer();
+        if (!buf || buf.byteLength < 200) { speakBrowser(text); return; }
+        stopAudio();
+        const url = URL.createObjectURL(new Blob([buf], { type: "audio/mpeg" }));
+        const a = new Audio(url); curAudio = a; a.crossOrigin = "anonymous";
         try {
-          speechSynthesis.cancel();
-          const u = new SpeechSynthesisUtterance(text);
-          if (voice) u.voice = voice; u.rate = 1.04;
-          u.onstart = () => talkJaw(true); u.onend = () => talkJaw(false); u.onerror = () => talkJaw(false);
-          speechSynthesis.speak(u);
-        } catch { flapFor(text); }
-      } else flapFor(text);
+          ensureCtx();
+          if (audioCtx) {
+            const src = audioCtx.createMediaElementSource(a);
+            analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
+            src.connect(analyser); analyser.connect(audioCtx.destination);
+          }
+        } catch { analyser = null; }
+        a.onplay = () => { speaking = true; BODY?.classList.add("amp-talking"); if (analyser) lipLoop(); else loopJaw(); };
+        a.onended = () => { talkJaw(false); URL.revokeObjectURL(url); };
+        a.onerror = () => { talkJaw(false); speakBrowser(text); };
+        await a.play();
+      } catch { speakBrowser(text); }
     }
 
     function open() {
       if (W.getAttribute("data-state") === "open") return;
       W.setAttribute("data-state", "open");
+      ensureCtx();
       window.clearTimeout(hintTimer); if (HINT) HINT.style.opacity = "0";
       BODY?.classList.remove("amp-intro"); void BODY?.offsetWidth; BODY?.classList.add("amp-intro");
-      if (!started) { started = true; renderQuick(); window.setTimeout(() => say(CFG.greeting), 420); }
+      if (!started) { started = true; renderQuick(); window.setTimeout(() => say(CFG.greeting), 380); }
       window.setTimeout(() => TEXT?.focus(), 360);
     }
-    function close() { W.setAttribute("data-state", "idle"); if (window.speechSynthesis) speechSynthesis.cancel(); talkJaw(false); }
+    function close() { W.setAttribute("data-state", "idle"); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); talkJaw(false); }
 
     function renderQuick() {
       if (!QUICK) return; QUICK.innerHTML = "";
@@ -90,26 +143,58 @@ export default function MrAmp() {
         b.addEventListener("click", () => send(q)); QUICK.appendChild(b);
       });
     }
-    function getReply(text: string) {
+    function offlineReply(text: string) {
       const q = " " + text.toLowerCase().replace(/[^a-z0-9\s]/g, " ") + " ";
       for (const s of CFG.answers) for (const k of s.k) if (q.includes(" " + k + " ")) return s.a;
       return CFG.fallback;
     }
-    function send(text: string) {
+    async function send(text: string) {
       text = (text || "").trim(); if (!text) return;
       if (YOU) YOU.textContent = "You: " + text; if (SAY) SAY.textContent = "…"; if (TEXT) TEXT.value = "";
-      window.setTimeout(() => say(getReply(text)), 460);
+      history.push({ role: "user", content: text });
+      ensureCtx();
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history }),
+        });
+        if (!res.ok) throw new Error("bad");
+        const data = await res.json();
+        const reply = (data && data.reply) ? String(data.reply) : offlineReply(text);
+        history.push({ role: "assistant", content: reply });
+        say(reply);
+      } catch {
+        say(offlineReply(text));
+      }
+    }
+
+    // ---- mic / speech-to-text ----
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    let recog: any = null;
+    function toggleMic() {
+      if (!SR) { say("Voice input isn't supported in this browser — just type to me instead!"); return; }
+      if (listening && recog) { try { recog.stop(); } catch {} return; }
+      ensureCtx();
+      recog = new SR(); recog.lang = "en-US"; recog.interimResults = false; recog.maxAlternatives = 1;
+      recog.onstart = () => { listening = true; MIC?.classList.add("amp-live"); };
+      recog.onresult = (e: any) => { const t = e.results[0][0].transcript; if (t) send(t); };
+      recog.onerror = () => { listening = false; MIC?.classList.remove("amp-live"); };
+      recog.onend = () => { listening = false; MIC?.classList.remove("amp-live"); };
+      try { recog.start(); } catch {}
     }
 
     STAGE?.addEventListener("click", open);
     $(".amp-x")?.addEventListener("click", (e) => { e.stopPropagation(); close(); });
     FORM?.addEventListener("submit", (e) => { e.preventDefault(); if (TEXT) send(TEXT.value); });
-    MUTE?.addEventListener("click", () => { muted = !muted; MUTE.classList.toggle("amp-off", muted); MUTE.innerHTML = muted ? "&#128263;" : "&#128266;"; if (muted && window.speechSynthesis) speechSynthesis.cancel(); });
+    MIC?.addEventListener("click", toggleMic);
+    MUTE?.addEventListener("click", () => {
+      muted = !muted; MUTE.classList.toggle("amp-off", muted); MUTE.innerHTML = muted ? "&#128263;" : "&#128266;";
+      if (muted) { if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); talkJaw(false); }
+    });
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
     document.addEventListener("keydown", onKey);
     hintTimer = window.setTimeout(() => { if (W.getAttribute("data-state") !== "open" && HINT) HINT.style.opacity = "1"; }, 3500);
 
-    return () => { document.removeEventListener("keydown", onKey); if (window.speechSynthesis) speechSynthesis.cancel(); };
+    return () => { document.removeEventListener("keydown", onKey); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); };
   }, []);
 
   return (
@@ -126,6 +211,9 @@ export default function MrAmp() {
         <div className="amp-quick" id="amp-quick"></div>
         <form className="amp-input" id="amp-form" autoComplete="off">
           <input id="amp-text" type="text" placeholder="Ask the mascot…" aria-label="Ask the mascot" />
+          <button type="button" className="amp-mic" id="amp-mic" aria-label="Talk to the mascot">
+            <svg viewBox="0 0 24 24" width="17" height="17"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z" fill="currentColor" /><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" /></svg>
+          </button>
           <button type="submit" className="amp-send" aria-label="Send">
             <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 11.5 21 3l-8.5 18-2.2-7.3z" fill="currentColor" /></svg>
           </button>
@@ -208,8 +296,12 @@ const CSS = `
 .amp-quick{ display:flex; flex-wrap:wrap; gap:6px; width:100%; }
 .amp-chip{ border:1.5px solid #d9dee5; background:#fff; color:var(--ink); font-size:12px; font-weight:600; padding:6px 10px; border-radius:16px; cursor:pointer; transition:all .16s; box-shadow:0 3px 10px rgba(0,0,0,.06); }
 .amp-chip:hover{ border-color:var(--red); color:var(--red); transform:translateY(-1px); }
-.amp-input{ display:flex; gap:7px; width:100%; background:#fff; border:1.5px solid #d9dee5; border-radius:24px; padding:5px 5px 5px 14px; box-shadow:0 8px 22px rgba(0,0,0,.12); }
+.amp-input{ display:flex; gap:6px; width:100%; background:#fff; border:1.5px solid #d9dee5; border-radius:24px; padding:5px 5px 5px 14px; box-shadow:0 8px 22px rgba(0,0,0,.12); align-items:center; }
 #amp-text{ flex:1; border:none; outline:none; font-size:14px; background:none; color:var(--ink); }
+.amp-mic{ width:34px; height:34px; flex:0 0 auto; border:1.5px solid #d9dee5; border-radius:50%; cursor:pointer; color:var(--ink); background:#fff; display:grid; place-items:center; transition:all .18s; }
+.amp-mic:hover{ border-color:var(--red); color:var(--red); }
+.amp-mic.amp-live{ background:var(--red); color:#fff; border-color:var(--red); animation:ampMic 1s ease-in-out infinite; }
+@keyframes ampMic{0%,100%{box-shadow:0 0 0 0 rgba(227,52,43,.5)}50%{box-shadow:0 0 0 7px rgba(227,52,43,0)}}
 .amp-send{ width:36px; height:36px; flex:0 0 auto; border:none; border-radius:50%; cursor:pointer; color:#fff; background:linear-gradient(160deg,var(--red),var(--red-d)); display:grid; place-items:center; transition:transform .2s; box-shadow:0 4px 11px rgba(227,52,43,.4); }
 .amp-send:hover{ transform:scale(1.08) rotate(8deg); }
 @media (max-width:560px){ #amp{right:10px;bottom:8px} .amp-body{width:120px;height:210px} .amp-panel{right:112px;width:62vw} }
