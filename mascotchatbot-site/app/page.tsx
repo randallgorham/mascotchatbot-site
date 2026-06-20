@@ -158,17 +158,17 @@ export default function Home() {
           {/* Full roster */}
           <div className="grid grid-cols-2 gap-px border-2 border-ink bg-ink sm:grid-cols-3 lg:grid-cols-6">
             {CHARACTERS.map((c) => (
-              <div key={c.img} className="group flex aspect-[3/4] flex-col bg-paper p-3 text-left transition hover:bg-black/5">
+              <div key={c.img} className="group flex aspect-[3/4] flex-col overflow-hidden bg-paper p-3 text-left">
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-smoke">{c.niche}</span>
-                <span className="flex flex-1 items-center justify-center">
+                <span className="flex flex-1 items-center justify-center overflow-hidden py-1">
                   <img
                     src={`/mascots/${c.img}.jpg`}
                     alt={`${c.name} — ${c.niche} mascot`}
                     loading="lazy"
-                    className="max-h-full w-auto object-contain mix-blend-multiply"
+                    className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 ease-out group-hover:scale-110"
                   />
                 </span>
-                <span className="text-lg font-bold">{c.name}</span>
+                <span className="text-base font-bold">{c.name}</span>
               </div>
             ))}
           </div>
