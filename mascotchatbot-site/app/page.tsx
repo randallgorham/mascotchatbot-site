@@ -41,6 +41,31 @@ const TIERS = [
   { name: "Voice", setup: "$4,500+", price: "$1,100", feats: ["Talking voice mascot", "Multi-page knowledge", "Custom integrations", "A/B tuning", "Priority support"] },
 ];
 
+const STATS = [
+  { n: "24/7", l: "Always answering" },
+  { n: "<2s", l: "Average reply time" },
+  { n: "100%", l: "Of visitors greeted" },
+  { n: "0", l: "Leads missed after hours" },
+];
+
+const CHAT_CONS = ["Sits silent until someone clicks it", "Looks like every other website", "Feels like tech support", "Easy to scroll past and ignore"];
+const MASCOT_PROS = ["Greets and talks to every visitor", "100% your brand and personality", "Feels like a real person", "Impossible to miss — and asks for the booking"];
+
+const TESTIMONIALS = [
+  { q: "It booked three jobs the first weekend — while we were closed.", a: "Owner", b: "Roofing company" },
+  { q: "Like having a receptionist who never clocks out or calls in sick.", a: "Agent", b: "Real estate" },
+  { q: "Zero effort on our end. They built it, host it, and keep it sharp.", a: "Owner", b: "Med-spa" },
+];
+
+const FAQS = [
+  { q: "How much does it cost?", a: "A one-time build starting around $1,000, then a flat monthly to host, monitor, and keep it sharp. Plans start at $300/mo — see pricing above. Cancel anytime." },
+  { q: "How long until it's live on my site?", a: "About a week. We design the mascot, train it on your business, and hand you one line of code to drop in — or we add it for you." },
+  { q: "Do I have to do anything?", a: "No. It's fully done-for-you. We build it, host it, monitor it, and tune it every month. You just collect the leads." },
+  { q: "Can it use my own mascot or logo?", a: "Yes — bring your own character, or we design one that fits your brand. Either way it's uniquely yours." },
+  { q: "What if it answers something wrong?", a: "It's trained only on your business, so answers stay accurate. We monitor conversations and tune it monthly, and it always offers a human handoff when needed." },
+  { q: "Where do the leads go?", a: "Straight to you the moment they come in — email, text, or your CRM — and booked right onto your calendar." },
+];
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-paper text-ink">
@@ -60,9 +85,10 @@ export default function Home() {
             <span>Mascot<span className="text-smoke">Chatbot</span></span>
           </a>
           <nav className="hidden gap-8 text-sm font-medium md:flex">
-            <a href="#demos" className="hover:opacity-60">Demos</a>
             <a href="#how" className="hover:opacity-60">How it works</a>
+            <a href="#demos" className="hover:opacity-60">Demos</a>
             <a href="#pricing" className="hover:opacity-60">Pricing</a>
+            <a href="#faq" className="hover:opacity-60">FAQ</a>
           </nav>
           <a href="#cta" className="rounded-full border-2 border-ink bg-ink px-5 py-2 text-sm font-semibold text-paper transition hover:bg-paper hover:text-ink">
             Book a demo
@@ -124,6 +150,51 @@ export default function Home() {
         </div>
       </section>
 
+      {/* WHY A MASCOT */}
+      <section id="why" className="border-t-2 border-ink bg-paper">
+        <div className="mx-auto max-w-7xl px-5 py-24">
+          <h2 className="mb-3 max-w-3xl text-4xl font-bold tracking-tightest md:text-6xl">
+            A mascot converts. A chat box doesn&apos;t.
+          </h2>
+          <p className="mb-14 max-w-2xl text-lg leading-relaxed text-smoke">
+            Most visitors never click the little chat bubble in the corner — it blends in and feels like tech support. A mascot greets them, talks, and asks for the booking. Engaged visitors are the ones who convert, so more of your traffic turns into actual leads and booked jobs.
+          </p>
+
+          <div className="grid gap-px overflow-hidden rounded-3xl border-2 border-ink bg-ink md:grid-cols-2">
+            {/* Plain chat */}
+            <div className="bg-paper p-8 md:p-10">
+              <div className="mb-6 text-xs font-bold uppercase tracking-widest text-smoke">A plain chat window</div>
+              <ul className="space-y-4">
+                {CHAT_CONS.map((c) => (
+                  <li key={c} className="flex items-start gap-3 text-smoke">
+                    <svg width="20" height="20" viewBox="0 0 20 20" className="mt-0.5 shrink-0" aria-hidden="true">
+                      <circle cx="10" cy="10" r="9" fill="none" stroke="#9a9a9a" strokeWidth="1.5" />
+                      <path d="M7 7l6 6M13 7l-6 6" stroke="#9a9a9a" strokeWidth="1.6" strokeLinecap="round" />
+                    </svg>
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Mascot */}
+            <div className="bg-ink p-8 text-paper md:p-10">
+              <div className="mb-6 text-xs font-bold uppercase tracking-widest text-paper/60">Your talking mascot</div>
+              <ul className="space-y-4">
+                {MASCOT_PROS.map((c) => (
+                  <li key={c} className="flex items-start gap-3">
+                    <svg width="20" height="20" viewBox="0 0 20 20" className="mt-0.5 shrink-0" aria-hidden="true">
+                      <circle cx="10" cy="10" r="10" fill="#ffffff" />
+                      <path d="M5.5 10.5l2.8 2.8 6-6.4" fill="none" stroke="#0A0A0A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* DEMOS / GALLERY */}
       <section id="demos" className="border-t-2 border-ink bg-paper">
         <div className="mx-auto max-w-7xl px-5 py-24">
@@ -176,6 +247,18 @@ export default function Home() {
         </div>
       </section>
 
+      {/* STATS */}
+      <section className="border-t-2 border-ink bg-ink text-paper">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px md:grid-cols-4">
+          {STATS.map((s) => (
+            <div key={s.l} className="px-5 py-12 text-center">
+              <div className="text-5xl font-bold tracking-tightest md:text-6xl">{s.n}</div>
+              <div className="mt-2 text-sm text-smoke">{s.l}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* PRICING */}
       <section id="pricing" className="border-t-2 border-ink">
         <div className="mx-auto max-w-7xl px-5 py-24">
@@ -209,6 +292,45 @@ export default function Home() {
                   Choose {t.name}
                 </a>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SOCIAL PROOF */}
+      <section className="border-t-2 border-ink bg-paper">
+        <div className="mx-auto max-w-7xl px-5 py-24">
+          <h2 className="mb-14 max-w-2xl text-4xl font-bold tracking-tightest md:text-6xl">
+            Built to win you business.
+          </h2>
+          <div className="grid gap-6 md:grid-cols-3">
+            {TESTIMONIALS.map((t) => (
+              <figure key={t.q} className="flex flex-col rounded-3xl border border-ink/15 bg-paper p-8 shadow-sm">
+                <div className="mb-5 text-3xl font-bold leading-none text-ink">&ldquo;</div>
+                <blockquote className="flex-1 text-lg leading-relaxed">{t.q}</blockquote>
+                <figcaption className="mt-6 border-t border-ink/10 pt-4 text-sm">
+                  <span className="font-bold">{t.a}</span>
+                  <span className="text-smoke"> · {t.b}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="border-t-2 border-ink bg-paper">
+        <div className="mx-auto max-w-3xl px-5 py-24">
+          <h2 className="mb-14 text-4xl font-bold tracking-tightest md:text-6xl">Questions, answered.</h2>
+          <div className="divide-y divide-ink/10 border-y border-ink/10">
+            {FAQS.map((f) => (
+              <details key={f.q} className="group py-5">
+                <summary className="flex cursor-pointer items-center justify-between gap-4 text-lg font-semibold marker:content-none">
+                  {f.q}
+                  <span className="shrink-0 text-2xl font-normal text-smoke transition-transform duration-200 group-open:rotate-45">+</span>
+                </summary>
+                <p className="mt-3 max-w-2xl leading-relaxed text-smoke">{f.a}</p>
+              </details>
             ))}
           </div>
         </div>
