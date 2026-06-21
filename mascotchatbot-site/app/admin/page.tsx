@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { BOTS, VOICES, defaultVoiceFor } from "@/lib/bots";
 
 type Stat = { set: boolean; last4: string; source: string };
 type Member = { email: string; role: string; addedAt?: string };
+type Settings = { brain: string; voice: string; openaiVoice: string; elevenVoiceId: string; botVoices: Record<string, string> };
 type Status = {
   auth: boolean;
   signedIn?: boolean;
@@ -13,7 +15,7 @@ type Status = {
   team?: Member[];
   kv?: boolean;
   integrations?: Record<string, Stat>;
-  settings?: { brain: string; voice: string; openaiVoice: string; elevenVoiceId: string };
+  settings?: Settings;
   data?: { orders: any[]; customers: any[]; onboarding: any[] };
 };
 
@@ -55,6 +57,7 @@ const GROUPS: { title: string; items: { id: string; name: string; ph: string; li
 const MANAGER_TABS: [string, string][] = [
   ["integrations", "Integrations"],
   ["mascot", "Mascot"],
+  ["voices", "Voices"],
   ["orders", "Orders"],
   ["customers", "Customers"],
   ["onboarding", "Onboarding"],
@@ -70,10 +73,12 @@ export default function Admin() {
   const [status, setStatus] = useState<Status | null>(null);
   const [tab, setTab] = useState<string>("integrations");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [settings, setSettings] = useState({ brain: "openai", voice: "openai", openaiVoice: "onyx", elevenVoiceId: "" });
+  const [settings, setSettings] = useState<Settings>({ brain: "openai", voice: "openai", openaiVoice: "ash", elevenVoiceId: "", botVoices: {} });
   const [teamForm, setTeamForm] = useState({ email: "", role: "staff" });
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [previewing, setPreviewing] = useState("");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   // owner sign-in
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [cred, setCred] = useState({ name: "", email: "", password: "" });
@@ -83,7 +88,7 @@ export default function Admin() {
     const r = await fetch("/api/admin/status", { cache: "no-store" });
     const d: Status = await r.json();
     setStatus(d);
-    if (d.settings) setSettings(d.settings);
+    if (d.settings) setSettings({ ...d.settings, botVoices: d.settings.botVoices || {} });
     if (d.auth && !d.manage) setTab("orders"); // staff land on Orders
   }
   useEffect(() => { load(); }, []);
@@ -124,6 +129,23 @@ export default function Admin() {
     const r = await fetch("/api/admin/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "settings", ...settings }) });
     const d = await r.json(); setBusy(false);
     setMsg(d.ok ? "Settings saved ✓" : d.error || "Save failed.");
+  }
+  function setBotVoice(id: string, v: string) {
+    setSettings((s) => ({ ...s, botVoices: { ...(s.botVoices || {}), [id]: v } }));
+  }
+  async function previewVoice(botId: string, voiceId: string, name: string, industry: string) {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    setPreviewing(botId);
+    try {
+      const line = `Hi there! I'm ${name}, your friendly ${industry} helper. I can answer questions and book your appointment right now — want me to get you scheduled?`;
+      const r = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: line, provider: "openai", openaiVoice: voiceId }) });
+      if (!r.ok) { setPreviewing(""); setMsg("Preview needs an OpenAI key connected."); return; }
+      const url = URL.createObjectURL(await r.blob());
+      const a = new Audio(url);
+      audioRef.current = a;
+      a.onended = () => { setPreviewing(""); URL.revokeObjectURL(url); };
+      await a.play();
+    } catch { setPreviewing(""); }
   }
 
   const authed = status && status.auth;
@@ -243,8 +265,11 @@ export default function Admin() {
                   <label className="block text-sm"><span className="mb-1 block font-semibold">Voice</span>
                     <select value={settings.voice} onChange={(e) => setSettings({ ...settings, voice: e.target.value })} className="w-full rounded-xl border-2 border-neutral-200 px-3 py-2.5 outline-none focus:border-neutral-900"><option value="openai">OpenAI TTS</option><option value="eleven">ElevenLabs</option></select>
                   </label>
-                  <label className="block text-sm"><span className="mb-1 block font-semibold">OpenAI voice</span>
-                    <select value={settings.openaiVoice} onChange={(e) => setSettings({ ...settings, openaiVoice: e.target.value })} className="w-full rounded-xl border-2 border-neutral-200 px-3 py-2.5 outline-none focus:border-neutral-900">{["onyx", "echo", "alloy", "fable", "nova", "shimmer"].map((v) => <option key={v} value={v}>{v}</option>)}</select>
+                  <label className="block text-sm"><span className="mb-1 block font-semibold">OpenAI voice (Mr Amp)</span>
+                    <select value={settings.openaiVoice} onChange={(e) => setSettings({ ...settings, openaiVoice: e.target.value })} className="w-full rounded-xl border-2 border-neutral-200 px-3 py-2.5 outline-none focus:border-neutral-900">
+                      <optgroup label="Male voices">{VOICES.filter((v) => v.gender === "male").map((v) => <option key={v.id} value={v.id}>{v.label} — {v.note}</option>)}</optgroup>
+                      <optgroup label="Female voices">{VOICES.filter((v) => v.gender === "female").map((v) => <option key={v.id} value={v.id}>{v.label} — {v.note}</option>)}</optgroup>
+                    </select>
                   </label>
                   <label className="block text-sm"><span className="mb-1 block font-semibold">ElevenLabs voice ID</span>
                     <input value={settings.elevenVoiceId} onChange={(e) => setSettings({ ...settings, elevenVoiceId: e.target.value })} placeholder="e.g. pNInz6obpgDQGcFmaJgB" className="w-full rounded-xl border-2 border-neutral-200 px-3 py-2.5 outline-none focus:border-neutral-900" />
@@ -252,6 +277,40 @@ export default function Admin() {
                 </div>
                 <button onClick={saveSettings} disabled={busy} className="mt-4 rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50">Save settings</button>
                 {msg && <p className="mt-3 text-sm font-medium text-neutral-700">{msg}</p>}
+              </div>
+            )}
+
+            {tab === "voices" && (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+                  <h2 className="text-lg font-bold">Voice casting</h2>
+                  <p className="mt-0.5 text-sm text-neutral-500">Pick a voice for each of our {BOTS.length} demo bots. Tap <b>▶ Preview</b> to hear it, then <b>Save casting</b>. Mr Amp&apos;s pick is what visitors hear live on the homepage.</p>
+                </div>
+                <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+                  {BOTS.map((bot, i) => {
+                    const sel = settings.botVoices?.[bot.id] || defaultVoiceFor(bot.gender);
+                    return (
+                      <div key={bot.id} className={"flex flex-col gap-3 p-4 sm:flex-row sm:items-center " + (i > 0 ? "border-t border-neutral-100 " : "")}>
+                        <div className="sm:w-56">
+                          <div className="font-bold">{bot.name}{bot.id === "amp" && <span className="ml-2 rounded-full bg-neutral-900 px-2 py-0.5 text-[10px] font-semibold text-white align-middle">LIVE</span>}</div>
+                          <div className="text-xs text-neutral-500">{bot.industry}</div>
+                        </div>
+                        <select value={sel} onChange={(e) => setBotVoice(bot.id, e.target.value)} className="flex-1 rounded-xl border-2 border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-900">
+                          <optgroup label="Male voices">{VOICES.filter((v) => v.gender === "male").map((v) => <option key={v.id} value={v.id}>{v.label} — {v.note}</option>)}</optgroup>
+                          <optgroup label="Female voices">{VOICES.filter((v) => v.gender === "female").map((v) => <option key={v.id} value={v.id}>{v.label} — {v.note}</option>)}</optgroup>
+                        </select>
+                        <button onClick={() => previewVoice(bot.id, sel, bot.name, bot.industry)} disabled={previewing === bot.id}
+                          className="shrink-0 rounded-xl border-2 border-neutral-900 px-4 py-2.5 text-sm font-semibold transition hover:bg-neutral-900 hover:text-white disabled:opacity-50">
+                          {previewing === bot.id ? "Playing…" : "▶ Preview"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={saveSettings} disabled={busy} className="rounded-xl bg-neutral-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50">Save casting</button>
+                  {msg && <span className="text-sm font-medium text-neutral-700">{msg}</span>}
+                </div>
               </div>
             )}
 
