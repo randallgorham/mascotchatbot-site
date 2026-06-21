@@ -2,6 +2,9 @@
 // session cookies, and Google OAuth helpers. All via Web Crypto + fetch.
 import { kvGet, kvSet, getSecret } from "@/lib/vault";
 
+export type Role = "owner" | "admin" | "staff";
+export type TeamMember = { email: string; role: "admin" | "staff"; addedAt?: string };
+
 const E = new TextEncoder();
 const Dec = new TextDecoder();
 
@@ -91,4 +94,44 @@ export async function googleCreds() {
   const id = await getSecret("GOOGLE_CLIENT_ID");
   const sec = await getSecret("GOOGLE_CLIENT_SECRET");
   return { id, secret: sec };
+}
+
+// Owner accounts get full admin access. Defaults to the founder's email; override
+// with the OWNER_EMAILS env var (comma-separated).
+export function ownerEmails(): string[] {
+  return (process.env.OWNER_EMAILS || "randallgorham@gmail.com")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+export function isOwner(email: string | null): boolean {
+  if (!email) return false;
+  return ownerEmails().includes(email.toLowerCase());
+}
+
+// Team members the owner invites (stored in KV, managed from the admin Team tab).
+export async function getTeam(): Promise<TeamMember[]> {
+  const v = await kvGet("team:members");
+  if (!v) return [];
+  try {
+    const list = JSON.parse(v);
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+export async function setTeam(list: TeamMember[]) {
+  return kvSet("team:members", JSON.stringify(list));
+}
+export async function getRole(email: string | null): Promise<Role | null> {
+  if (!email) return null;
+  if (isOwner(email)) return "owner";
+  const team = await getTeam();
+  for (let i = 0; i < team.length; i++) {
+    if (team[i].email.toLowerCase() === email.toLowerCase()) return team[i].role;
+  }
+  return null;
+}
+export function canManage(role: Role | null): boolean {
+  return role === "owner" || role === "admin";
 }
