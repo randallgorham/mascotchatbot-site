@@ -10,19 +10,23 @@ export function kvReady() {
 
 async function kvCmd(cmd: (string | number)[]): Promise<unknown> {
   if (!kvReady()) return null;
-  try {
-    const r = await fetch(KV_URL, {
-      method: "POST",
-      headers: { Authorization: "Bearer " + KV_TOKEN, "Content-Type": "application/json" },
-      body: JSON.stringify(cmd),
-      cache: "no-store",
-    });
-    if (!r.ok) return null;
-    const j = await r.json();
-    return j && "result" in j ? j.result : null;
-  } catch {
-    return null;
+  // Try up to 2 times — guards against a transient edge/Upstash read returning null.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch(KV_URL, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + KV_TOKEN, "Content-Type": "application/json" },
+        body: JSON.stringify(cmd),
+        cache: "no-store",
+      });
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (j && "result" in j) return j.result;
+    } catch {
+      /* retry */
+    }
   }
+  return null;
 }
 
 export async function kvGet(key: string): Promise<string | null> {
@@ -32,6 +36,10 @@ export async function kvGet(key: string): Promise<string | null> {
 export async function kvSet(key: string, val: string): Promise<boolean> {
   const v = await kvCmd(["SET", key, val]);
   return v === "OK";
+}
+export async function kvDel(key: string): Promise<boolean> {
+  const v = await kvCmd(["DEL", key]);
+  return typeof v === "number" ? v > 0 : false;
 }
 export async function kvList(prefix: string): Promise<string[]> {
   const r = await kvCmd(["KEYS", prefix + "*"]);
