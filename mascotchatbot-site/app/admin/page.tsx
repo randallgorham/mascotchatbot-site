@@ -5,7 +5,7 @@ import { BOTS, VOICES, defaultVoiceFor } from "@/lib/bots";
 
 type Stat = { set: boolean; last4: string; source: string };
 type Member = { email: string; role: string; addedAt?: string };
-type Settings = { brain: string; voice: string; openaiVoice: string; elevenVoiceId: string; botVoices: Record<string, string> };
+type Settings = { brain: string; voice: string; openaiVoice: string; elevenVoiceId: string; botVoices: Record<string, string>; ghlCalendarUrl: string };
 type Status = {
   auth: boolean;
   signedIn?: boolean;
@@ -73,7 +73,7 @@ export default function Admin() {
   const [status, setStatus] = useState<Status | null>(null);
   const [tab, setTab] = useState<string>("integrations");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [settings, setSettings] = useState<Settings>({ brain: "openai", voice: "openai", openaiVoice: "ash", elevenVoiceId: "", botVoices: {} });
+  const [settings, setSettings] = useState<Settings>({ brain: "openai", voice: "openai", openaiVoice: "ash", elevenVoiceId: "", botVoices: {}, ghlCalendarUrl: "" });
   const [teamForm, setTeamForm] = useState({ email: "", role: "staff" });
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -129,6 +129,13 @@ export default function Admin() {
     const r = await fetch("/api/admin/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "settings", ...settings }) });
     const d = await r.json(); setBusy(false);
     setMsg(d.ok ? "Settings saved ✓" : d.error || "Save failed.");
+  }
+  async function deleteCustomer(email: string) {
+    if (!email || !confirm("Remove " + email + " from customers? This can't be undone.")) return;
+    setBusy(true); setMsg("");
+    const r = await fetch("/api/admin/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "deleteCustomer", email }) });
+    const d = await r.json(); setBusy(false);
+    if (d.ok) { setMsg("Customer removed ✓"); load(); } else setMsg(d.error || "Couldn't remove.");
   }
   function setBotVoice(id: string, v: string) {
     setSettings((s) => ({ ...s, botVoices: { ...(s.botVoices || {}), [id]: v } }));
@@ -274,6 +281,10 @@ export default function Admin() {
                   <label className="block text-sm"><span className="mb-1 block font-semibold">ElevenLabs voice ID</span>
                     <input value={settings.elevenVoiceId} onChange={(e) => setSettings({ ...settings, elevenVoiceId: e.target.value })} placeholder="e.g. pNInz6obpgDQGcFmaJgB" className="w-full rounded-xl border-2 border-neutral-200 px-3 py-2.5 outline-none focus:border-neutral-900" />
                   </label>
+                  <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">Booking calendar link (GoHighLevel)</span>
+                    <input value={settings.ghlCalendarUrl} onChange={(e) => setSettings({ ...settings, ghlCalendarUrl: e.target.value })} placeholder="https://api.leadconnectorhq.com/widget/booking/XXXXXXXX" className="w-full rounded-xl border-2 border-neutral-200 px-3 py-2.5 outline-none focus:border-neutral-900" />
+                    <span className="mt-1 block text-xs text-neutral-500">GHL → Calendars → your calendar → Share/Embed → copy the <b>booking widget URL</b>. This powers the &ldquo;Book a demo&rdquo; button and the /book page.</span>
+                  </label>
                 </div>
                 <button onClick={saveSettings} disabled={busy} className="mt-4 rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50">Save settings</button>
                 {msg && <p className="mt-3 text-sm font-medium text-neutral-700">{msg}</p>}
@@ -315,7 +326,7 @@ export default function Admin() {
             )}
 
             {(tab === "orders" || tab === "customers" || tab === "onboarding") && (
-              <DataList rows={(status?.data as any)?.[tab] || []} kind={tab} />
+              <DataList rows={(status?.data as any)?.[tab] || []} kind={tab} onDelete={tab === "customers" && status?.manage ? deleteCustomer : undefined} />
             )}
 
             {tab === "team" && status?.manage && (
@@ -359,7 +370,7 @@ export default function Admin() {
   );
 }
 
-function DataList({ rows, kind }: { rows: any[]; kind: string }) {
+function DataList({ rows, kind, onDelete }: { rows: any[]; kind: string; onDelete?: (email: string) => void }) {
   if (!rows || rows.length === 0) {
     const empty: Record<string, string> = {
       orders: "No orders yet. They'll appear here once checkout is live.",
@@ -374,7 +385,10 @@ function DataList({ rows, kind }: { rows: any[]; kind: string }) {
         <div key={i} className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div className="font-bold">{r.business || r.name || r.email || r.id || "Record " + (i + 1)}</div>
-            {r.status && <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">{r.status}</span>}
+            <div className="flex items-center gap-3">
+              {r.status && <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">{r.status}</span>}
+              {onDelete && r.email && <button onClick={() => onDelete(r.email)} className="text-xs font-medium text-red-600 underline">remove</button>}
+            </div>
           </div>
           {(r.email || r.plan || r.website || r.createdAt) && (
             <div className="mt-1 text-sm text-neutral-500">{[r.email, r.plan, r.website, r.createdAt].filter(Boolean).join(" · ")}</div>
