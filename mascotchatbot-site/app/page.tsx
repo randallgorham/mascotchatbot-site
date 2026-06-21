@@ -21,24 +21,24 @@ const STEPS = [
 
 // Full character roster shown in the gallery. Mr Amp is the live, click-to-talk demo.
 const CHARACTERS = [
-  { img: "01-realtor-female-classic", name: "Ava", niche: "Realtor", say: "Pick me! 🏡" },
-  { img: "02-realtor-female-glam", name: "Bianca", niche: "Realtor", say: "Choose me! 🔑" },
-  { img: "03-realtor-male", name: "Marcus", niche: "Realtor", say: "I'll sell it! 🏡" },
-  { img: "04-dentist-male", name: "Dr. Bright", niche: "Dental", say: "Pick me! 🦷" },
-  { img: "12-dentist-female", name: "Dr. Dana", niche: "Dental", say: "Say aah — pick me!" },
-  { img: "10-doctor-male", name: "Dr. Cole", niche: "Medical", say: "Pick me! 🩺" },
-  { img: "13-doctor-female", name: "Dr. Maya", niche: "Medical", say: "I'm in! 🩺" },
-  { img: "16-nurse-female", name: "Nina", niche: "Nursing", say: "Ooh, pick me! 💉" },
-  { img: "15-medspa-female", name: "Skye", niche: "Med-spa", say: "Choose me! ✨" },
-  { img: "05-fitness-coach-male", name: "Coach Rex", niche: "Fitness", say: "Pick me! 💪" },
-  { img: "14-fitness-coach-female", name: "Coach Tara", niche: "Fitness", say: "Let's go! 💪" },
-  { img: "18-gym-instructor-female-blonde", name: "Brooke", niche: "Gym", say: "Pick me! 🏋️" },
-  { img: "06-plumber-home-services-male", name: "Max", niche: "Home Services", say: "Pick me! 🔧" },
-  { img: "08-electrician-male", name: "Sparky", niche: "Electrician", say: "Pick me! ⚡" },
-  { img: "19-mechanic-male", name: "Gus", niche: "Auto Repair", say: "Pick me! 🔧" },
-  { img: "09-contractor-male-cap-vest", name: "Bo", niche: "Contractor", say: "Pick me! 🔨" },
-  { img: "11-general-contractor-male", name: "Hank", niche: "General Contractor", say: "I'll build it! 🔨" },
-  { img: "20-attorney-male", name: "Vance", niche: "Law Firm", say: "I'm your guy! ⚖️" },
+  { img: "01-realtor-female-classic", name: "Ava", niche: "Realtor", say: "Pick me!" },
+  { img: "02-realtor-female-glam", name: "Bianca", niche: "Realtor", say: "Choose me!" },
+  { img: "03-realtor-male", name: "Marcus", niche: "Realtor", say: "I'll sell it!" },
+  { img: "04-dentist-male", name: "Dr. Bright", niche: "Dental", say: "Pick me!" },
+  { img: "12-dentist-female", name: "Dr. Dana", niche: "Dental", say: "Pick me!" },
+  { img: "10-doctor-male", name: "Dr. Cole", niche: "Medical", say: "Pick me!" },
+  { img: "13-doctor-female", name: "Dr. Maya", niche: "Medical", say: "I'm in!" },
+  { img: "16-nurse-female", name: "Nina", niche: "Nursing", say: "Pick me!" },
+  { img: "15-medspa-female", name: "Skye", niche: "Med-spa", say: "Choose me!" },
+  { img: "05-fitness-coach-male", name: "Coach Rex", niche: "Fitness", say: "Pick me!" },
+  { img: "14-fitness-coach-female", name: "Coach Tara", niche: "Fitness", say: "Let's go!" },
+  { img: "18-gym-instructor-female-blonde", name: "Brooke", niche: "Gym", say: "Pick me!" },
+  { img: "06-plumber-home-services-male", name: "Max", niche: "Home Services", say: "Pick me!" },
+  { img: "08-electrician-male", name: "Sparky", niche: "Electrician", say: "Pick me!" },
+  { img: "19-mechanic-male", name: "Gus", niche: "Auto Repair", say: "Pick me!" },
+  { img: "09-contractor-male-cap-vest", name: "Bo", niche: "Contractor", say: "Pick me!" },
+  { img: "11-general-contractor-male", name: "Hank", niche: "General Contractor", say: "I'll build it!" },
+  { img: "20-attorney-male", name: "Vance", niche: "Law Firm", say: "I'm your guy!" },
 ];
 
 const STATS = [
@@ -277,10 +277,12 @@ export default async function Home() {
             {CHARACTERS.map((c) => (
               <div key={c.img} className="group relative flex aspect-[3/4] flex-col overflow-hidden bg-paper p-3 text-left">
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-smoke">{c.niche}</span>
-                <span
-                  className="pointer-events-none absolute left-1/2 top-[20%] z-10 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-xl border-2 border-ink bg-paper px-2.5 py-1 text-xs font-extrabold text-ink opacity-0 shadow-[3px_3px_0_0_#e3342b] transition-all duration-200 ease-out group-hover:translate-y-0 group-hover:opacity-100"
-                >
-                  {c.say}
+                <span className="pointer-events-none absolute left-1/2 top-1 z-20 -translate-x-1/2 translate-y-1 opacity-0 transition-all duration-200 ease-out group-hover:-translate-y-1 group-hover:opacity-100">
+                  <span className="relative block whitespace-nowrap rounded-2xl border-2 border-ink bg-paper px-3 py-1.5 text-xs font-extrabold text-ink shadow-[3px_3px_0_0_#e3342b]">
+                    {c.say}
+                    <span className="absolute -bottom-1.5 left-4 h-2 w-2 rounded-full border-2 border-ink bg-paper" />
+                    <span className="absolute -bottom-[11px] left-2 h-1.5 w-1.5 rounded-full border-2 border-ink bg-paper" />
+                  </span>
                 </span>
                 <span className="flex flex-1 items-center justify-center overflow-hidden py-1">
                   <img
