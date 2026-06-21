@@ -12,17 +12,17 @@ export default function MrAmp() {
 
     const CFG = {
       greeting:
-        "Hey! I'm Mr Amp — a live MascotChatbot demo. This is exactly what we put on your site: a talking mascot that answers visitors and books jobs. Ask me anything!",
-      quick: ["What is this?", "How much?", "How does it work?", "Book a demo"],
+        "Hey there! ⚡ I'm Mr Amp, your friendly electrician's helper — and a live demo of what MascotChatbot builds. Tell me what's going on, or let's get you booked in!",
+      quick: ["Breaker keeps tripping", "How much?", "Book an appointment"],
       // Offline fallback answers (used only if the AI brain can't be reached)
       answers: [
-        { k: ["what", "this", "who are you", "explain"], a: "We design a custom animated mascot for your brand, give it an AI brain trained on your business, and host it on your site. It chats with visitors 24/7, captures leads, and books appointments — done for you." },
-        { k: ["how much", "price", "pricing", "cost", "rates"], a: "Plans start around $300 a month with a one-time setup. Most businesses pick the Pro plan at about $600 a month. One extra booked job usually covers it." },
-        { k: ["how", "work", "works", "build", "setup"], a: "Three steps: we design the mascot, train it on your business so answers are accurate, then drop it on your site with one line of code. You do nothing." },
-        { k: ["book", "demo", "call", "talk to", "human", "contact", "start"], a: "Love it. Scroll down and drop your email in the form — we'll build a free talking demo of YOUR mascot before you pay a cent. ⚡" },
-        { k: ["hi", "hey", "hello", "yo"], a: "Hey there! ⚡ Ask me what we do, pricing, or how to get one." },
+        { k: ["breaker", "trip", "tripping", "fuse", "panel", "outlet", "spark", "power", "outage", "wiring", "light", "flicker"], a: "That's worth a proper look from a licensed electrician — safety first! Tap Book an appointment and grab a time that works, and we'll get someone out to you. ⚡" },
+        { k: ["how much", "price", "pricing", "cost", "rates", "quote"], a: "Pricing depends on the job, so the best move is a quick visit — tap Book an appointment and we'll get you scheduled to take a look!" },
+        { k: ["what", "this", "who are you", "explain", "mascot", "chatbot"], a: "I'm a MascotChatbot demo — a custom talking mascot that lives on a business's site, answers questions 24/7, and books jobs. Want one like me? Tap Book an appointment!" },
+        { k: ["book", "demo", "call", "talk to", "human", "contact", "start", "appointment", "schedule"], a: "Love it — let's get you on the calendar! Tap Book an appointment and pick a time. ⚡" },
+        { k: ["hi", "hey", "hello", "yo"], a: "Hey there! ⚡ Tell me your electrical issue, or tap Book an appointment to grab a time." },
       ],
-      fallback: "Good question! I can tell you what MascotChatbot does, pricing, how it works, or get you a free demo. What would you like?",
+      fallback: "Good question! I can help with your electrical issue or get you scheduled — tap Book an appointment and pick a time that works. ⚡",
     };
 
     const W = r;
@@ -140,7 +140,9 @@ export default function MrAmp() {
       if (!QUICK) return; QUICK.innerHTML = "";
       CFG.quick.forEach((q) => {
         const b = document.createElement("button"); b.className = "amp-chip"; b.textContent = q;
-        b.addEventListener("click", () => send(q)); QUICK.appendChild(b);
+        if (/book|appointment|schedule/i.test(q)) b.addEventListener("click", () => { try { window.location.href = "/#book"; } catch {} });
+        else b.addEventListener("click", () => send(q));
+        QUICK.appendChild(b);
       });
     }
     function offlineReply(text: string) {
