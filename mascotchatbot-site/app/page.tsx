@@ -4,6 +4,9 @@ import OpenMascot from "@/components/OpenMascot";
 import MobileNav from "@/components/MobileNav";
 import NavActions from "@/components/NavActions";
 import Pricing from "@/components/Pricing";
+import { getSetting } from "@/lib/vault";
+
+export const dynamic = "force-dynamic";
 
 const NICHES = [
   "Electricians","Realtors","HVAC","Dentists","Law firms","Med-spas",
@@ -63,7 +66,8 @@ const FAQS = [
   { q: "Where do the leads go?", a: "Straight to you the moment they come in — email, text, or your CRM — and booked right onto your calendar." },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const bookingUrl = await getSetting("ghl_calendar_url", "");
   return (
     <main className="min-h-screen bg-paper text-ink">
       <script
@@ -149,6 +153,9 @@ export default function Home() {
               <OpenMascot className="rounded-full border-2 border-ink px-7 py-3.5 font-semibold transition hover:bg-ink hover:text-paper">
                 ▶ See it talk
               </OpenMascot>
+              <a href="#book" className="rounded-full border-2 border-ink px-7 py-3.5 font-semibold transition hover:bg-ink hover:text-paper">
+                Book a call
+              </a>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-smoke">
               {["No code", "Done-for-you", "Live in ~a week", "Cancel anytime"].map((t) => (
@@ -340,6 +347,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* BOOK */}
+      <section id="book" className="scroll-mt-24 border-t-2 border-ink bg-paper">
+        <div className="mx-auto max-w-3xl px-5 py-24">
+          <h2 className="text-4xl font-bold tracking-tightest md:text-5xl">Book an appointment</h2>
+          <p className="mt-3 max-w-xl text-lg text-smoke">Grab a time that works for you and we&apos;ll take it from there. ⚡</p>
+          {bookingUrl ? (
+            <iframe
+              src={bookingUrl}
+              title="Book an appointment"
+              className="mt-8 w-full rounded-2xl border-2 border-ink bg-white"
+              style={{ minHeight: 760 }}
+            />
+          ) : (
+            <div className="mt-8 rounded-2xl border-2 border-ink bg-white p-8 text-center">
+              <p className="text-lg font-semibold text-ink">Online booking is being set up.</p>
+              <p className="mt-2 text-smoke">In the meantime, drop your details just below and we&apos;ll reach out to schedule you right away.</p>
+              <a href="#cta" className="mt-5 inline-block rounded-full bg-ink px-6 py-3 font-semibold text-paper transition hover:opacity-80">Get in touch →</a>
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* CTA */}
       <section id="cta" className="scroll-mt-24 bg-ink text-paper">
         <div className="mx-auto max-w-7xl px-5 py-28 text-center">
@@ -350,6 +379,7 @@ export default function Home() {
             Tell us your business. We&apos;ll build a talking demo of your own mascot — free — before you pay a cent.
           </p>
           <LeadForm />
+          <p className="mt-6 text-sm text-smoke">Prefer to talk? <a href="#book" className="font-semibold text-paper underline underline-offset-4 hover:opacity-80">Book a call →</a></p>
         </div>
       </section>
 
