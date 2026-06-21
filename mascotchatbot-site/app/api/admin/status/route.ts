@@ -1,4 +1,4 @@
-import { isAuthed, secretStatus, getSetting, kvReady } from "@/lib/vault";
+import { isAuthed, secretStatus, getSetting, kvReady, INTEGRATION_ENV, recentRecords } from "@/lib/vault";
 
 export const runtime = "edge";
 
@@ -11,22 +11,31 @@ function json(data: unknown, status = 200) {
 
 export async function GET(req: Request) {
   if (!(await isAuthed(req))) return json({ auth: false });
-  const [openai, anthropic, eleven, ghl] = await Promise.all([
-    secretStatus("OPENAI_API_KEY"),
-    secretStatus("ANTHROPIC_API_KEY"),
-    secretStatus("ELEVENLABS_API_KEY"),
-    secretStatus("GHL_WEBHOOK_URL"),
-  ]);
+
+  const integrations: Record<string, { set: boolean; last4: string; source: string }> = {};
+  const ids = Object.keys(INTEGRATION_ENV);
+  for (let i = 0; i < ids.length; i++) {
+    integrations[ids[i]] = await secretStatus(INTEGRATION_ENV[ids[i]]);
+  }
+
   const [brain, voice, openaiVoice, elevenVoiceId] = await Promise.all([
     getSetting("brain", "openai"),
     getSetting("voice", "openai"),
     getSetting("openai_voice", "onyx"),
     getSetting("eleven_voice_id", ""),
   ]);
+
+  const [orders, customers, onboarding] = await Promise.all([
+    recentRecords("order:", 100),
+    recentRecords("user:", 100),
+    recentRecords("onboarding:", 100),
+  ]);
+
   return json({
     auth: true,
     kv: kvReady(),
-    integrations: { openai, anthropic, eleven, ghl },
+    integrations,
     settings: { brain, voice, openaiVoice, elevenVoiceId },
+    data: { orders, customers, onboarding },
   });
 }
