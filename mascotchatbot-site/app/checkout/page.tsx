@@ -24,8 +24,17 @@ export default function Checkout() {
         body: JSON.stringify({ ...form, items, monthly: monthlyTotal, oneTime: oneTimeTotal }),
       });
       const d = await r.json();
-      if (d.ok) { setOrderId(d.id); setStatus("done"); clear(); }
-      else { setErr(d.error || "Something went wrong."); setStatus("error"); }
+      if (d.ok) {
+        // If Stripe is connected, send them straight to secure payment; otherwise confirm + invoice.
+        try {
+          const cs = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items, email: form.email }) });
+          const cd = await cs.json();
+          if (cd && cd.ok && cd.url) { clear(); window.location.href = cd.url; return; }
+        } catch {
+          /* fall through to invoice flow */
+        }
+        setOrderId(d.id); setStatus("done"); clear();
+      } else { setErr(d.error || "Something went wrong."); setStatus("error"); }
     } catch {
       setErr("Network error — please try again."); setStatus("error");
     }
