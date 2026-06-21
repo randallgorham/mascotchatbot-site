@@ -1,4 +1,5 @@
-import { isAuthed, setSecret, setSetting, kvReady, INTEGRATION_ENV } from "@/lib/vault";
+import { setSecret, setSetting, kvReady, INTEGRATION_ENV } from "@/lib/vault";
+import { getSessionEmail, getRole, canManage } from "@/lib/auth";
 
 export const runtime = "edge";
 
@@ -10,7 +11,9 @@ function json(data: unknown, status = 200) {
 }
 
 export async function POST(req: Request) {
-  if (!(await isAuthed(req))) return json({ ok: false, error: "Not authorized." }, 401);
+  const email = await getSessionEmail(req);
+  const role = await getRole(email);
+  if (!canManage(role)) return json({ ok: false, error: "Not authorized." }, 401);
   if (!kvReady()) return json({ ok: false, error: "No database connected yet. Create a Vercel KV store, then reload." }, 400);
   const body = await req.json().catch(() => ({} as Record<string, string>));
 
