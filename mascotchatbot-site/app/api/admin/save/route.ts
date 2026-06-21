@@ -1,4 +1,4 @@
-import { setSecret, setSetting, kvReady, INTEGRATION_ENV } from "@/lib/vault";
+import { setSecret, setSetting, kvReady, kvDel, INTEGRATION_ENV } from "@/lib/vault";
 import { getSessionEmail, getRole, canManage } from "@/lib/auth";
 
 export const runtime = "edge";
@@ -31,6 +31,7 @@ export async function POST(req: Request) {
     if (body.voice) await setSetting("voice", String(body.voice));
     if (body.openaiVoice) await setSetting("openai_voice", String(body.openaiVoice));
     if (typeof body.elevenVoiceId === "string") await setSetting("eleven_voice_id", body.elevenVoiceId.trim());
+    if (typeof body.ghlCalendarUrl === "string") await setSetting("ghl_calendar_url", body.ghlCalendarUrl.trim());
     if (typeof body.openaiSpeed === "string" || typeof body.openaiSpeed === "number")
       await setSetting("openai_speed", String(body.openaiSpeed));
     const bv = (body as { botVoices?: Record<string, string> }).botVoices;
@@ -39,6 +40,13 @@ export async function POST(req: Request) {
       // Mr Amp is the live demo bot — keep the homepage voice in sync with his row.
       if (typeof bv.amp === "string" && bv.amp) await setSetting("openai_voice", bv.amp);
     }
+    return json({ ok: true });
+  }
+
+  if (body.type === "deleteCustomer") {
+    const email = String((body as { email?: string }).email || "").trim().toLowerCase();
+    if (!email) return json({ ok: false, error: "No email provided." }, 400);
+    await kvDel("user:" + email);
     return json({ ok: true });
   }
 
