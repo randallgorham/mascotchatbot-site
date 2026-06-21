@@ -68,6 +68,7 @@ export const INTEGRATION_ENV: Record<string, string> = {
   stripe_webhook: "STRIPE_WEBHOOK_SECRET",
   google_id: "GOOGLE_CLIENT_ID",
   google_secret: "GOOGLE_CLIENT_SECRET",
+  resend: "RESEND_API_KEY",
   mailgun: "MAILGUN_API_KEY",
   auth_secret: "AUTH_SECRET",
 };
