@@ -45,7 +45,8 @@ const GROUPS: { title: string; items: { id: string; name: string; ph: string; li
   {
     title: "Email & CRM",
     items: [
-      { id: "mailgun", name: "Mailgun API Key", ph: "Mailgun sending key", link: "https://app.mailgun.com/", note: "Login links + order emails" },
+      { id: "resend", name: "Resend API Key", ph: "re_…", link: "https://resend.com/api-keys", note: "Order confirmations + login emails (recommended)" },
+      { id: "mailgun", name: "Mailgun API Key", ph: "Mailgun sending key", link: "https://app.mailgun.com/", note: "Alternative email sender" },
       { id: "ghl", name: "GoHighLevel Webhook", ph: "https://services.leadconnectorhq.com/hooks/…", link: "", note: "Leads + order routing" },
     ],
   },
