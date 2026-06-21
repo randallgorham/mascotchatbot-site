@@ -11,6 +11,33 @@ function json(data: unknown, status = 200) {
 }
 
 export async function GET(req: Request) {
+  // Headless daily digest: GET /api/admin/status?digest=<token> (token = sha256("mcb-digest|"+AUTH_SECRET)).
+  const digest = new URL(req.url).searchParams.get("digest");
+  if (digest) {
+    const enc = new TextEncoder().encode("mcb-digest|" + (process.env.AUTH_SECRET || ""));
+    const hbuf = await crypto.subtle.digest("SHA-256", enc);
+    const a = new Uint8Array(hbuf);
+    let hex = "";
+    for (let i = 0; i < a.length; i++) hex += a[i].toString(16).padStart(2, "0");
+    if (!process.env.AUTH_SECRET || digest !== hex) return json({ ok: false }, 401);
+    const [orders, customers] = await Promise.all([recentRecords("order:", 300), recentRecords("user:", 300)]);
+    const since = Date.now() - 24 * 60 * 60 * 1000;
+    const recent = (rows: unknown[]) =>
+      rows.filter((r) => {
+        const c = (r as { createdAt?: string }).createdAt;
+        return c ? Date.parse(c) >= since : false;
+      });
+    const no = recent(orders) as Array<{ business?: string; email?: string; monthly?: number; oneTime?: number }>;
+    const nc = recent(customers) as Array<{ email?: string; name?: string }>;
+    return json({
+      ok: true,
+      window: "24h",
+      newOrders: no.map((o) => ({ business: o.business || "", email: o.email || "", monthly: o.monthly || 0, oneTime: o.oneTime || 0 })),
+      newSignups: nc.map((c) => ({ email: c.email || "", name: c.name || "" })),
+      totals: { orders: orders.length, customers: customers.length },
+    });
+  }
+
   const email = await getSessionEmail(req);
   const role = await getRole(email);
   if (!role) return json({ auth: false, signedIn: !!email, email: email || null });
