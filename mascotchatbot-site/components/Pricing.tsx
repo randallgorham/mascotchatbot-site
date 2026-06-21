@@ -1,0 +1,118 @@
+"use client";
+
+import { useState } from "react";
+import { useCart } from "@/components/CartProvider";
+
+type Plan = { id: string; name: string; monthly: number; annual: number; setup: number; featured?: boolean; label: string; feats: string[] };
+
+const PLANS: Plan[] = [
+  { id: "starter", name: "Starter", monthly: 249, annual: 199, setup: 500, label: "Get started", feats: ["Custom animated mascot", "FAQ brain trained on your business", "Text chat + lead capture to email/CRM", "Fully hosted & maintained", "1 website"] },
+  { id: "pro", name: "Pro", monthly: 599, annual: 479, setup: 1500, featured: true, label: "Most popular", feats: ["Everything in Starter", "Talking voice mascot (natural voice + lip-sync)", "Booking + calendar", "CRM / SMS routing", "Monthly tuning + performance report", "Priority build"] },
+  { id: "premium", name: "Premium", monthly: 1199, annual: 959, setup: 2500, label: "Premium", feats: ["Everything in Pro", "Multi-page knowledge + custom integrations", "Multiple mascots / multi-location", "A/B tuning", "Priority support"] },
+];
+
+type Billing = "monthly" | "annual" | "prepay3";
+
+function money(n: number) {
+  return "$" + n.toLocaleString();
+}
+
+export default function Pricing() {
+  const [billing, setBilling] = useState<Billing>("annual");
+  const { add, setOpen } = useCart();
+
+  function perMonth(p: Plan) {
+    return billing === "monthly" ? p.monthly : p.annual;
+  }
+  function setupFor(p: Plan) {
+    return billing === "prepay3" ? 0 : p.setup;
+  }
+  function billingLabel() {
+    if (billing === "monthly") return "billed monthly";
+    if (billing === "annual") return "billed yearly";
+    return "3-year prepay";
+  }
+  function addPlan(p: Plan) {
+    const detail =
+      billing === "prepay3"
+        ? "3-year prepay — setup waived"
+        : billing === "annual"
+        ? "Billed yearly (save 20%)"
+        : "Billed monthly";
+    add({ id: "plan-" + p.id, name: p.name + " plan", kind: "plan", monthly: perMonth(p), oneTime: setupFor(p), billing, detail });
+  }
+  function addThnk() {
+    add({ id: "thnk-rebuild", name: "Full website rebuild by THNK", kind: "addon", monthly: 0, oneTime: 1500, detail: "One-time — new site built around your mascot" });
+  }
+
+  const toggle: [Billing, string][] = [
+    ["monthly", "Monthly"],
+    ["annual", "Annual −20%"],
+    ["prepay3", "3 years · setup waived"],
+  ];
+
+  return (
+    <section id="pricing" className="scroll-mt-24 border-t-2 border-ink">
+      <div className="mx-auto max-w-7xl px-5 py-24">
+        <h2 className="mb-3 text-4xl font-bold tracking-tightest md:text-6xl">Simple, honest pricing.</h2>
+        <p className="mb-8 max-w-lg text-smoke">Flat monthly — no per-message credits, no surprise overage bills. We build it, host it, and keep it sharp. Cancel anytime.</p>
+
+        <div className="mb-12 inline-flex flex-wrap gap-1 rounded-full border-2 border-ink p-1">
+          {toggle.map(([id, lbl]) => (
+            <button key={id} onClick={() => setBilling(id)}
+              className={"rounded-full px-4 py-2 text-sm font-semibold transition " + (billing === id ? "bg-ink text-paper" : "text-ink hover:bg-ink/5")}>
+              {lbl}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid items-start gap-6 md:grid-cols-3">
+          {PLANS.map((p) => (
+            <div key={p.id} className={"flex h-full flex-col rounded-3xl border p-8 transition " + (p.featured ? "border-ink bg-ink text-paper shadow-xl md:-mt-3 md:scale-[1.03]" : "border-ink/15 bg-paper shadow-sm hover:-translate-y-1 hover:shadow-md")}>
+              <span className={"mb-4 inline-block w-fit rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest " + (p.featured ? "bg-paper text-ink" : "border border-ink/15 text-smoke")}>{p.label}</span>
+              <h3 className="text-2xl font-bold tracking-tight">{p.name}</h3>
+              <div className="mt-4 flex items-end gap-1">
+                <span className="text-6xl font-bold tracking-tightest">{money(perMonth(p))}</span>
+                <span className={"mb-2 " + (p.featured ? "text-paper/60" : "text-smoke")}>/mo</span>
+              </div>
+              <p className={"mt-1 text-sm " + (p.featured ? "text-paper/60" : "text-smoke")}>
+                {billingLabel()}
+                {" · "}
+                {billing === "prepay3" ? "setup waived 🎉" : money(setupFor(p)) + " setup"}
+              </p>
+              <div className={"my-6 h-px w-full " + (p.featured ? "bg-paper/20" : "bg-ink/10")} />
+              <ul className="flex-1 space-y-3.5 text-sm">
+                {p.feats.map((f) => (
+                  <li key={f} className="flex items-start gap-2.5">
+                    <svg width="18" height="18" viewBox="0 0 20 20" className="mt-0.5 shrink-0" aria-hidden="true">
+                      <circle cx="10" cy="10" r="10" fill={p.featured ? "#ffffff" : "#0A0A0A"} />
+                      <path d="M5.5 10.5l2.8 2.8 6-6.4" fill="none" stroke={p.featured ? "#0A0A0A" : "#ffffff"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button onClick={() => addPlan(p)} className={"mt-8 rounded-full px-6 py-3.5 text-center font-semibold transition " + (p.featured ? "bg-paper text-ink hover:opacity-90" : "bg-ink text-paper hover:opacity-90")}>
+                Add {p.name} to cart
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* THNK add-on */}
+        <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-3xl border-2 border-ink bg-ink p-8 text-paper sm:flex-row sm:items-center">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-widest text-paper/60">Add-on · a THNK.biz service</div>
+            <h3 className="mt-1 text-2xl font-bold tracking-tight">Have THNK rebuild your whole website</h3>
+            <p className="mt-1 max-w-xl text-paper/70">A brand-new, modern site designed around your mascot — done by the THNK design team. From {money(1500)} one-time.</p>
+          </div>
+          <button onClick={addThnk} className="shrink-0 rounded-full bg-paper px-6 py-3.5 font-semibold text-ink transition hover:opacity-90">Add to cart</button>
+        </div>
+
+        <p className="mt-6 text-center text-sm text-smoke">
+          <button onClick={() => setOpen(true)} className="font-semibold text-ink underline">View cart & checkout →</button>
+        </p>
+      </div>
+    </section>
+  );
+}
