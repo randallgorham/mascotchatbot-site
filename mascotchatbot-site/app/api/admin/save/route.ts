@@ -1,4 +1,4 @@
-import { isAuthed, setSecret, setSetting, kvReady } from "@/lib/vault";
+import { isAuthed, setSecret, setSetting, kvReady, INTEGRATION_ENV } from "@/lib/vault";
 
 export const runtime = "edge";
 
@@ -9,20 +9,13 @@ function json(data: unknown, status = 200) {
   });
 }
 
-const KEY_MAP: Record<string, string> = {
-  openai: "OPENAI_API_KEY",
-  anthropic: "ANTHROPIC_API_KEY",
-  eleven: "ELEVENLABS_API_KEY",
-  ghl: "GHL_WEBHOOK_URL",
-};
-
 export async function POST(req: Request) {
   if (!(await isAuthed(req))) return json({ ok: false, error: "Not authorized." }, 401);
   if (!kvReady()) return json({ ok: false, error: "No database connected yet. Create a Vercel KV store, then reload." }, 400);
   const body = await req.json().catch(() => ({} as Record<string, string>));
 
   if (body.type === "secret") {
-    const name = KEY_MAP[String(body.provider || "")];
+    const name = INTEGRATION_ENV[String(body.provider || "")];
     const value = String(body.value || "").trim();
     if (!name) return json({ ok: false, error: "Unknown integration." }, 400);
     if (!value) return json({ ok: false, error: "Paste a value first." }, 400);
