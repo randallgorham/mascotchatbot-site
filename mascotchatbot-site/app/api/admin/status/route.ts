@@ -19,18 +19,32 @@ export async function GET(req: Request) {
 
   // Sensitive integration keys + team list only for owner/admin (not staff).
   const integrations: Record<string, { set: boolean; last4: string; source: string }> = {};
-  let settings = { brain: "openai", voice: "openai", openaiVoice: "onyx", elevenVoiceId: "" };
+  let settings: {
+    brain: string;
+    voice: string;
+    openaiVoice: string;
+    elevenVoiceId: string;
+    botVoices: Record<string, string>;
+  } = { brain: "openai", voice: "openai", openaiVoice: "ash", elevenVoiceId: "", botVoices: {} };
   let team: unknown[] = [];
   if (manage) {
     const ids = Object.keys(INTEGRATION_ENV);
     for (let i = 0; i < ids.length; i++) integrations[ids[i]] = await secretStatus(INTEGRATION_ENV[ids[i]]);
-    const [brain, voice, openaiVoice, elevenVoiceId] = await Promise.all([
+    const [brain, voice, openaiVoice, elevenVoiceId, botVoicesRaw] = await Promise.all([
       getSetting("brain", "openai"),
       getSetting("voice", "openai"),
-      getSetting("openai_voice", "onyx"),
+      getSetting("openai_voice", "ash"),
       getSetting("eleven_voice_id", ""),
+      getSetting("bot_voices", "{}"),
     ]);
-    settings = { brain, voice, openaiVoice, elevenVoiceId };
+    let botVoices: Record<string, string> = {};
+    try {
+      const parsed = JSON.parse(botVoicesRaw);
+      if (parsed && typeof parsed === "object") botVoices = parsed as Record<string, string>;
+    } catch {
+      /* ignore */
+    }
+    settings = { brain, voice, openaiVoice, elevenVoiceId, botVoices };
     team = await getTeam();
   }
 
