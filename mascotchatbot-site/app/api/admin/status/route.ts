@@ -25,17 +25,19 @@ export async function GET(req: Request) {
     openaiVoice: string;
     elevenVoiceId: string;
     botVoices: Record<string, string>;
-  } = { brain: "openai", voice: "openai", openaiVoice: "ash", elevenVoiceId: "", botVoices: {} };
+    ghlCalendarUrl: string;
+  } = { brain: "openai", voice: "openai", openaiVoice: "ash", elevenVoiceId: "", botVoices: {}, ghlCalendarUrl: "" };
   let team: unknown[] = [];
   if (manage) {
     const ids = Object.keys(INTEGRATION_ENV);
     for (let i = 0; i < ids.length; i++) integrations[ids[i]] = await secretStatus(INTEGRATION_ENV[ids[i]]);
-    const [brain, voice, openaiVoice, elevenVoiceId, botVoicesRaw] = await Promise.all([
+    const [brain, voice, openaiVoice, elevenVoiceId, botVoicesRaw, ghlCalendarUrl] = await Promise.all([
       getSetting("brain", "openai"),
       getSetting("voice", "openai"),
       getSetting("openai_voice", "ash"),
       getSetting("eleven_voice_id", ""),
       getSetting("bot_voices", "{}"),
+      getSetting("ghl_calendar_url", ""),
     ]);
     let botVoices: Record<string, string> = {};
     try {
@@ -44,7 +46,7 @@ export async function GET(req: Request) {
     } catch {
       /* ignore */
     }
-    settings = { brain, voice, openaiVoice, elevenVoiceId, botVoices };
+    settings = { brain, voice, openaiVoice, elevenVoiceId, botVoices, ghlCalendarUrl };
     team = await getTeam();
   }
 
