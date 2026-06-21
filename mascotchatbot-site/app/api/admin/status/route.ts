@@ -1,4 +1,5 @@
-import { isAuthed, secretStatus, getSetting, kvReady, INTEGRATION_ENV, recentRecords } from "@/lib/vault";
+import { secretStatus, getSetting, kvReady, INTEGRATION_ENV, recentRecords } from "@/lib/vault";
+import { getSessionEmail, getRole, canManage, getTeam } from "@/lib/auth";
 
 export const runtime = "edge";
 
@@ -10,20 +11,28 @@ function json(data: unknown, status = 200) {
 }
 
 export async function GET(req: Request) {
-  if (!(await isAuthed(req))) return json({ auth: false });
+  const email = await getSessionEmail(req);
+  const role = await getRole(email);
+  if (!role) return json({ auth: false, signedIn: !!email, email: email || null });
 
+  const manage = canManage(role);
+
+  // Sensitive integration keys + team list only for owner/admin (not staff).
   const integrations: Record<string, { set: boolean; last4: string; source: string }> = {};
-  const ids = Object.keys(INTEGRATION_ENV);
-  for (let i = 0; i < ids.length; i++) {
-    integrations[ids[i]] = await secretStatus(INTEGRATION_ENV[ids[i]]);
+  let settings = { brain: "openai", voice: "openai", openaiVoice: "onyx", elevenVoiceId: "" };
+  let team: unknown[] = [];
+  if (manage) {
+    const ids = Object.keys(INTEGRATION_ENV);
+    for (let i = 0; i < ids.length; i++) integrations[ids[i]] = await secretStatus(INTEGRATION_ENV[ids[i]]);
+    const [brain, voice, openaiVoice, elevenVoiceId] = await Promise.all([
+      getSetting("brain", "openai"),
+      getSetting("voice", "openai"),
+      getSetting("openai_voice", "onyx"),
+      getSetting("eleven_voice_id", ""),
+    ]);
+    settings = { brain, voice, openaiVoice, elevenVoiceId };
+    team = await getTeam();
   }
-
-  const [brain, voice, openaiVoice, elevenVoiceId] = await Promise.all([
-    getSetting("brain", "openai"),
-    getSetting("voice", "openai"),
-    getSetting("openai_voice", "onyx"),
-    getSetting("eleven_voice_id", ""),
-  ]);
 
   const [orders, customers, onboarding] = await Promise.all([
     recentRecords("order:", 100),
@@ -33,9 +42,13 @@ export async function GET(req: Request) {
 
   return json({
     auth: true,
+    email,
+    role,
+    manage,
     kv: kvReady(),
     integrations,
-    settings: { brain, voice, openaiVoice, elevenVoiceId },
+    settings,
+    team,
     data: { orders, customers, onboarding },
   });
 }
