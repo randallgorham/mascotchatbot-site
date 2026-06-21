@@ -9,27 +9,23 @@ const RING = [
   "20-attorney-male",
 ];
 
-const R = 122; // orbit radius (px)
-
 export default function MascotRing() {
   return (
-    <div className="relative mx-auto h-[330px] w-[330px] md:h-[400px] md:w-[400px]">
+    <div className="mcb-wrap relative mx-auto">
       <style>{CSS}</style>
 
       {/* soft glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e3342b]/10 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e3342b]/10 blur-3xl" />
 
       {/* rotating ring */}
       <div className="mcb-ring absolute inset-0">
         {RING.map((img, i) => {
           const a = i * 72;
           return (
-            <div key={img} className="absolute left-1/2 top-1/2" style={{ transform: `rotate(${a}deg) translateY(-${R}px)` }}>
+            <div key={img} className="absolute left-1/2 top-1/2" style={{ transform: `rotate(${a}deg) translateY(calc(-1 * var(--r)))` }}>
               <div style={{ transform: `translate(-50%, -50%) rotate(${-a}deg)` }}>
                 <div className="mcb-face">
-                  <span className="flex h-[92px] w-[92px] items-center justify-center overflow-hidden rounded-full border-2 border-ink bg-paper shadow-[4px_4px_0_0_#0A0A0A] md:h-[112px] md:w-[112px]">
-                    <img src={`/mascots/${img}.jpg`} alt="Mascot style option" loading="lazy" className="h-full w-full scale-110 object-contain mix-blend-multiply" />
-                  </span>
+                  <img src={`/mascots/${img}.jpg`} alt="Mascot style option" loading="lazy" className="mcb-img object-contain mix-blend-multiply" />
                 </div>
               </div>
             </div>
@@ -38,8 +34,8 @@ export default function MascotRing() {
       </div>
 
       {/* static center — click to talk to the live demo */}
-      <OpenMascot className="absolute left-1/2 top-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border-2 border-ink bg-ink text-center text-paper transition hover:scale-105 md:h-28 md:w-28">
-        <svg width="40" height="40" viewBox="0 0 200 200" aria-hidden="true">
+      <OpenMascot className="absolute left-1/2 top-1/2 z-10 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border-2 border-ink bg-ink text-center text-paper shadow-[5px_5px_0_0_#e3342b] transition hover:scale-105">
+        <svg width="38" height="38" viewBox="0 0 200 200" aria-hidden="true">
           <line x1="100" y1="22" x2="100" y2="6" stroke="#fff" strokeWidth="9" strokeLinecap="round" />
           <circle cx="100" cy="5" r="9" fill="#fff" />
           <rect x="20" y="22" width="160" height="126" rx="36" fill="#fff" />
@@ -54,8 +50,14 @@ export default function MascotRing() {
 }
 
 const CSS = `
-.mcb-ring{ animation: mcbSpin 30s linear infinite; }
-.mcb-face{ animation: mcbSpinR 30s linear infinite; }
+.mcb-wrap{ width:340px; height:340px; --r:118px; }
+.mcb-img{ width:150px; height:150px; }
+@media (min-width:768px){
+  .mcb-wrap{ width:480px; height:480px; --r:170px; }
+  .mcb-img{ width:210px; height:210px; }
+}
+.mcb-ring{ animation: mcbSpin 34s linear infinite; }
+.mcb-face{ animation: mcbSpinR 34s linear infinite; }
 @keyframes mcbSpin{ from{ transform: rotate(0deg);} to{ transform: rotate(360deg);} }
 @keyframes mcbSpinR{ from{ transform: rotate(0deg);} to{ transform: rotate(-360deg);} }
 @media (prefers-reduced-motion: reduce){ .mcb-ring, .mcb-face{ animation: none; } }

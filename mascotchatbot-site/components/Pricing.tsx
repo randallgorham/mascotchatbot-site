@@ -41,8 +41,8 @@ export default function Pricing() {
         : "Billed monthly";
     add({ id: "plan-" + p.id, name: p.name + " plan", kind: "plan", monthly: perMonth(p), oneTime: setupFor(p), billing, detail });
   }
-  function addThnk() {
-    add({ id: "thnk-rebuild", name: "Full website rebuild by THNK", kind: "addon", monthly: 0, oneTime: 1500, detail: "One-time — new site built around your mascot" });
+  function addService(id: string, name: string, price: number, detail: string) {
+    add({ id, name, kind: "addon", monthly: 0, oneTime: price, detail });
   }
 
   const toggle: [Billing, string][] = [
@@ -99,14 +99,23 @@ export default function Pricing() {
           ))}
         </div>
 
-        {/* THNK add-on */}
-        <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-3xl border-2 border-ink bg-ink p-8 text-paper sm:flex-row sm:items-center">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-widest text-paper/60">Add-on · a THNK.biz service</div>
-            <h3 className="mt-1 text-2xl font-bold tracking-tight">Have THNK rebuild your whole website</h3>
-            <p className="mt-1 max-w-xl text-paper/70">A brand-new, modern site designed around your mascot — done by the THNK design team. From {money(1500)} one-time.</p>
+        {/* THNK add-ons */}
+        <div className="mt-8">
+          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-smoke">Add a website service · by THNK.biz</div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="flex flex-col rounded-3xl border-2 border-ink bg-paper p-7">
+              <h3 className="text-xl font-bold tracking-tight">Website update</h3>
+              <p className="mt-1 flex-1 text-sm text-smoke">A modern refresh of your existing site — up to 10 pages — rebuilt around your new mascot.</p>
+              <div className="mt-4 text-3xl font-bold tracking-tightest">{money(999)} <span className="text-base font-medium text-smoke">one-time</span></div>
+              <button onClick={() => addService("thnk-update", "Website update (up to 10 pages)", 999, "One-time · up to 10 pages, by THNK")} className="mt-5 rounded-full bg-ink px-6 py-3 font-semibold text-paper transition hover:opacity-90">Add to cart</button>
+            </div>
+            <div className="flex flex-col rounded-3xl border-2 border-ink bg-ink p-7 text-paper">
+              <h3 className="text-xl font-bold tracking-tight">Full custom rebuild</h3>
+              <p className="mt-1 flex-1 text-sm text-paper/70">A brand-new, fully custom website designed from scratch around your mascot.</p>
+              <div className="mt-4 text-3xl font-bold tracking-tightest">from {money(1500)} <span className="text-base font-medium text-paper/60">one-time</span></div>
+              <button onClick={() => addService("thnk-rebuild", "Full website rebuild by THNK", 1500, "One-time · full custom build, by THNK")} className="mt-5 rounded-full bg-paper px-6 py-3 font-semibold text-ink transition hover:opacity-90">Add to cart</button>
+            </div>
           </div>
-          <button onClick={addThnk} className="shrink-0 rounded-full bg-paper px-6 py-3.5 font-semibold text-ink transition hover:opacity-90">Add to cart</button>
         </div>
 
         <p className="mt-6 text-center text-sm text-smoke">
