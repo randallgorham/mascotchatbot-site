@@ -110,7 +110,10 @@ export async function getSetting(name: string, def: string): Promise<string> {
 export async function adminToken(): Promise<string> {
   const secret = process.env.ADMIN_PASSWORD || "";
   const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("mcb-admin-v1|" + secret));
-  return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  const arr = new Uint8Array(h);
+  let hex = "";
+  for (let i = 0; i < arr.length; i++) hex += arr[i].toString(16).padStart(2, "0");
+  return hex;
 }
 export async function isAuthed(req: Request): Promise<boolean> {
   if (!process.env.ADMIN_PASSWORD) return false;
