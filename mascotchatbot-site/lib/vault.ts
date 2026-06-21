@@ -33,6 +33,44 @@ export async function kvSet(key: string, val: string): Promise<boolean> {
   const v = await kvCmd(["SET", key, val]);
   return v === "OK";
 }
+export async function kvList(prefix: string): Promise<string[]> {
+  const r = await kvCmd(["KEYS", prefix + "*"]);
+  if (!Array.isArray(r)) return [];
+  const out: string[] = [];
+  for (let i = 0; i < r.length; i++) out.push(String(r[i]));
+  return out;
+}
+export async function recentRecords(prefix: string, limit: number): Promise<unknown[]> {
+  const keys = await kvList(prefix);
+  const out: unknown[] = [];
+  const slice = keys.slice(0, limit);
+  for (let i = 0; i < slice.length; i++) {
+    const v = await kvGet(slice[i]);
+    if (v) {
+      try {
+        out.push(JSON.parse(v));
+      } catch {
+        /* skip */
+      }
+    }
+  }
+  return out;
+}
+
+// All integrations the owner can connect, mapped to their env-var / vault names.
+export const INTEGRATION_ENV: Record<string, string> = {
+  openai: "OPENAI_API_KEY",
+  anthropic: "ANTHROPIC_API_KEY",
+  eleven: "ELEVENLABS_API_KEY",
+  ghl: "GHL_WEBHOOK_URL",
+  stripe_secret: "STRIPE_SECRET_KEY",
+  stripe_pub: "STRIPE_PUBLISHABLE_KEY",
+  stripe_webhook: "STRIPE_WEBHOOK_SECRET",
+  google_id: "GOOGLE_CLIENT_ID",
+  google_secret: "GOOGLE_CLIENT_SECRET",
+  mailgun: "MAILGUN_API_KEY",
+  auth_secret: "AUTH_SECRET",
+};
 
 // ---- AES-GCM ----
 async function aesKey(): Promise<CryptoKey> {
