@@ -31,6 +31,14 @@ export async function POST(req: Request) {
     if (body.voice) await setSetting("voice", String(body.voice));
     if (body.openaiVoice) await setSetting("openai_voice", String(body.openaiVoice));
     if (typeof body.elevenVoiceId === "string") await setSetting("eleven_voice_id", body.elevenVoiceId.trim());
+    if (typeof body.openaiSpeed === "string" || typeof body.openaiSpeed === "number")
+      await setSetting("openai_speed", String(body.openaiSpeed));
+    const bv = (body as { botVoices?: Record<string, string> }).botVoices;
+    if (bv && typeof bv === "object") {
+      await setSetting("bot_voices", JSON.stringify(bv));
+      // Mr Amp is the live demo bot — keep the homepage voice in sync with his row.
+      if (typeof bv.amp === "string" && bv.amp) await setSetting("openai_voice", bv.amp);
+    }
     return json({ ok: true });
   }
 
