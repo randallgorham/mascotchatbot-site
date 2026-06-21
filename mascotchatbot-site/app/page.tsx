@@ -1,4 +1,4 @@
-import MascotMock from "@/components/MascotMock";
+import MascotRing from "@/components/MascotRing";
 import LeadForm from "@/components/LeadForm";
 import OpenMascot from "@/components/OpenMascot";
 import MobileNav from "@/components/MobileNav";
@@ -156,9 +156,8 @@ export default function Home() {
               ))}
             </ul>
           </div>
-          <div className="relative flex justify-center md:justify-end">
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e3342b]/10 blur-3xl" />
-            <MascotMock />
+          <div className="flex justify-center md:justify-end">
+            <MascotRing />
           </div>
         </div>
       </section>
