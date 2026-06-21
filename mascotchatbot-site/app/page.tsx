@@ -2,6 +2,8 @@ import MascotMock from "@/components/MascotMock";
 import LeadForm from "@/components/LeadForm";
 import OpenMascot from "@/components/OpenMascot";
 import MobileNav from "@/components/MobileNav";
+import NavActions from "@/components/NavActions";
+import Pricing from "@/components/Pricing";
 
 const NICHES = [
   "Electricians","Realtors","HVAC","Dentists","Law firms","Med-spas",
@@ -34,12 +36,6 @@ const CHARACTERS = [
   { img: "09-contractor-male-cap-vest", name: "Bo", niche: "Contractor" },
   { img: "11-general-contractor-male", name: "Hank", niche: "General Contractor" },
   { img: "20-attorney-male", name: "Vance", niche: "Law Firm" },
-];
-
-const TIERS = [
-  { name: "Starter", setup: "$1,000+", price: "$300", feats: ["Branded mascot", "Text chat", "FAQ brain", "Lead capture to email", "1 website"] },
-  { name: "Pro", setup: "$2,500+", price: "$600", feats: ["Custom animated mascot", "Booking + calendar", "CRM / SMS routing", "Monthly tuning + report", "Priority build"], featured: true },
-  { name: "Voice", setup: "$4,500+", price: "$1,100", feats: ["Talking voice mascot", "Multi-page knowledge", "Custom integrations", "A/B tuning", "Priority support"] },
 ];
 
 const STATS = [
@@ -111,43 +107,59 @@ export default function Home() {
             </svg>
             <span>Mascot<span className="text-smoke">Chatbot</span></span>
           </a>
-          <nav className="hidden gap-8 text-sm font-medium md:flex">
-            <a href="#how" className="hover:opacity-60">How it works</a>
-            <a href="#demos" className="hover:opacity-60">Demos</a>
-            <a href="#pricing" className="hover:opacity-60">Pricing</a>
-            <a href="#faq" className="hover:opacity-60">FAQ</a>
-          </nav>
-          <a href="#cta" className="hidden rounded-full border-2 border-ink bg-ink px-5 py-2 text-sm font-semibold text-paper transition hover:bg-paper hover:text-ink md:inline-block">
-            Book a demo
-          </a>
-          <MobileNav />
+          <div className="flex items-center gap-3 md:gap-5">
+            <nav className="hidden gap-7 text-sm font-medium lg:flex">
+              <a href="#how" className="hover:opacity-60">How it works</a>
+              <a href="#demos" className="hover:opacity-60">Demos</a>
+              <a href="#pricing" className="hover:opacity-60">Pricing</a>
+              <a href="#faq" className="hover:opacity-60">FAQ</a>
+            </nav>
+            <a href="#pricing" className="hidden rounded-full bg-ink px-5 py-2 text-sm font-semibold text-paper transition hover:opacity-80 md:inline-block">
+              Get your mascot
+            </a>
+            <NavActions />
+            <MobileNav />
+          </div>
         </div>
       </header>
 
       {/* HERO */}
-      <section id="top" className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-20 pt-16 md:grid-cols-[1.15fr_0.85fr] md:pt-24">
-        <div>
-          <p className="mb-6 inline-block border-2 border-ink px-3 py-1 text-xs font-semibold uppercase tracking-widest">
-            Animated AI mascots for websites
-          </p>
-          <h1 className="text-[15vw] font-bold leading-[0.86] tracking-tightest md:text-[7.5rem]">
-            Your brand,<br />talking.
-          </h1>
-          <p className="mt-7 max-w-md text-lg leading-relaxed text-smoke">
-            We build a custom animated mascot that lives on your website, talks to your
-            visitors, answers their questions, and books the job — 24/7. Done for you. Hosted by us.
-          </p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <a href="#cta" className="rounded-full bg-ink px-7 py-3 font-semibold text-paper transition hover:opacity-80">
-              Get your mascot →
-            </a>
-            <OpenMascot className="rounded-full border-2 border-ink px-7 py-3 font-semibold transition hover:bg-ink hover:text-paper">
-              See it talk
-            </OpenMascot>
+      <section id="top" className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(#0A0A0A 1.2px, transparent 1.2px)", backgroundSize: "22px 22px" }} />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 pb-20 pt-16 md:grid-cols-[1.1fr_0.9fr] md:pt-24">
+          <div>
+            <p className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-ink px-3 py-1 text-xs font-semibold uppercase tracking-widest">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e3342b] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#e3342b]" />
+              </span>
+              Animated AI mascots for websites
+            </p>
+            <h1 className="text-[15vw] font-bold leading-[0.84] tracking-tightest md:text-[7.5rem]">
+              Your brand,<br />
+              <span className="relative inline-block">talking.<span className="absolute -bottom-1 left-0 h-2.5 w-full bg-[#e3342b]/80" /></span>
+            </h1>
+            <p className="mt-8 max-w-md text-lg leading-relaxed text-smoke">
+              We build a custom animated mascot that lives on your site, talks to visitors, answers questions, and books the job — <b className="text-ink">24/7, done for you, hosted by us.</b>
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <a href="#pricing" className="rounded-full bg-ink px-7 py-3.5 font-semibold text-paper transition hover:opacity-80">
+                Get your mascot →
+              </a>
+              <OpenMascot className="rounded-full border-2 border-ink px-7 py-3.5 font-semibold transition hover:bg-ink hover:text-paper">
+                ▶ See it talk
+              </OpenMascot>
+            </div>
+            <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-smoke">
+              {["No code", "Done-for-you", "Live in ~a week", "Cancel anytime"].map((t) => (
+                <li key={t} className="flex items-center gap-1.5"><span className="text-ink">✓</span>{t}</li>
+              ))}
+            </ul>
           </div>
-        </div>
-        <div className="flex justify-center md:justify-end">
-          <MascotMock />
+          <div className="relative flex justify-center md:justify-end">
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e3342b]/10 blur-3xl" />
+            <MascotMock />
+          </div>
         </div>
       </section>
 
@@ -288,42 +300,7 @@ export default function Home() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="scroll-mt-24 border-t-2 border-ink">
-        <div className="mx-auto max-w-7xl px-5 py-24">
-          <h2 className="mb-3 text-4xl font-bold tracking-tightest md:text-6xl">Simple pricing.</h2>
-          <p className="mb-14 max-w-lg text-smoke">A one-time build, then a flat monthly to host, monitor, and keep it sharp. Cancel anytime.</p>
-          <div className="grid items-start gap-6 md:grid-cols-3">
-            {TIERS.map((t) => (
-              <div key={t.name} className={`flex h-full flex-col rounded-3xl border p-8 transition ${t.featured ? "border-ink bg-ink text-paper shadow-xl md:-mt-3 md:scale-[1.03]" : "border-ink/15 bg-paper shadow-sm hover:-translate-y-1 hover:shadow-md"}`}>
-                {t.featured
-                  ? <span className="mb-4 inline-block w-fit rounded-full bg-paper px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-ink">Most popular</span>
-                  : <span className="mb-4 inline-block w-fit rounded-full border border-ink/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-smoke">{t.name === "Starter" ? "Get started" : "Premium"}</span>}
-                <h3 className="text-2xl font-bold tracking-tight">{t.name}</h3>
-                <div className="mt-4 flex items-end gap-1">
-                  <span className="text-6xl font-bold tracking-tightest">{t.price}</span>
-                  <span className={`mb-2 ${t.featured ? "text-paper/60" : "text-smoke"}`}>/mo</span>
-                </div>
-                <p className={`mt-1 text-sm ${t.featured ? "text-paper/60" : "text-smoke"}`}>{t.setup} one-time setup</p>
-                <div className={`my-6 h-px w-full ${t.featured ? "bg-paper/20" : "bg-ink/10"}`} />
-                <ul className="flex-1 space-y-3.5 text-sm">
-                  {t.feats.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5">
-                      <svg width="18" height="18" viewBox="0 0 20 20" className="mt-0.5 shrink-0" aria-hidden="true">
-                        <circle cx="10" cy="10" r="10" fill={t.featured ? "#ffffff" : "#0A0A0A"} />
-                        <path d="M5.5 10.5l2.8 2.8 6-6.4" fill="none" stroke={t.featured ? "#0A0A0A" : "#ffffff"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <a href="#cta" className={`mt-8 rounded-full px-6 py-3.5 text-center font-semibold transition ${t.featured ? "bg-paper text-ink hover:opacity-90" : "bg-ink text-paper hover:opacity-90"}`}>
-                  Choose {t.name}
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Pricing />
 
       {/* SOCIAL PROOF */}
       <section className="border-t-2 border-ink bg-paper">

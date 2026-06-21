@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import MrAmp from "@/components/MrAmp";
+import { CartProvider } from "@/components/CartProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mascotchatbot.com"),
@@ -48,8 +49,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="scroll-smooth">
       <body className="font-sans antialiased">
-        {children}
-        <MrAmp />
+        <CartProvider>
+          {children}
+          <MrAmp />
+        </CartProvider>
       </body>
     </html>
   );
