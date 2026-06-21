@@ -1,12 +1,13 @@
 import OpenMascot from "@/components/OpenMascot";
 
 // Five distinct mascots that orbit clockwise so visitors see the range of styles.
+// Each says something cute on hover — "window shopping" for a mascot.
 const RING = [
-  "01-realtor-female-classic",
-  "05-fitness-coach-male",
-  "08-electrician-male",
-  "15-medspa-female",
-  "20-attorney-male",
+  { img: "01-realtor-female-classic", say: "Pick me! 🏡" },
+  { img: "05-fitness-coach-male", say: "Ooh, pick me! 💪" },
+  { img: "08-electrician-male", say: "Pick me! ⚡" },
+  { img: "15-medspa-female", say: "Choose me! ✨" },
+  { img: "20-attorney-male", say: "I'm your guy! ⚖️" },
 ];
 
 export default function MascotRing() {
@@ -19,13 +20,14 @@ export default function MascotRing() {
 
       {/* rotating ring */}
       <div className="mcb-ring absolute inset-0">
-        {RING.map((img, i) => {
+        {RING.map((m, i) => {
           const a = i * 72;
           return (
-            <div key={img} className="absolute left-1/2 top-1/2" style={{ transform: `rotate(${a}deg) translateY(calc(-1 * var(--r)))` }}>
+            <div key={m.img} className="absolute left-1/2 top-1/2" style={{ transform: `rotate(${a}deg) translateY(calc(-1 * var(--r)))` }}>
               <div style={{ transform: `translate(-50%, -50%) rotate(${-a}deg)` }}>
-                <div className="mcb-face">
-                  <img src={`/mascots/${img}.jpg`} alt="Mascot style option" loading="lazy" className="mcb-img object-contain mix-blend-multiply" />
+                <div className="mcb-face" tabIndex={0}>
+                  <span className="mcb-bubble">{m.say}</span>
+                  <img src={`/mascots/${m.img}.jpg`} alt="Mascot style option" loading="lazy" className="mcb-img object-contain mix-blend-multiply" />
                 </div>
               </div>
             </div>
@@ -51,14 +53,39 @@ export default function MascotRing() {
 
 const CSS = `
 .mcb-wrap{ width:340px; height:340px; --r:118px; }
-.mcb-img{ width:150px; height:150px; }
+.mcb-img{ width:150px; height:150px; transition: transform .25s ease; }
 @media (min-width:768px){
   .mcb-wrap{ width:480px; height:480px; --r:170px; }
   .mcb-img{ width:210px; height:210px; }
 }
 .mcb-ring{ animation: mcbSpin 34s linear infinite; }
-.mcb-face{ animation: mcbSpinR 34s linear infinite; }
+.mcb-face{ position:relative; cursor:pointer; outline:none; animation: mcbSpinR 34s linear infinite; }
 @keyframes mcbSpin{ from{ transform: rotate(0deg);} to{ transform: rotate(360deg);} }
 @keyframes mcbSpinR{ from{ transform: rotate(0deg);} to{ transform: rotate(-360deg);} }
+
+/* hover/focus: grow the mascot */
+.mcb-face:hover .mcb-img, .mcb-face:focus-visible .mcb-img{ transform: scale(1.09); }
+.mcb-face:hover, .mcb-face:focus-visible{ z-index:6; }
+
+/* cute speech bubble */
+.mcb-bubble{
+  position:absolute; left:50%; top:2px; z-index:7;
+  transform: translate(-50%,-6px) scale(.8);
+  background:#fff; color:#0A0A0A; border:2px solid #0A0A0A; border-radius:14px;
+  padding:5px 11px; font-size:13px; font-weight:800; white-space:nowrap;
+  box-shadow:4px 4px 0 0 #e3342b; opacity:0; pointer-events:none;
+  transition: opacity .18s ease, transform .24s cubic-bezier(.34,1.5,.5,1);
+}
+.mcb-bubble::after{
+  content:""; position:absolute; left:50%; bottom:-7px;
+  transform:translateX(-50%) rotate(45deg); width:10px; height:10px;
+  background:#fff; border-right:2px solid #0A0A0A; border-bottom:2px solid #0A0A0A;
+}
+.mcb-face:hover .mcb-bubble, .mcb-face:focus-visible .mcb-bubble{ opacity:1; transform: translate(-50%,-16px) scale(1); }
+
+/* freeze the whole carousel while a mascot is hovered/focused so the bubble is readable */
+.mcb-ring:has(.mcb-face:hover), .mcb-ring:has(.mcb-face:focus-visible){ animation-play-state: paused; }
+.mcb-ring:has(.mcb-face:hover) .mcb-face, .mcb-ring:has(.mcb-face:focus-visible) .mcb-face{ animation-play-state: paused; }
+
 @media (prefers-reduced-motion: reduce){ .mcb-ring, .mcb-face{ animation: none; } }
 `;
