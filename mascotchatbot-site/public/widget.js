@@ -29,7 +29,7 @@
 
   function build() {
     var accent = cfg.accent || "#e3342b";
-    var img = cfg.image || (base + "/mascots/dr-volt-1.png");
+    var img = cfg.image ? (cfg.image.charAt(0) === "/" ? base + cfg.image : cfg.image) : (base + "/mascots/dr-volt-1.png");
     var css = el("style");
     css.textContent =
       "#mcbw{position:fixed;right:18px;bottom:16px;z-index:2147483000;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}" +
