@@ -262,7 +262,8 @@ export default function MrAmp() {
 
 const CSS = `
 #amp{ --red:#e3342b; --red-d:#b41f17; --char:#14171c; --ink:#1d2127; --skin:#ecbb90;
-  position:fixed; right:20px; bottom:14px; z-index:60; font-family:ui-sans-serif,system-ui,Arial,sans-serif; }
+  position:fixed; right:20px; bottom:14px; z-index:60; font-family:ui-sans-serif,system-ui,Arial,sans-serif; transition:bottom .32s cubic-bezier(.34,1.4,.5,1); }
+#amp[data-state="open"]{ bottom:58px; }
 #amp *{ box-sizing:border-box; }
 .amp-body{ position:relative; width:150px; height:262px; }
 .amp-stage{ position:absolute; inset:0; width:100%; height:100%; border:none; background:none; padding:0; cursor:pointer;
@@ -303,7 +304,7 @@ const CSS = `
 @keyframes ampIntro{0%{transform:translateY(150px) scale(.7);opacity:0}60%{transform:translateY(-12px) scale(1.03)}100%{transform:translateY(0) scale(1);opacity:1}}
 .amp-panel{ position:absolute; right:140px; bottom:6px; width:280px; max-width:74vw; display:flex; flex-direction:column; align-items:flex-start; gap:9px; opacity:0; transform:translateY(10px) scale(.96); transform-origin:bottom right; pointer-events:none; transition:opacity .28s ease, transform .34s cubic-bezier(.34,1.4,.5,1); }
 #amp[data-state="open"] .amp-panel{ opacity:1; transform:none; pointer-events:auto; }
-.amp-nameplate{ position:absolute; left:50%; bottom:-4px; transform:translateX(-50%) translateY(8px); display:flex; align-items:center; gap:6px; background:#fff; border:2px solid var(--char); border-radius:12px; padding:4px 9px; box-shadow:0 8px 20px rgba(0,0,0,.18); white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .28s ease, transform .34s cubic-bezier(.34,1.4,.5,1); z-index:5; }
+.amp-nameplate{ position:absolute; left:50%; bottom:-46px; transform:translateX(-50%) translateY(8px); display:flex; align-items:center; gap:6px; background:#fff; border:2px solid var(--char); border-radius:12px; padding:4px 9px; box-shadow:0 8px 20px rgba(0,0,0,.18); white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .28s ease, transform .34s cubic-bezier(.34,1.4,.5,1); z-index:5; }
 #amp[data-state="open"] .amp-nameplate{ opacity:1; transform:translateX(-50%) translateY(0); }
 .amp-logo{ flex:0 0 auto; }
 .amp-brand{ font-size:13px; font-weight:800; color:var(--ink); letter-spacing:-.01em; }
