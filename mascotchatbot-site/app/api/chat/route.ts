@@ -1,5 +1,6 @@
 import { getSecret, getSetting } from "@/lib/vault";
 import { getBot, publicConfig, botSystemPrompt } from "@/lib/botcfg";
+import { extractContact, saveLead, emailOwner } from "@/lib/leads";
 
 export const runtime = "edge";
 
@@ -59,6 +60,20 @@ export async function POST(req: Request) {
       role: m && m.role === "assistant" ? "assistant" : "user",
       content: String((m && m.content) || "").slice(0, 600),
     }));
+
+    // Lead capture: if the visitor shared contact info, store it and notify the owner.
+    if (bot) {
+      const lastUser = [...trimmed].reverse().find((m) => m.role === "user");
+      if (lastUser && lastUser.content) {
+        const c = extractContact(lastUser.content);
+        if (c.email || c.phone) {
+          const id = (c.email || c.phone || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 40) || Date.now().toString(36);
+          const lead = { id, botId: bot.id, name: c.name, email: c.email, phone: c.phone, message: lastUser.content.slice(0, 500), at: new Date().toISOString() };
+          await saveLead(lead);
+          if (bot.owner) await emailOwner(bot.owner, bot.business, lead);
+        }
+      }
+    }
 
     const brain = await resolveBrain();
     if (!brain) {
