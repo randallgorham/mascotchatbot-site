@@ -5,7 +5,7 @@ import { VOICES } from "@/lib/bots";
 
 type U = { email: string; name: string } | null;
 type Bot = {
-  id: string; business: string; industry: string; about: string; facts: string;
+  id: string; business: string; industry: string; about: string; facts: string; notes: string;
   cta: string; ctaUrl: string; greet: boolean; wave: boolean; wink: boolean;
   voice: string; accent: string; image: string; badge: boolean; plan: string;
 };
@@ -81,6 +81,25 @@ export default function Account() {
     s.src = "/widget.js"; s.setAttribute("data-bot", bot.id); s.async = true;
     document.body.appendChild(s); setPreviewing(true);
   }
+  async function resizeToDataUrl(file: File, max = 512): Promise<string> {
+    const blob = new Blob([await file.arrayBuffer()], { type: file.type || "image/png" });
+    const bmp = await createImageBitmap(blob);
+    const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const w = Math.max(1, Math.round(bmp.width * scale)), h = Math.max(1, Math.round(bmp.height * scale));
+    const canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d"); if (ctx) ctx.drawImage(bmp, 0, 0, w, h);
+    return canvas.toDataURL("image/png");
+  }
+  async function uploadArt(file?: File | null) {
+    if (!file) return; setBusy(true); setSaved("");
+    try {
+      const dataUrl = await resizeToDataUrl(file, 512);
+      const r = await fetch("/api/mascot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ dataUrl }) });
+      const d = await r.json();
+      if (d.ok) { setB("image", d.image as string); setSaved("Artwork uploaded ✓"); } else setSaved(d.error || "Upload failed.");
+    } catch { setSaved("Upload failed — try a smaller image."); }
+    setBusy(false);
+  }
 
   const field = "w-full rounded-xl border-2 border-ink/15 px-4 py-2.5 outline-none focus:border-ink text-sm";
   const needsSetup = !!bot && !bot.industry && !bot.about && !bot.facts && !wizardDone;
@@ -136,7 +155,13 @@ export default function Account() {
                             <img src={url} alt={name} className="h-20 w-full object-contain" />
                             <span className="mt-1 text-[11px] font-semibold">{name}</span>
                           </button> ); })}
+                        <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-ink/30 p-2 text-center transition hover:border-ink/60">
+                          <span className="text-2xl leading-none">＋</span>
+                          <span className="mt-1 text-[11px] font-semibold">Upload your own</span>
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadArt(e.target.files?.[0])} />
+                        </label>
                       </div>
+                      {bot.image && bot.image.indexOf("/api/mascot") === 0 && <p className="mt-3 text-xs font-medium text-smoke">Your custom artwork is uploaded ✓</p>}
                     </div>
                   )}
                   {step === 2 && (
@@ -158,6 +183,8 @@ export default function Account() {
                         <textarea className={field} rows={4} value={bot.facts} onChange={(e) => setB("facts", e.target.value)} placeholder={"Hours: Mon–Fri 7–6\nService area: ...\nServices & pricing: ..."} /></label>
                       <label className="block text-sm"><span className="mb-1 block font-semibold">Main goal (call to action)</span>
                         <input className={field} value={bot.cta} onChange={(e) => setB("cta", e.target.value)} placeholder="book an appointment" /></label>
+                      <label className="block text-sm"><span className="mb-1 block font-semibold">Special instructions (optional)</span>
+                        <textarea className={field} rows={3} value={bot.notes} onChange={(e) => setB("notes", e.target.value)} placeholder="Your mascot's name & personality, tone, things to always or never say…" /></label>
                     </div>
                   )}
 
@@ -187,6 +214,9 @@ export default function Account() {
                     <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">Key facts the bot should know</span>
                       <textarea className={field} rows={4} value={bot.facts} onChange={(e) => setB("facts", e.target.value)} placeholder={"Hours: Mon–Fri 7–6\nService area: ...\nServices & typical pricing: ...\nCommon questions: ..."} />
                       <span className="mt-1 block text-xs text-smoke">Hours, service area, services, pricing, FAQs — anything you want it to answer accurately.</span></label>
+                    <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">Special instructions (optional)</span>
+                      <textarea className={field} rows={3} value={bot.notes} onChange={(e) => setB("notes", e.target.value)} placeholder="Your mascot's name & personality, tone of voice, things to always or never say…" />
+                      <span className="mt-1 block text-xs text-smoke">Shape its personality and rules — name, tone, do&apos;s and don&apos;ts.</span></label>
                     <label className="block text-sm"><span className="mb-1 block font-semibold">Main goal (call to action)</span>
                       <input className={field} value={bot.cta} onChange={(e) => setB("cta", e.target.value)} placeholder="book an appointment" /></label>
                     <label className="block text-sm"><span className="mb-1 block font-semibold">Action link (optional)</span>
@@ -201,8 +231,20 @@ export default function Account() {
                       </select></label>
                     <label className="block text-sm"><span className="mb-1 block font-semibold">Accent color</span>
                       <input type="color" className="h-11 w-full rounded-xl border-2 border-ink/15 bg-white px-2" value={bot.accent} onChange={(e) => setB("accent", e.target.value)} /></label>
-                    <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">Mascot image URL (optional)</span>
-                      <input className={field} value={bot.image} onChange={(e) => setB("image", e.target.value)} placeholder="Leave blank to use your delivered mascot" /></label>
+                    <div className="block text-sm sm:col-span-2">
+                      <span className="mb-1 block font-semibold">Your mascot</span>
+                      <div className="flex items-center gap-4">
+                        <img src={bot.image || "/mascots/dr-volt-1.png"} alt="" className="h-20 w-20 shrink-0 rounded-xl border-2 border-ink/15 bg-white object-contain" />
+                        <div className="flex-1">
+                          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border-2 border-ink px-4 py-2 text-sm font-semibold transition hover:bg-ink hover:text-paper">
+                            Upload your artwork
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadArt(e.target.files?.[0])} />
+                          </label>
+                          <span className="mt-1 block text-xs text-smoke">Upload your own character (PNG/JPG, square works best), pick one of ours in setup, or paste a URL.</span>
+                          <input className={field + " mt-2"} value={bot.image} onChange={(e) => setB("image", e.target.value)} placeholder="…or paste an image URL" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-5">
