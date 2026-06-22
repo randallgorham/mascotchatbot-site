@@ -12,13 +12,6 @@ export default function NavActions() {
 
   return (
     <div className="flex items-center gap-2">
-      <a href="/account" aria-label="Your account"
-        className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink transition hover:bg-ink hover:text-paper">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="12" cy="8" r="3.5" /><path d="M5 20a7 7 0 0 1 14 0" />
-        </svg>
-      </a>
-
       <button onClick={() => setOpen(!open)} aria-label="Cart"
         className="relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink transition hover:bg-ink hover:text-paper">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -28,6 +21,13 @@ export default function NavActions() {
           <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#e3342b] px-1 text-[11px] font-bold text-white">{count}</span>
         )}
       </button>
+
+      <a href="/account" aria-label="Your account"
+        className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink transition hover:bg-ink hover:text-paper">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.5" /><path d="M5 20a7 7 0 0 1 14 0" />
+        </svg>
+      </a>
 
       {open && (
         <>
