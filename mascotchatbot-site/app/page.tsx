@@ -417,6 +417,22 @@ export default async function Home() {
 
       {/* FOOTER */}
       <footer className="border-t-2 border-paper bg-ink text-paper">
+        <div className="mx-auto max-w-7xl px-5 pt-10">
+          <div className="text-xs font-bold uppercase tracking-widest text-smoke">Mascots for every business</div>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-paper/80">
+            <a href="/industry/electricians" className="hover:text-paper">Electricians</a>
+            <a href="/industry/hvac" className="hover:text-paper">HVAC</a>
+            <a href="/industry/plumbers" className="hover:text-paper">Plumbers</a>
+            <a href="/industry/dentists" className="hover:text-paper">Dentists</a>
+            <a href="/industry/realtors" className="hover:text-paper">Realtors</a>
+            <a href="/industry/med-spas" className="hover:text-paper">Med-spas</a>
+            <a href="/industry/law-firms" className="hover:text-paper">Law firms</a>
+            <a href="/industry/gyms" className="hover:text-paper">Gyms</a>
+            <a href="/industry/salons" className="hover:text-paper">Salons</a>
+            <a href="/industry/veterinary" className="hover:text-paper">Veterinary</a>
+          </div>
+          <div className="mt-6 h-px w-full bg-paper/15" />
+        </div>
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-8 text-sm text-smoke sm:flex-row">
           <a href="#top" className="flex items-center gap-2 text-base font-bold tracking-tight text-paper">
             <svg width="34" height="26" viewBox="100 52 182 138" aria-hidden="true">
