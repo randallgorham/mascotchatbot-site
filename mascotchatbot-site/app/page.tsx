@@ -119,17 +119,17 @@ export default async function Home() {
       <header className="sticky top-0 z-50 border-b border-ink/10 bg-paper/70 backdrop-blur-xl">
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
           <a href="#top" className="group flex items-center gap-2.5 text-2xl font-bold tracking-tightest">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-ink shadow-[0_6px_16px_rgba(10,10,10,0.28)] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105">
-              <svg width="30" height="30" viewBox="0 0 200 200" aria-hidden="true">
-                <line x1="100" y1="22" x2="100" y2="6" stroke="#fff" strokeWidth="8" strokeLinecap="round" />
-                <circle cx="100" cy="5" r="8" fill="#fff" />
-                <rect x="20" y="22" width="160" height="126" rx="36" fill="#fff" />
-                <path d="M50 134 L50 180 L94 140 Z" fill="#fff" />
-                <circle cx="74" cy="76" r="13" fill="#0A0A0A" />
-                <circle cx="128" cy="76" r="13" fill="#0A0A0A" />
-                <path d="M70 104 q31 26 62 0" stroke="#0A0A0A" strokeWidth="11" fill="none" strokeLinecap="round" />
-              </svg>
-            </span>
+            <svg width="48" height="36" viewBox="100 52 182 138" aria-hidden="true" className="transition-transform duration-300 group-hover:scale-105">
+              <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+              <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+              <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+              <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
+              <rect x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+              <rect x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+              <path d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
+              <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
+              <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
+            </svg>
             <span>Mascot<span className="text-smoke">Chatbot</span></span>
           </a>
           <div className="flex items-center gap-3 md:gap-6">
