@@ -1,5 +1,6 @@
 import { getUser, saveUser, hashPassword, makeSessionToken, sessionCookie, clearSessionCookie, getSessionEmail } from "@/lib/auth";
 import { kvReady } from "@/lib/vault";
+import { getOrCreateBot, saveBot, BotConfig } from "@/lib/botcfg";
 
 export const runtime = "edge";
 
@@ -23,6 +24,43 @@ export async function POST(req: Request) {
     if (!email) return json({ user: null });
     const u = await getUser(email);
     return json({ user: u ? { email: u.email, name: u.name } : { email, name: email.split("@")[0] } });
+  }
+
+  if (action === "getBot") {
+    const em = await getSessionEmail(req);
+    if (!em) return json({ ok: false, error: "Please sign in." }, 401);
+    if (!kvReady()) return json({ ok: false, error: "Database not connected." }, 400);
+    const u = await getUser(em);
+    const bot = await getOrCreateBot(em, u?.name);
+    return json({ ok: true, bot });
+  }
+
+  if (action === "saveBot") {
+    const em = await getSessionEmail(req);
+    if (!em) return json({ ok: false, error: "Please sign in." }, 401);
+    if (!kvReady()) return json({ ok: false, error: "Database not connected." }, 400);
+    const u = await getUser(em);
+    const cur = await getOrCreateBot(em, u?.name);
+    const b = ((body as Record<string, unknown>).bot || {}) as Partial<BotConfig>;
+    const str = (v: unknown, d: string, n: number) => (typeof v === "string" ? v : d).slice(0, n);
+    const bool = (v: unknown, d: boolean) => (typeof v === "boolean" ? v : d);
+    const next: BotConfig = {
+      ...cur,
+      business: str(b.business, cur.business, 120),
+      industry: str(b.industry, cur.industry, 80),
+      about: str(b.about, cur.about, 1500),
+      facts: str(b.facts, cur.facts, 4000),
+      cta: str(b.cta, cur.cta, 120),
+      ctaUrl: str(b.ctaUrl, cur.ctaUrl, 300),
+      greet: bool(b.greet, cur.greet),
+      wave: bool(b.wave, cur.wave),
+      wink: bool(b.wink, cur.wink),
+      voice: str(b.voice, cur.voice, 40),
+      accent: str(b.accent, cur.accent, 16),
+      image: str(b.image, cur.image, 500),
+    };
+    await saveBot(next);
+    return json({ ok: true, bot: next });
   }
 
   if (!kvReady()) return json({ ok: false, error: "Accounts aren't enabled yet — the database isn't connected." }, 400);
