@@ -51,9 +51,10 @@ export default function HeroMascot() {
 }
 
 const CSS = `
-.hm-stage{ position:relative; display:block; animation: hmFloat 6s ease-in-out infinite; }
-.hm-img{ position:relative; z-index:2; display:block; width:100%; margin:0 auto; filter: drop-shadow(0 22px 34px rgba(10,10,10,.18)); animation: hmSwap .45s cubic-bezier(.2,.7,.2,1) both; }
-.hm-shadow{ position:absolute; z-index:1; left:50%; bottom:5%; width:54%; height:24px; transform:translateX(-50%); background:radial-gradient(closest-side, rgba(10,10,10,.22), rgba(10,10,10,0) 75%); filter:blur(2px); }
+.hm-stage{ position:relative; display:flex; align-items:flex-end; justify-content:center; height:430px; animation: hmFloat 6s ease-in-out infinite; }
+@media (min-width:768px){ .hm-stage{ height:540px; } }
+.hm-img{ position:relative; z-index:2; display:block; height:100%; width:auto; max-width:100%; object-fit:contain; object-position:bottom center; filter: drop-shadow(0 22px 34px rgba(10,10,10,.18)); animation: hmSwap .45s cubic-bezier(.2,.7,.2,1) both; }
+.hm-shadow{ position:absolute; z-index:1; left:50%; bottom:6px; width:52%; height:22px; transform:translateX(-50%); background:radial-gradient(closest-side, rgba(10,10,10,.22), rgba(10,10,10,0) 75%); filter:blur(2px); }
 @keyframes hmFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 @keyframes hmSwap{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
 .hm{ transition: transform .35s cubic-bezier(.2,.7,.2,1); }

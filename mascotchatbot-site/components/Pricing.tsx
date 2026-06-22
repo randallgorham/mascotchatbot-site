@@ -92,7 +92,7 @@ export default function Pricing() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => addPlan(p)} className={"mt-8 rounded-full px-6 py-3.5 text-center font-semibold transition " + (p.featured ? "bg-paper text-ink hover:opacity-90" : "bg-ink text-paper hover:opacity-90")}>
+              <button onClick={() => addPlan(p)} className={"mt-8 rounded-full px-6 py-3.5 text-center font-semibold transition-all duration-300 hover:-translate-y-0.5 " + (p.featured ? "bg-paper text-ink shadow-[0_8px_22px_rgba(0,0,0,0.18)] hover:shadow-[0_14px_30px_rgba(0,0,0,0.28)]" : "bg-ink text-paper shadow-[0_8px_22px_rgba(10,10,10,0.28)] hover:shadow-[0_14px_30px_rgba(10,10,10,0.35)]")}>
                 Add {p.name} to cart
               </button>
             </div>
@@ -107,13 +107,13 @@ export default function Pricing() {
               <h3 className="text-xl font-bold tracking-tight">Website update</h3>
               <p className="mt-1 flex-1 text-sm text-smoke">A modern refresh of your existing site — up to 10 pages — rebuilt around your new mascot.</p>
               <div className="mt-4 text-3xl font-bold tracking-tightest">{money(999)} <span className="text-base font-medium text-smoke">one-time</span></div>
-              <button onClick={() => addService("thnk-update", "Website update (up to 10 pages)", 999, "One-time · up to 10 pages, by THNK")} className="mt-5 rounded-full bg-ink px-6 py-3 font-semibold text-paper transition hover:opacity-90">Add to cart</button>
+              <button onClick={() => addService("thnk-update", "Website update (up to 10 pages)", 999, "One-time · up to 10 pages, by THNK")} className="mt-5 rounded-full bg-ink px-6 py-3 font-semibold text-paper shadow-[0_8px_22px_rgba(10,10,10,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(10,10,10,0.35)]">Add to cart</button>
             </div>
             <div className="flex flex-col rounded-3xl border-2 border-ink bg-ink p-7 text-paper">
               <h3 className="text-xl font-bold tracking-tight">Full custom rebuild</h3>
               <p className="mt-1 flex-1 text-sm text-paper/70">A brand-new, fully custom website designed from scratch around your mascot.</p>
               <div className="mt-4 text-3xl font-bold tracking-tightest">from {money(1500)} <span className="text-base font-medium text-paper/60">one-time</span></div>
-              <button onClick={() => addService("thnk-rebuild", "Full website rebuild by THNK", 1500, "One-time · full custom build, by THNK")} className="mt-5 rounded-full bg-paper px-6 py-3 font-semibold text-ink transition hover:opacity-90">Add to cart</button>
+              <button onClick={() => addService("thnk-rebuild", "Full website rebuild by THNK", 1500, "One-time · full custom build, by THNK")} className="mt-5 rounded-full bg-paper px-6 py-3 font-semibold text-ink shadow-[0_8px_22px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(0,0,0,0.28)]">Add to cart</button>
             </div>
           </div>
         </div>
