@@ -1,4 +1,4 @@
-import MascotRing from "@/components/MascotRing";
+import HeroMascot from "@/components/HeroMascot";
 import LeadForm from "@/components/LeadForm";
 import OpenMascot from "@/components/OpenMascot";
 import MobileNav from "@/components/MobileNav";
@@ -108,30 +108,39 @@ export default async function Home() {
           }),
         }}
       />
+      <style>{`
+@keyframes heroFadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:heroFadeUp .75s cubic-bezier(.2,.7,.2,1) both}
+@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero-float{animation:heroFloat 7s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.fade-up,.hero-float{animation:none}}
+`}</style>
       {/* NAV */}
-      <header className="sticky top-0 z-50 border-b-2 border-ink bg-paper/90 backdrop-blur">
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-          <a href="#top" className="flex items-center gap-3 text-2xl font-bold tracking-tightest">
-            <svg width="60" height="60" viewBox="0 0 200 200" aria-hidden="true">
-              <line x1="100" y1="22" x2="100" y2="6" stroke="#0A0A0A" strokeWidth="8" strokeLinecap="round" />
-              <circle cx="100" cy="5" r="8" fill="#0A0A0A" />
-              <rect x="20" y="22" width="160" height="126" rx="36" fill="#0A0A0A" />
-              <path d="M50 134 L50 180 L94 140 Z" fill="#0A0A0A" />
-              <circle cx="74" cy="76" r="13" fill="#fff" />
-              <circle cx="128" cy="76" r="13" fill="#fff" />
-              <path d="M70 104 q31 26 62 0" stroke="#fff" strokeWidth="11" fill="none" strokeLinecap="round" />
-            </svg>
+      <header className="sticky top-0 z-50 border-b border-ink/10 bg-paper/70 backdrop-blur-xl">
+        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
+          <a href="#top" className="group flex items-center gap-2.5 text-2xl font-bold tracking-tightest">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-ink shadow-[0_6px_16px_rgba(10,10,10,0.28)] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105">
+              <svg width="30" height="30" viewBox="0 0 200 200" aria-hidden="true">
+                <line x1="100" y1="22" x2="100" y2="6" stroke="#fff" strokeWidth="8" strokeLinecap="round" />
+                <circle cx="100" cy="5" r="8" fill="#fff" />
+                <rect x="20" y="22" width="160" height="126" rx="36" fill="#fff" />
+                <path d="M50 134 L50 180 L94 140 Z" fill="#fff" />
+                <circle cx="74" cy="76" r="13" fill="#0A0A0A" />
+                <circle cx="128" cy="76" r="13" fill="#0A0A0A" />
+                <path d="M70 104 q31 26 62 0" stroke="#0A0A0A" strokeWidth="11" fill="none" strokeLinecap="round" />
+              </svg>
+            </span>
             <span>Mascot<span className="text-smoke">Chatbot</span></span>
           </a>
-          <div className="flex items-center gap-3 md:gap-5">
-            <nav className="hidden gap-7 text-sm font-medium lg:flex">
-              <a href="#how" className="hover:opacity-60">How it works</a>
-              <a href="#demos" className="hover:opacity-60">Demos</a>
-              <a href="#pricing" className="hover:opacity-60">Pricing</a>
-              <a href="#faq" className="hover:opacity-60">FAQ</a>
+          <div className="flex items-center gap-3 md:gap-6">
+            <nav className="hidden gap-7 text-sm font-medium text-smoke lg:flex">
+              <a href="#how" className="group relative py-1 transition-colors hover:text-ink">How it works<span className="absolute -bottom-0.5 left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-ink transition-transform duration-300 ease-out group-hover:scale-x-100" /></a>
+              <a href="#demos" className="group relative py-1 transition-colors hover:text-ink">Demos<span className="absolute -bottom-0.5 left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-ink transition-transform duration-300 ease-out group-hover:scale-x-100" /></a>
+              <a href="#pricing" className="group relative py-1 transition-colors hover:text-ink">Pricing<span className="absolute -bottom-0.5 left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-ink transition-transform duration-300 ease-out group-hover:scale-x-100" /></a>
+              <a href="#faq" className="group relative py-1 transition-colors hover:text-ink">FAQ<span className="absolute -bottom-0.5 left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-ink transition-transform duration-300 ease-out group-hover:scale-x-100" /></a>
             </nav>
-            <a href="#pricing" className="hidden rounded-full bg-ink px-5 py-2 text-sm font-semibold text-paper transition hover:opacity-80 md:inline-block">
-              Get your mascot
+            <a href="#pricing" className="group hidden items-center gap-1.5 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-paper shadow-[0_4px_14px_rgba(10,10,10,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(10,10,10,0.32)] md:inline-flex">
+              Get your mascot<span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
             </a>
             <NavActions />
             <MobileNav />
@@ -142,41 +151,45 @@ export default async function Home() {
       {/* HERO */}
       <section id="top" className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(#0A0A0A 1.2px, transparent 1.2px)", backgroundSize: "22px 22px" }} />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 pb-20 pt-16 md:grid-cols-[1.1fr_0.9fr] md:pt-24">
+        <div className="pointer-events-none absolute -top-32 left-1/2 h-[460px] w-[760px] -translate-x-1/2 rounded-full opacity-70 blur-3xl" style={{ background: "radial-gradient(closest-side, rgba(227,52,43,0.16), rgba(227,52,43,0) 70%)" }} />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 pb-20 pt-16 md:grid-cols-[1.05fr_0.95fr] md:pt-20">
           <div>
-            <p className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-ink px-3 py-1 text-xs font-semibold uppercase tracking-widest">
+            <p className="fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-ink/15 bg-paper/70 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest shadow-sm backdrop-blur" style={{ animationDelay: "0ms" }}>
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e3342b] opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[#e3342b]" />
               </span>
               Animated AI mascots for websites
             </p>
-            <h1 className="text-[15vw] font-bold leading-[0.84] tracking-tightest md:text-[7.5rem]">
+            <h1 className="fade-up text-[15vw] font-bold leading-[0.84] tracking-tightest md:text-[7.5rem]" style={{ animationDelay: "80ms" }}>
               Your brand,<br />
-              <span className="relative inline-block">talking.<span className="absolute -bottom-1 left-0 h-2.5 w-full bg-[#e3342b]/80" /></span>
+              <span className="relative inline-block">talking.<span className="absolute -bottom-1 left-0 h-2.5 w-full rounded-full bg-[#e3342b]/80" /></span>
             </h1>
-            <p className="mt-8 max-w-md text-lg leading-relaxed text-smoke">
+            <p className="fade-up mt-8 max-w-md text-lg leading-relaxed text-smoke" style={{ animationDelay: "160ms" }}>
               We build a custom animated mascot that lives on your site, talks to visitors, answers questions, and books the job — <b className="text-ink">24/7, done for you, hosted by us.</b>
             </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <a href="#pricing" className="rounded-full bg-ink px-7 py-3.5 font-semibold text-paper transition hover:opacity-80">
-                Get your mascot →
+            <div className="fade-up mt-9 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}>
+              <a href="#pricing" className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 font-semibold text-paper shadow-[0_8px_22px_rgba(10,10,10,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(10,10,10,0.35)]">
+                Get your mascot <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
               </a>
-              <OpenMascot className="rounded-full border-2 border-ink px-7 py-3.5 font-semibold transition hover:bg-ink hover:text-paper">
+              <OpenMascot className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-paper/60 px-7 py-3.5 font-semibold backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-ink hover:text-paper">
                 ▶ See it talk
               </OpenMascot>
-              <a href="#book" className="rounded-full border-2 border-ink px-7 py-3.5 font-semibold transition hover:bg-ink hover:text-paper">
+              <a href="#book" className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-paper/60 px-7 py-3.5 font-semibold backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-ink hover:text-paper">
                 Book a call
               </a>
             </div>
-            <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-smoke">
-              {["No code", "Done-for-you", "Live in ~a week", "Cancel anytime"].map((t) => (
-                <li key={t} className="flex items-center gap-1.5"><span className="text-ink">✓</span>{t}</li>
-              ))}
-            </ul>
+            <div className="fade-up mt-8 flex flex-wrap items-center gap-x-6 gap-y-3" style={{ animationDelay: "320ms" }}>
+              <span className="flex items-center gap-2 text-sm font-medium text-smoke"><span className="tracking-tight text-[#e3342b]">★★★★★</span> Loved by local service businesses</span>
+              <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-smoke">
+                {["No code", "Done-for-you", "Live in ~a week", "Cancel anytime"].map((t) => (
+                  <li key={t} className="flex items-center gap-1.5"><span className="text-ink">✓</span>{t}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className="flex justify-center md:justify-end">
-            <MascotRing />
+          <div className="fade-up flex justify-center md:justify-end" style={{ animationDelay: "200ms" }}>
+            <HeroMascot />
           </div>
         </div>
       </section>
