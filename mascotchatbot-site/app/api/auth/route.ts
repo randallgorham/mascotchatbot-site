@@ -1,6 +1,7 @@
 import { getUser, saveUser, hashPassword, makeSessionToken, sessionCookie, clearSessionCookie, getSessionEmail } from "@/lib/auth";
 import { kvReady } from "@/lib/vault";
 import { getOrCreateBot, saveBot, BotConfig } from "@/lib/botcfg";
+import { listLeads } from "@/lib/leads";
 
 export const runtime = "edge";
 
@@ -33,6 +34,16 @@ export async function POST(req: Request) {
     const u = await getUser(em);
     const bot = await getOrCreateBot(em, u?.name);
     return json({ ok: true, bot });
+  }
+
+  if (action === "leads") {
+    const em = await getSessionEmail(req);
+    if (!em) return json({ ok: false, error: "Please sign in." }, 401);
+    if (!kvReady()) return json({ ok: false, error: "Database not connected." }, 400);
+    const u = await getUser(em);
+    const bot = await getOrCreateBot(em, u?.name);
+    const leads = await listLeads(bot.id, 100);
+    return json({ ok: true, leads });
   }
 
   if (action === "saveBot") {
