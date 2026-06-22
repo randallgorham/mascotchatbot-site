@@ -203,22 +203,7 @@ export default function MrAmp() {
     <div id="amp" ref={root} data-state="idle" aria-live="polite">
       <style>{CSS}</style>
       <div className="amp-panel">
-        <div className="amp-headbar">
-          <svg className="amp-logo" width="30" height="23" viewBox="100 52 182 138" aria-hidden="true">
-            <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
-            <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
-            <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-            <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
-            <rect x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
-            <rect x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
-            <path d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
-            <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
-            <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
-          </svg>
-          <span className="amp-brand">Mascot<span>Chatbot</span></span>
-          <span className="amp-online"><i></i>Online</span>
-          <button className="amp-x" aria-label="Close chat">&times;</button>
-        </div>
+        <button className="amp-x" aria-label="Close chat">&times;</button>
         <div className="amp-bubble" id="amp-bubble">
           <button className="amp-mute" id="amp-mute" aria-label="Mute voice">&#128266;</button>
           <span className="amp-you" id="amp-you"></span>
@@ -255,6 +240,21 @@ export default function MrAmp() {
           <span className="amp-shadow"></span>
         </button>
         <span className="amp-hint" id="amp-hint">Click me ⚡</span>
+        <div className="amp-nameplate">
+          <svg className="amp-logo" width="26" height="20" viewBox="100 52 182 138" aria-hidden="true">
+            <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+            <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+            <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+            <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
+            <rect x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+            <rect x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+            <path d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
+            <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
+            <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
+          </svg>
+          <span className="amp-brand">Mascot<span>Chatbot</span></span>
+          <span className="amp-online"><i></i>Online</span>
+        </div>
       </div>
     </div>
   );
@@ -303,14 +303,15 @@ const CSS = `
 @keyframes ampIntro{0%{transform:translateY(150px) scale(.7);opacity:0}60%{transform:translateY(-12px) scale(1.03)}100%{transform:translateY(0) scale(1);opacity:1}}
 .amp-panel{ position:absolute; right:140px; bottom:6px; width:280px; max-width:74vw; display:flex; flex-direction:column; align-items:flex-start; gap:9px; opacity:0; transform:translateY(10px) scale(.96); transform-origin:bottom right; pointer-events:none; transition:opacity .28s ease, transform .34s cubic-bezier(.34,1.4,.5,1); }
 #amp[data-state="open"] .amp-panel{ opacity:1; transform:none; pointer-events:auto; }
-.amp-headbar{ display:flex; align-items:center; gap:7px; width:100%; background:#fff; border:2px solid var(--char); border-radius:14px; padding:6px 8px; box-shadow:0 10px 26px rgba(0,0,0,.14); }
+.amp-nameplate{ position:absolute; left:50%; bottom:-4px; transform:translateX(-50%) translateY(8px); display:flex; align-items:center; gap:6px; background:#fff; border:2px solid var(--char); border-radius:12px; padding:4px 9px; box-shadow:0 8px 20px rgba(0,0,0,.18); white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .28s ease, transform .34s cubic-bezier(.34,1.4,.5,1); z-index:5; }
+#amp[data-state="open"] .amp-nameplate{ opacity:1; transform:translateX(-50%) translateY(0); }
 .amp-logo{ flex:0 0 auto; }
 .amp-brand{ font-size:13px; font-weight:800; color:var(--ink); letter-spacing:-.01em; }
 .amp-brand span{ color:#9aa0a8; }
 .amp-online{ display:flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700; color:#16a34a; }
 .amp-online i{ width:7px; height:7px; border-radius:50%; background:#16a34a; box-shadow:0 0 0 0 rgba(22,163,74,.6); animation:ampOnline 1.8s infinite; }
 @keyframes ampOnline{ 0%{box-shadow:0 0 0 0 rgba(22,163,74,.5)} 70%{box-shadow:0 0 0 6px rgba(22,163,74,0)} 100%{box-shadow:0 0 0 0 rgba(22,163,74,0)} }
-.amp-x{ margin-left:auto; width:24px; height:24px; border:none; border-radius:50%; cursor:pointer; background:var(--char); color:#fff; font-size:15px; line-height:1; box-shadow:0 4px 12px rgba(0,0,0,.25); }
+.amp-x{ align-self:flex-end; width:26px; height:26px; border:none; border-radius:50%; cursor:pointer; background:var(--char); color:#fff; font-size:16px; line-height:1; box-shadow:0 4px 12px rgba(0,0,0,.25); }
 .amp-bubble{ position:relative; background:#fff; color:var(--ink); border:2px solid var(--char); border-radius:16px; padding:13px 15px 14px; font-size:14.5px; line-height:1.42; width:100%; box-shadow:0 14px 34px rgba(0,0,0,.16); min-height:20px; }
 .amp-mute{ position:absolute; top:8px; right:9px; border:none; background:none; cursor:pointer; font-size:14px; opacity:.55; line-height:1; } .amp-mute:hover{opacity:1} .amp-mute.amp-off{opacity:.3;text-decoration:line-through}
 .amp-you{ display:block; font-size:12px; color:#9aa3ad; margin-bottom:4px; } .amp-you:empty{display:none}
