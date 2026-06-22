@@ -40,7 +40,7 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "12-dentist-female", name: "Dr. Dana", niche: "Dental", say: "Pick me!" },
   { img: "10-doctor-male", name: "Dr. Cole", niche: "Medical", say: "Pick me!" },
   { img: "13-doctor-female", name: "Dr. Maya", niche: "Medical", say: "I'm in!" },
-  { img: "16-nurse-female", name: "Nina", niche: "Nursing", say: "Pick me!" },
+  { img: "17-nurse-female-v2", name: "Nina", niche: "Nursing", say: "Pick me!" },
   { img: "15-medspa-female", name: "Skye", niche: "Med-spa", say: "Choose me!" },
   { img: "05-fitness-coach-male", name: "Coach Rex", niche: "Fitness", say: "Pick me!" },
   { img: "14-fitness-coach-female", name: "Coach Tara", niche: "Fitness", say: "Let's go!" },
