@@ -395,7 +395,7 @@ export default async function Home() {
             <div className="mt-8 rounded-2xl border-2 border-ink bg-white p-8 text-center">
               <p className="text-lg font-semibold text-ink">Online booking is being set up.</p>
               <p className="mt-2 text-smoke">In the meantime, drop your details just below and we&apos;ll reach out to schedule you right away.</p>
-              <a href="#cta" className="mt-5 inline-block rounded-full bg-ink px-6 py-3 font-semibold text-paper transition hover:opacity-80">Get in touch →</a>
+              <a href="#cta" className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-ink px-6 py-3 font-semibold text-paper shadow-[0_8px_22px_rgba(10,10,10,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(10,10,10,0.35)]">Get in touch →</a>
             </div>
           )}
         </div>
