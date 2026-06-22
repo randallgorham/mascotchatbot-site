@@ -20,7 +20,8 @@ const STEPS = [
 ];
 
 // Full character roster shown in the gallery. Mr Amp is the live, click-to-talk demo.
-const CHARACTERS = [
+const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?: string }[] = [
+  { img: "dr-volt-1", name: "Dr. Volt", niche: "Electrical", say: "Pick me!", ext: "png" },
   { img: "01-realtor-female-classic", name: "Ava", niche: "Realtor", say: "Pick me!" },
   { img: "02-realtor-female-glam", name: "Bianca", niche: "Realtor", say: "Choose me!" },
   { img: "03-realtor-male", name: "Marcus", niche: "Realtor", say: "I'll sell it!" },
@@ -286,7 +287,7 @@ export default async function Home() {
                 </span>
                 <span className="flex flex-1 items-center justify-center overflow-hidden py-1">
                   <img
-                    src={`/mascots/${c.img}.jpg`}
+                    src={`/mascots/${c.img}.${c.ext || "jpg"}`}
                     alt={`${c.name} — ${c.niche} mascot`}
                     loading="lazy"
                     className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 ease-out group-hover:scale-110"
