@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { VOICES } from "@/lib/bots";
 
 type U = { email: string; name: string } | null;
+type Bot = {
+  id: string; business: string; industry: string; about: string; facts: string;
+  cta: string; ctaUrl: string; greet: boolean; wave: boolean; wink: boolean;
+  voice: string; accent: string; image: string; badge: boolean; plan: string;
+};
 
 export default function Account() {
   const [user, setUser] = useState<U>(null);
@@ -11,6 +17,10 @@ export default function Account() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [bot, setBot] = useState<Bot | null>(null);
+  const [saved, setSaved] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
 
   async function refresh() {
     const r = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "me" }) });
@@ -24,6 +34,11 @@ export default function Account() {
     else if (p) setErr("Google sign-in didn't complete — please try again.");
     refresh();
   }, []);
+  useEffect(() => {
+    if (!user) { setBot(null); return; }
+    fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "getBot" }) })
+      .then((r) => r.json()).then((d) => { if (d.ok) setBot(d.bot); }).catch(() => {});
+  }, [user]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setErr("");
@@ -36,6 +51,23 @@ export default function Account() {
     await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "logout" }) });
     setUser(null);
   }
+  function setB<K extends keyof Bot>(k: K, v: Bot[K]) { setBot((b) => (b ? { ...b, [k]: v } : b)); }
+  async function saveBot() {
+    if (!bot) return; setBusy(true); setSaved("");
+    const r = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "saveBot", bot }) });
+    const d = await r.json(); setBusy(false);
+    if (d.ok) { setBot(d.bot); setSaved("Saved ✓"); } else setSaved(d.error || "Couldn't save.");
+  }
+  const snippet = bot ? `<script src="https://www.mascotchatbot.com/widget.js" data-bot="${bot.id}" async></script>` : "";
+  function copy() { if (snippet) navigator.clipboard.writeText(snippet).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); }); }
+  function preview() {
+    if (!bot || previewing) return;
+    const s = document.createElement("script");
+    s.src = "/widget.js"; s.setAttribute("data-bot", bot.id); s.async = true;
+    document.body.appendChild(s); setPreviewing(true);
+  }
+
+  const field = "w-full rounded-xl border-2 border-ink/15 px-4 py-2.5 outline-none focus:border-ink text-sm";
 
   return (
     <main className="flex min-h-screen flex-col bg-paper text-ink" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
@@ -46,25 +78,80 @@ export default function Account() {
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-12">
+      <div className="mx-auto w-full max-w-3xl flex-1 px-5 py-12">
         {loading ? (
           <p className="text-smoke">Loading…</p>
         ) : user ? (
           <div>
-            <h1 className="text-3xl font-bold tracking-tightest">Welcome back, {user.name} 👋</h1>
-            <p className="mt-1 text-smoke">{user.email}</p>
-            <div className="mt-8 grid gap-6 md:grid-cols-2">
-              <div className="rounded-3xl border-2 border-ink p-6">
-                <h2 className="text-lg font-bold">Your mascot</h2>
-                <p className="mt-1 text-sm text-smoke">Once your order is built, your install snippet and behavior settings (greeting, wave, wink, voice, and more) will live here.</p>
-                <a href="/#pricing" className="mt-4 inline-block rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-paper transition hover:opacity-90">Start an order →</a>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tightest">Welcome back, {user.name} 👋</h1>
+                <p className="mt-1 text-smoke">{user.email}</p>
               </div>
-              <div className="rounded-3xl border border-ink/15 p-6 shadow-sm">
-                <h2 className="text-lg font-bold">Orders</h2>
-                <p className="mt-1 text-sm text-smoke">Your orders and their status will appear here.</p>
-              </div>
+              <button onClick={logout} className="shrink-0 rounded-full border-2 border-ink px-4 py-2 text-sm font-semibold transition hover:bg-ink hover:text-paper">Sign out</button>
             </div>
-            <button onClick={logout} className="mt-8 rounded-full border-2 border-ink px-5 py-2.5 text-sm font-semibold transition hover:bg-ink hover:text-paper">Sign out</button>
+
+            {!bot ? (
+              <p className="mt-8 text-smoke">Setting up your mascot…</p>
+            ) : (
+              <div className="mt-8 space-y-6">
+                <div className="rounded-3xl border-2 border-ink p-6">
+                  <h2 className="text-lg font-bold">Your chatbot</h2>
+                  <p className="mt-0.5 text-sm text-smoke">Tell your mascot about your business. It uses this to answer your visitors and guide them to act.</p>
+
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                    <label className="block text-sm"><span className="mb-1 block font-semibold">Business name</span>
+                      <input className={field} value={bot.business} onChange={(e) => setB("business", e.target.value)} placeholder="Acme Electric" /></label>
+                    <label className="block text-sm"><span className="mb-1 block font-semibold">Industry</span>
+                      <input className={field} value={bot.industry} onChange={(e) => setB("industry", e.target.value)} placeholder="Electrician / HVAC / Dental…" /></label>
+                    <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">What you do</span>
+                      <textarea className={field} rows={2} value={bot.about} onChange={(e) => setB("about", e.target.value)} placeholder="Residential & commercial electrical service across the metro area, 24/7 emergencies." /></label>
+                    <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">Key facts the bot should know</span>
+                      <textarea className={field} rows={4} value={bot.facts} onChange={(e) => setB("facts", e.target.value)} placeholder={"Hours: Mon–Fri 7–6\nService area: ...\nServices & typical pricing: ...\nCommon questions: ..."} />
+                      <span className="mt-1 block text-xs text-smoke">Hours, service area, services, pricing, FAQs — anything you want it to answer accurately.</span></label>
+                    <label className="block text-sm"><span className="mb-1 block font-semibold">Main goal (call to action)</span>
+                      <input className={field} value={bot.cta} onChange={(e) => setB("cta", e.target.value)} placeholder="book an appointment" /></label>
+                    <label className="block text-sm"><span className="mb-1 block font-semibold">Action link (optional)</span>
+                      <input className={field} value={bot.ctaUrl} onChange={(e) => setB("ctaUrl", e.target.value)} placeholder="https://…/book" /></label>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                    <label className="block text-sm"><span className="mb-1 block font-semibold">Voice</span>
+                      <select className={field} value={bot.voice} onChange={(e) => setB("voice", e.target.value)}>
+                        <optgroup label="Male voices">{VOICES.filter((v) => v.gender === "male").map((v) => <option key={v.id} value={v.id}>{v.label} — {v.note}</option>)}</optgroup>
+                        <optgroup label="Female voices">{VOICES.filter((v) => v.gender === "female").map((v) => <option key={v.id} value={v.id}>{v.label} — {v.note}</option>)}</optgroup>
+                      </select></label>
+                    <label className="block text-sm"><span className="mb-1 block font-semibold">Accent color</span>
+                      <input type="color" className="h-11 w-full rounded-xl border-2 border-ink/15 bg-white px-2" value={bot.accent} onChange={(e) => setB("accent", e.target.value)} /></label>
+                    <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">Mascot image URL (optional)</span>
+                      <input className={field} value={bot.image} onChange={(e) => setB("image", e.target.value)} placeholder="Leave blank to use your delivered mascot" /></label>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-5">
+                    {([["greet", "Greet every visitor"], ["wave", "Wave"], ["wink", "Wink"]] as [keyof Bot, string][]).map(([k, label]) => (
+                      <label key={k} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" className="h-4 w-4" checked={!!bot[k]} onChange={(e) => setB(k, e.target.checked as never)} />{label}
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 flex items-center gap-3">
+                    <button onClick={saveBot} disabled={busy} className="rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-paper transition hover:opacity-90 disabled:opacity-50">{busy ? "Saving…" : "Save settings"}</button>
+                    <button onClick={preview} disabled={previewing} className="rounded-full border-2 border-ink px-5 py-2.5 text-sm font-semibold transition hover:bg-ink hover:text-paper disabled:opacity-50">{previewing ? "Preview loaded ↘" : "Preview it here"}</button>
+                    {saved && <span className="text-sm font-medium text-smoke">{saved}</span>}
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-ink/15 p-6 shadow-sm">
+                  <h2 className="text-lg font-bold">Install on your website</h2>
+                  <p className="mt-0.5 text-sm text-smoke">Paste this one line into your site (just before <code>&lt;/body&gt;</code>). Works on any site — WordPress, Squarespace, Wix, custom. Update your settings anytime above; the code never changes.</p>
+                  <div className="mt-3 flex items-stretch gap-2">
+                    <code className="flex-1 overflow-auto rounded-xl bg-ink px-4 py-3 text-xs text-paper">{snippet}</code>
+                    <button onClick={copy} className="shrink-0 rounded-xl border-2 border-ink px-4 text-sm font-semibold transition hover:bg-ink hover:text-paper">{copied ? "Copied ✓" : "Copy"}</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mx-auto max-w-sm">
@@ -80,13 +167,10 @@ export default function Account() {
 
             <form onSubmit={submit} className="space-y-3">
               {mode === "signup" && (
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your name"
-                  className="w-full rounded-xl border-2 border-ink/15 px-4 py-3 outline-none focus:border-ink" />
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your name" className={field} />
               )}
-              <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@business.com"
-                className="w-full rounded-xl border-2 border-ink/15 px-4 py-3 outline-none focus:border-ink" />
-              <input type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Password"
-                className="w-full rounded-xl border-2 border-ink/15 px-4 py-3 outline-none focus:border-ink" />
+              <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@business.com" className={field} />
+              <input type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Password" className={field} />
               <button disabled={busy} className="w-full rounded-xl bg-ink px-5 py-3 font-semibold text-paper transition hover:opacity-90 disabled:opacity-60">
                 {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
               </button>
