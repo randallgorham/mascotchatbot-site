@@ -9,6 +9,7 @@ export interface BotConfig {
   industry: string;
   about: string; // what they do
   facts: string; // hours, services, FAQ, anything the bot should know
+  notes: string; // special instructions / personality / custom mascot notes
   cta: string; // the action to push toward, e.g. "book an appointment"
   ctaUrl: string; // optional link the bot/button points to
   greet: boolean; // auto-greet (open + speak) when the widget loads
@@ -60,6 +61,7 @@ export async function getOrCreateBot(email: string, name?: string): Promise<BotC
     industry: "",
     about: "",
     facts: "",
+    notes: "",
     cta: "book an appointment",
     ctaUrl: "",
     greet: true,
@@ -103,6 +105,7 @@ export function botSystemPrompt(c: BotConfig): string {
       ".",
     c.about ? "What we do: " + c.about : "",
     c.facts ? "Key facts you can use: " + c.facts : "",
+    c.notes ? "Special instructions from the business owner (follow these): " + c.notes : "",
     "On every reply, help the visitor and naturally guide them to " + (c.cta || "get in touch") + ".",
     "Keep replies short and conversational, like natural speech: one to three sentences, no markdown, no bullet points, no headings. Be warm and helpful. Never invent prices, hours, or facts you were not given — if unsure, offer to connect them with the team.",
   ];
