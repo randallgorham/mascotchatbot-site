@@ -9,6 +9,16 @@ type Bot = {
   cta: string; ctaUrl: string; greet: boolean; wave: boolean; wink: boolean;
   voice: string; accent: string; image: string; badge: boolean; plan: string;
 };
+type LeadRow = { id: string; name?: string; email?: string; phone?: string; message: string; at: string };
+
+const MASCOTS: [string, string][] = [
+  ["dr-volt-1", "Dr. Volt"], ["hvac", "Reggie"], ["06-plumber-home-services-male", "Max"],
+  ["04-dentist-male", "Dr. Bright"], ["01-realtor-female-classic", "Ava"], ["vet", "Bella"],
+  ["hair", "Gigi"], ["nail", "Priya"], ["chef", "Theo"], ["20-attorney-male", "Vance"],
+  ["18-gym-instructor-female-blonde", "Brooke"], ["landscaper", "Diego"],
+];
+const mascotExt = (img: string) => (/^(dr-volt-1|hvac|vet|hair|nail|chef|tattoo|massage|barber|florist|therapist|landscaper)$/.test(img) ? "png" : "jpg");
+const mascotUrl = (img: string) => `/mascots/${img}.${mascotExt(img)}`;
 
 export default function Account() {
   const [user, setUser] = useState<U>(null);
@@ -21,6 +31,9 @@ export default function Account() {
   const [saved, setSaved] = useState("");
   const [copied, setCopied] = useState(false);
   const [previewing, setPreviewing] = useState(false);
+  const [leads, setLeads] = useState<LeadRow[]>([]);
+  const [step, setStep] = useState(0);
+  const [wizardDone, setWizardDone] = useState(false);
 
   async function refresh() {
     const r = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "me" }) });
@@ -38,6 +51,8 @@ export default function Account() {
     if (!user) { setBot(null); return; }
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "getBot" }) })
       .then((r) => r.json()).then((d) => { if (d.ok) setBot(d.bot); }).catch(() => {});
+    fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "leads" }) })
+      .then((r) => r.json()).then((d) => { if (d.ok && Array.isArray(d.leads)) setLeads(d.leads); }).catch(() => {});
   }, [user]);
 
   async function submit(e: React.FormEvent) {
@@ -68,6 +83,7 @@ export default function Account() {
   }
 
   const field = "w-full rounded-xl border-2 border-ink/15 px-4 py-2.5 outline-none focus:border-ink text-sm";
+  const needsSetup = !!bot && !bot.industry && !bot.about && !bot.facts && !wizardDone;
 
   return (
     <main className="flex min-h-screen flex-col bg-paper text-ink" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
@@ -93,6 +109,68 @@ export default function Account() {
 
             {!bot ? (
               <p className="mt-8 text-smoke">Setting up your mascot…</p>
+            ) : needsSetup ? (
+              <div className="mt-8">
+                <div className="rounded-3xl border-2 border-ink p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-lg font-bold">Let&apos;s set up your mascot</h2>
+                    <span className="text-xs font-semibold text-smoke">Step {step + 1} of 4</span>
+                  </div>
+                  <div className="mb-6 h-1.5 w-full overflow-hidden rounded-full bg-ink/10"><div className="h-full rounded-full bg-ink transition-all" style={{ width: `${((step + 1) / 4) * 100}%` }} /></div>
+
+                  {step === 0 && (
+                    <div className="space-y-4">
+                      <p className="text-sm text-smoke">Tell us the basics so your mascot can introduce your business.</p>
+                      <label className="block text-sm"><span className="mb-1 block font-semibold">Business name</span>
+                        <input className={field} value={bot.business} onChange={(e) => setB("business", e.target.value)} placeholder="Acme Electric" /></label>
+                      <label className="block text-sm"><span className="mb-1 block font-semibold">Industry</span>
+                        <input className={field} value={bot.industry} onChange={(e) => setB("industry", e.target.value)} placeholder="Electrician / HVAC / Dental…" /></label>
+                    </div>
+                  )}
+                  {step === 1 && (
+                    <div>
+                      <p className="mb-4 text-sm text-smoke">Pick your mascot — you can change it anytime.</p>
+                      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                        {MASCOTS.map(([img, name]) => { const url = mascotUrl(img); const active = bot.image === url; return (
+                          <button key={img} type="button" onClick={() => setB("image", url)} className={"flex flex-col items-center rounded-2xl border-2 p-2 transition " + (active ? "border-ink ring-2 ring-[#e3342b]/30" : "border-ink/15 hover:border-ink/40")}>
+                            <img src={url} alt={name} className="h-20 w-full object-contain" />
+                            <span className="mt-1 text-[11px] font-semibold">{name}</span>
+                          </button> ); })}
+                      </div>
+                    </div>
+                  )}
+                  {step === 2 && (
+                    <div className="space-y-4">
+                      <p className="text-sm text-smoke">Choose a voice and your brand color.</p>
+                      <label className="block text-sm"><span className="mb-1 block font-semibold">Voice</span>
+                        <select className={field} value={bot.voice} onChange={(e) => setB("voice", e.target.value)}>
+                          <optgroup label="Male voices">{VOICES.filter((v) => v.gender === "male").map((v) => <option key={v.id} value={v.id}>{v.label} — {v.note}</option>)}</optgroup>
+                          <optgroup label="Female voices">{VOICES.filter((v) => v.gender === "female").map((v) => <option key={v.id} value={v.id}>{v.label} — {v.note}</option>)}</optgroup>
+                        </select></label>
+                      <label className="block text-sm"><span className="mb-1 block font-semibold">Accent color</span>
+                        <input type="color" className="h-11 w-full rounded-xl border-2 border-ink/15 bg-white px-2" value={bot.accent} onChange={(e) => setB("accent", e.target.value)} /></label>
+                    </div>
+                  )}
+                  {step === 3 && (
+                    <div className="space-y-4">
+                      <p className="text-sm text-smoke">Last step — what should it know, and what should it push visitors toward?</p>
+                      <label className="block text-sm"><span className="mb-1 block font-semibold">Key facts (hours, services, pricing, FAQs)</span>
+                        <textarea className={field} rows={4} value={bot.facts} onChange={(e) => setB("facts", e.target.value)} placeholder={"Hours: Mon–Fri 7–6\nService area: ...\nServices & pricing: ..."} /></label>
+                      <label className="block text-sm"><span className="mb-1 block font-semibold">Main goal (call to action)</span>
+                        <input className={field} value={bot.cta} onChange={(e) => setB("cta", e.target.value)} placeholder="book an appointment" /></label>
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex items-center justify-between">
+                    <button type="button" onClick={() => (step === 0 ? setWizardDone(true) : setStep(step - 1))} className="rounded-full border-2 border-ink px-5 py-2.5 text-sm font-semibold transition hover:bg-ink hover:text-paper">{step === 0 ? "Skip" : "← Back"}</button>
+                    {step < 3 ? (
+                      <button type="button" onClick={() => setStep(step + 1)} className="rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-paper transition hover:opacity-90">Next →</button>
+                    ) : (
+                      <button type="button" disabled={busy} onClick={async () => { await saveBot(); setWizardDone(true); }} className="rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-paper transition hover:opacity-90 disabled:opacity-50">{busy ? "Saving…" : "Finish & get my code →"}</button>
+                    )}
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="mt-8 space-y-6">
                 <div className="rounded-3xl border-2 border-ink p-6">
@@ -149,6 +227,28 @@ export default function Account() {
                     <code className="flex-1 overflow-auto rounded-xl bg-ink px-4 py-3 text-xs text-paper">{snippet}</code>
                     <button onClick={copy} className="shrink-0 rounded-xl border-2 border-ink px-4 text-sm font-semibold transition hover:bg-ink hover:text-paper">{copied ? "Copied ✓" : "Copy"}</button>
                   </div>
+                </div>
+
+                <div className="rounded-3xl border-2 border-ink p-6">
+                  <h2 className="text-lg font-bold">Leads {leads.length > 0 && <span className="ml-1 inline-block rounded-full bg-[#e3342b] px-2 py-0.5 align-middle text-xs font-bold text-white">{leads.length}</span>}</h2>
+                  <p className="mt-0.5 text-sm text-smoke">When a visitor shares their name, email, or phone with your mascot, it shows up here — and we email you.</p>
+                  {leads.length === 0 ? (
+                    <p className="mt-5 rounded-2xl bg-ink/[0.03] px-4 py-6 text-center text-sm text-smoke">No leads yet. Once your mascot is live and someone leaves their info, it&apos;ll appear here.</p>
+                  ) : (
+                    <ul className="mt-4 divide-y divide-ink/10">
+                      {leads.map((l) => (
+                        <li key={l.id} className="py-3">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                            {l.name && <span className="font-semibold">{l.name}</span>}
+                            {l.email && <a href={`mailto:${l.email}`} className="text-ink underline">{l.email}</a>}
+                            {l.phone && <a href={`tel:${l.phone}`} className="text-ink underline">{l.phone}</a>}
+                            <span className="ml-auto text-xs text-smoke">{new Date(l.at).toLocaleString()}</span>
+                          </div>
+                          <p className="mt-1 text-sm text-smoke">&ldquo;{l.message}&rdquo;</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             )}
