@@ -1,5 +1,5 @@
 import { getUser, saveUser, hashPassword, makeSessionToken, sessionCookie, clearSessionCookie, getSessionEmail } from "@/lib/auth";
-import { kvReady } from "@/lib/vault";
+import { kvReady, kvGet } from "@/lib/vault";
 import { getOrCreateBot, saveBot, BotConfig } from "@/lib/botcfg";
 import { listLeads } from "@/lib/leads";
 
@@ -44,6 +44,17 @@ export async function POST(req: Request) {
     const bot = await getOrCreateBot(em, u?.name);
     const leads = await listLeads(bot.id, 100);
     return json({ ok: true, leads });
+  }
+
+  if (action === "stats") {
+    const em = await getSessionEmail(req);
+    if (!em) return json({ ok: false, error: "Please sign in." }, 401);
+    if (!kvReady()) return json({ ok: false, error: "Database not connected." }, 400);
+    const u = await getUser(em);
+    const bot = await getOrCreateBot(em, u?.name);
+    const [msgs, convos] = await Promise.all([kvGet("stat:" + bot.id + ":msgs"), kvGet("stat:" + bot.id + ":convos")]);
+    const leads = await listLeads(bot.id, 1000);
+    return json({ ok: true, stats: { messages: Number(msgs || 0), convos: Number(convos || 0), leads: leads.length } });
   }
 
   if (action === "saveBot") {
