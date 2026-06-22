@@ -61,6 +61,7 @@ export async function POST(req: Request) {
       industry: str(b.industry, cur.industry, 80),
       about: str(b.about, cur.about, 1500),
       facts: str(b.facts, cur.facts, 4000),
+      notes: str(b.notes, cur.notes, 2000),
       cta: str(b.cta, cur.cta, 120),
       ctaUrl: str(b.ctaUrl, cur.ctaUrl, 300),
       greet: bool(b.greet, cur.greet),
