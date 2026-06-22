@@ -1,4 +1,4 @@
-import { getSecret, getSetting } from "@/lib/vault";
+import { getSecret, getSetting, kvIncr } from "@/lib/vault";
 import { getBot, publicConfig, botSystemPrompt } from "@/lib/botcfg";
 import { extractContact, saveLead, emailOwner } from "@/lib/leads";
 
@@ -61,8 +61,10 @@ export async function POST(req: Request) {
       content: String((m && m.content) || "").slice(0, 600),
     }));
 
-    // Lead capture: if the visitor shared contact info, store it and notify the owner.
+    // Analytics + lead capture.
     if (bot) {
+      await kvIncr("stat:" + bot.id + ":msgs");
+      if (trimmed.filter((m) => m.role === "user").length <= 1) await kvIncr("stat:" + bot.id + ":convos");
       const lastUser = [...trimmed].reverse().find((m) => m.role === "user");
       if (lastUser && lastUser.content) {
         const c = extractContact(lastUser.content);
