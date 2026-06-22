@@ -34,6 +34,7 @@ export default function Account() {
   const [leads, setLeads] = useState<LeadRow[]>([]);
   const [step, setStep] = useState(0);
   const [wizardDone, setWizardDone] = useState(false);
+  const [stats, setStats] = useState<{ messages: number; convos: number; leads: number } | null>(null);
 
   async function refresh() {
     const r = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "me" }) });
@@ -53,6 +54,8 @@ export default function Account() {
       .then((r) => r.json()).then((d) => { if (d.ok) setBot(d.bot); }).catch(() => {});
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "leads" }) })
       .then((r) => r.json()).then((d) => { if (d.ok && Array.isArray(d.leads)) setLeads(d.leads); }).catch(() => {});
+    fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "stats" }) })
+      .then((r) => r.json()).then((d) => { if (d.ok && d.stats) setStats(d.stats); }).catch(() => {});
   }, [user]);
 
   async function submit(e: React.FormEvent) {
@@ -200,6 +203,14 @@ export default function Account() {
               </div>
             ) : (
               <div className="mt-8 space-y-6">
+                <div className="grid grid-cols-3 gap-3">
+                  {([["Conversations", stats?.convos], ["Messages", stats?.messages], ["Leads", stats?.leads]] as [string, number | undefined][]).map(([label, val]) => (
+                    <div key={label} className="rounded-2xl border-2 border-ink p-4 text-center">
+                      <div className="text-3xl font-bold tracking-tightest">{typeof val === "number" ? val.toLocaleString() : "—"}</div>
+                      <div className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-smoke">{label}</div>
+                    </div>
+                  ))}
+                </div>
                 <div className="rounded-3xl border-2 border-ink p-6">
                   <h2 className="text-lg font-bold">Your chatbot</h2>
                   <p className="mt-0.5 text-sm text-smoke">Tell your mascot about your business. It uses this to answer your visitors and guide them to act.</p>
