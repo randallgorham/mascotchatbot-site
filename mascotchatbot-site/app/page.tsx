@@ -142,8 +142,8 @@ export default async function Home() {
             <a href="#pricing" className="group hidden items-center gap-1.5 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-paper shadow-[0_4px_14px_rgba(10,10,10,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(10,10,10,0.32)] md:inline-flex">
               Get your mascot<span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
             </a>
-            <NavActions />
             <MobileNav />
+            <NavActions />
           </div>
         </div>
       </header>
