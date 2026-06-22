@@ -19,6 +19,8 @@ function money(n: number) {
 
 export default function Pricing() {
   const [billing, setBilling] = useState<Billing>("annual");
+  const [mascot, setMascot] = useState<"predesigned" | "custom">("predesigned");
+  const CUSTOM_FEE = 300;
   const { add, setOpen } = useCart();
 
   function perMonth(p: Plan) {
@@ -26,6 +28,9 @@ export default function Pricing() {
   }
   function setupFor(p: Plan) {
     return billing === "prepay3" ? 0 : p.setup;
+  }
+  function oneTimeFor(p: Plan) {
+    return setupFor(p) + (mascot === "custom" ? CUSTOM_FEE : 0);
   }
   function billingLabel() {
     if (billing === "monthly") return "billed monthly";
@@ -39,7 +44,7 @@ export default function Pricing() {
         : billing === "annual"
         ? "Billed yearly (save 20%)"
         : "Billed monthly";
-    add({ id: "plan-" + p.id, name: p.name + " plan", kind: "plan", monthly: perMonth(p), oneTime: setupFor(p), billing, detail });
+    add({ id: "plan-" + p.id, name: p.name + " plan", kind: "plan", monthly: perMonth(p), oneTime: oneTimeFor(p), billing, detail: detail + (mascot === "custom" ? " · custom mascot" : " · predesigned mascot") });
   }
   function addService(id: string, name: string, price: number, detail: string) {
     add({ id, name, kind: "addon", monthly: 0, oneTime: price, detail });
@@ -57,13 +62,18 @@ export default function Pricing() {
         <h2 className="mb-3 text-4xl font-bold tracking-tightest md:text-6xl">Simple, honest pricing.</h2>
         <p className="mb-8 max-w-lg text-smoke">Flat monthly — no per-message credits, no surprise overage bills. We build it, host it, and keep it sharp. Cancel anytime.</p>
 
-        <div className="mb-12 inline-flex flex-wrap gap-1 rounded-full border-2 border-ink p-1">
-          {toggle.map(([id, lbl]) => (
-            <button key={id} onClick={() => setBilling(id)}
-              className={"rounded-full px-4 py-2 text-sm font-semibold transition " + (billing === id ? "bg-ink text-paper" : "text-ink hover:bg-ink/5")}>
-              {lbl}
-            </button>
-          ))}
+        <div className="mb-10 flex flex-col items-start gap-3">
+          <div className="inline-flex flex-wrap gap-1 rounded-full border-2 border-ink p-1">
+            {toggle.map(([id, lbl]) => (
+              <button key={id} onClick={() => setBilling(id)} className={"rounded-full px-4 py-2 text-sm font-semibold transition " + (billing === id ? "bg-ink text-paper" : "text-ink hover:bg-ink/5")}>{lbl}</button>
+            ))}
+          </div>
+          <div className="inline-flex flex-wrap gap-1 rounded-full border-2 border-ink p-1">
+            {(["predesigned", "custom"] as const).map((id) => (
+              <button key={id} onClick={() => setMascot(id)} className={"rounded-full px-4 py-2 text-sm font-semibold transition " + (mascot === id ? "bg-ink text-paper" : "text-ink hover:bg-ink/5")}>{id === "predesigned" ? "Predesigned mascot" : "Custom mascot"}</button>
+            ))}
+          </div>
+          <p className="max-w-lg text-sm text-smoke">{mascot === "predesigned" ? "Pick from our 30+ ready-made mascots — the fastest, most affordable option." : `We craft a one-of-a-kind mascot for you (or use your own artwork) — +${money(CUSTOM_FEE)} one-time.`}</p>
         </div>
 
         <div className="grid items-start gap-6 md:grid-cols-3">
@@ -79,6 +89,7 @@ export default function Pricing() {
                 {billingLabel()}
                 {" · "}
                 {billing === "prepay3" ? "setup waived 🎉" : money(setupFor(p)) + " setup"}
+                {mascot === "custom" ? " · +" + money(CUSTOM_FEE) + " custom mascot" : ""}
               </p>
               <div className={"my-6 h-px w-full " + (p.featured ? "bg-paper/20" : "bg-ink/10")} />
               <ul className="flex-1 space-y-3.5 text-sm">
