@@ -12,7 +12,7 @@ const BOOKING = "https://api.leadconnectorhq.com/widget/booking/bYPWHLo2QmfN4WVH
 const TALK_CSS = `
 @keyframes mcShine{0%{background-position:120% 0}100%{background-position:-120% 0}}
 @keyframes mcEq{0%,100%{transform:scaleY(.22)}50%{transform:scaleY(1)}}
-.mc-talk{background-image:linear-gradient(90deg,currentColor 0%,currentColor 42%,#2bc4e6 50%,currentColor 58%,currentColor 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:mcShine 2.6s linear infinite}
+.mc-talk{background-image:linear-gradient(90deg,#0a0a0a 0%,#0a0a0a 42%,#2bc4e6 50%,#0a0a0a 58%,#0a0a0a 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:mcShine 2.6s linear infinite}
 .mc-eq{display:inline-flex;align-items:flex-end;gap:.045em;height:.5em;margin-left:.16em;vertical-align:baseline}
 .mc-eq i{width:.09em;min-width:3px;height:100%;background:#2bc4e6;border-radius:2px;transform-origin:bottom;animation:mcEq .9s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.mc-talk{animation:none;background:none;-webkit-text-fill-color:currentColor;color:inherit}.mc-eq i{animation:none}}
@@ -25,7 +25,7 @@ const Eq = () => (
 function Headline({ text }: { text: string }) {
   const idx = text.toLowerCase().lastIndexOf("talking");
   if (idx < 0) return <>{text}</>;
-  return (<>{text.slice(0, idx)}<span className="mc-talk">talking</span><Eq />{text.slice(idx + 7)}</>);
+  return (<>{text.slice(0, idx)}<span className="mc-talk">{"talking" + text.slice(idx + 7)}</span><Eq /></>);
 }
 
 export const INDUSTRIES: Record<string, Ind> = {
