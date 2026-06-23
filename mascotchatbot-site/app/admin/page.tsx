@@ -6,6 +6,8 @@ import { BOTS, VOICES, defaultVoiceFor } from "@/lib/bots";
 type Stat = { set: boolean; last4: string; source: string };
 type UsageRow = { id: string; business: string; owner: string; industry: string; plan: string; messages: number; convos: number; leads: number; updatedAt: string };
 type Usage = { ok: boolean; customers: UsageRow[]; totals: { messages: number; convos: number; leads: number }; count: number; error?: string };
+type PayoutRow = { referrer: string; signups: number; conversions: number; owed: number };
+type Payouts = { ok: boolean; rows: PayoutRow[]; totalOwed: number; totalConversions: number; error?: string };
 type Member = { email: string; role: string; addedAt?: string };
 type Settings = { brain: string; voice: string; openaiVoice: string; elevenVoiceId: string; botVoices: Record<string, string>; ghlCalendarUrl: string };
 type Status = {
@@ -63,6 +65,7 @@ const MANAGER_TABS: [string, string][] = [
   ["orders", "Orders"],
   ["customers", "Customers"],
   ["usage", "Usage"],
+  ["referrals", "Referrals"],
   ["onboarding", "Onboarding"],
   ["team", "Team"],
 ];
@@ -83,6 +86,8 @@ export default function Admin() {
   const [previewing, setPreviewing] = useState("");
   const [usage, setUsage] = useState<Usage | null>(null);
   const [usageBusy, setUsageBusy] = useState(false);
+  const [pay, setPay] = useState<Payouts | null>(null);
+  const [payBusy, setPayBusy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   // owner sign-in
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -110,6 +115,18 @@ export default function Admin() {
     setUsageBusy(false);
   }
   useEffect(() => { if (tab === "usage" && status?.manage && !usage) loadUsage(); }, [tab, status?.manage]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function loadPay() {
+    setPayBusy(true);
+    try {
+      const r = await fetch("/api/admin/referrals", { cache: "no-store" });
+      setPay(await r.json());
+    } catch {
+      setPay({ ok: false, rows: [], totalOwed: 0, totalConversions: 0, error: "Couldn't load payouts." });
+    }
+    setPayBusy(false);
+  }
+  useEffect(() => { if (tab === "referrals" && status?.manage && !pay) loadPay(); }, [tab, status?.manage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function addMember(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setMsg("");
@@ -396,6 +413,60 @@ export default function Admin() {
                             <td className="px-4 py-3 text-right tabular-nums">{c.convos.toLocaleString()}</td>
                             <td className="px-4 py-3 text-right tabular-nums">{c.messages.toLocaleString()}</td>
                             <td className="px-4 py-3 text-right font-semibold tabular-nums">{c.leads.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {tab === "referrals" && status?.manage && (
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold">Affiliate payouts</h2>
+                    <p className="mt-0.5 text-sm text-neutral-500">Commission owed to referrers (20% of each referred customer&apos;s first payment).</p>
+                  </div>
+                  <button onClick={loadPay} disabled={payBusy} className="rounded-xl border-2 border-neutral-200 px-4 py-2 text-sm font-semibold transition hover:border-neutral-900 disabled:opacity-50">{payBusy ? "Refreshing…" : "Refresh"}</button>
+                </div>
+
+                {pay && pay.ok && (
+                  <div className="grid grid-cols-3 gap-3">
+                    {([["Affiliates", String(pay.rows.length)], ["Conversions", String(pay.totalConversions)], ["Owed", "$" + pay.totalOwed.toLocaleString()]] as [string, string][]).map(([k, v]) => (
+                      <div key={k} className="rounded-2xl border border-neutral-200 bg-white p-4 text-center shadow-sm">
+                        <div className="text-2xl font-extrabold tabular-nums">{v}</div>
+                        <div className="mt-0.5 text-xs font-medium uppercase tracking-wide text-neutral-500">{k}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {payBusy && !pay && <p className="text-sm text-neutral-500">Loading payouts…</p>}
+                {pay && !pay.ok && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{pay.error || "Couldn't load payouts."}</p>}
+                {pay && pay.ok && pay.rows.length === 0 && (
+                  <p className="rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500 shadow-sm">No referrals yet. Share the affiliate program at <b>/affiliate</b> to get started.</p>
+                )}
+
+                {pay && pay.ok && pay.rows.length > 0 && (
+                  <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+                    <table className="w-full text-sm">
+                      <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
+                        <tr>
+                          <th className="px-4 py-3 font-semibold">Referrer</th>
+                          <th className="px-4 py-3 text-right font-semibold">Signups</th>
+                          <th className="px-4 py-3 text-right font-semibold">Paying</th>
+                          <th className="px-4 py-3 text-right font-semibold">Owed</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pay.rows.map((p) => (
+                          <tr key={p.referrer} className="border-t border-neutral-100">
+                            <td className="px-4 py-3 font-medium">{p.referrer}</td>
+                            <td className="px-4 py-3 text-right tabular-nums">{p.signups}</td>
+                            <td className="px-4 py-3 text-right tabular-nums">{p.conversions}</td>
+                            <td className="px-4 py-3 text-right font-semibold tabular-nums">${p.owed.toLocaleString()}</td>
                           </tr>
                         ))}
                       </tbody>
