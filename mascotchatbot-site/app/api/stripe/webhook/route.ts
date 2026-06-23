@@ -3,7 +3,7 @@
 // Signature is verified against STRIPE_WEBHOOK_SECRET using Web Crypto (Edge-safe).
 import { getSecret, kvSet } from "@/lib/vault";
 import { getUser, saveUser } from "@/lib/auth";
-import { getOrCreateBot } from "@/lib/botcfg";
+import { getOrCreateBot, saveBot } from "@/lib/botcfg";
 import { markReferralPaid } from "@/lib/referrals";
 
 export const runtime = "edge";
@@ -89,8 +89,9 @@ export async function POST(req: Request) {
       if (!existing) {
         await saveUser({ email, name: email.split("@")[0], createdAt: new Date().toISOString() });
       }
-      // Provision their bot.
-      await getOrCreateBot(email);
+      // Provision their bot and clear any free-trial state now that they've paid.
+      const provisioned = await getOrCreateBot(email);
+      try { provisioned.plan = "active"; provisioned.trialEnds = undefined; await saveBot(provisioned); } catch { /* best effort */ }
       // Record the paid order for the admin.
       const orderId = String(s.id || Date.now().toString(36));
       const amount = Number(s.amount_total || 0) / 100;
