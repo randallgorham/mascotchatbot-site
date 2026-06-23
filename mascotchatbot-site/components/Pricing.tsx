@@ -39,8 +39,10 @@ export default function Pricing() {
   // for 180 days, set the toggle to that default, and log a one-time view.
   useEffect(() => {
     const m = document.cookie.match(/mcb_abp=(monthly|annual)/);
-    let v = m ? (m[1] as "monthly" | "annual") : "";
-    if (!v) {
+    let v: "monthly" | "annual";
+    if (m) {
+      v = m[1] as "monthly" | "annual";
+    } else {
       v = Math.random() < 0.5 ? "monthly" : "annual";
       document.cookie = "mcb_abp=" + v + "; path=/; max-age=15552000; samesite=lax";
       abBeacon("view", v);
