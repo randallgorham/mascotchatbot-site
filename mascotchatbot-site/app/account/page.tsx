@@ -44,6 +44,8 @@ export default function Account() {
   const [verifyUrl, setVerifyUrl] = useState("");
   const [verifyBusy, setVerifyBusy] = useState(false);
   const [verifyMsg, setVerifyMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [ref, setRef] = useState<{ code: string; count: number; paid: number; earned: number } | null>(null);
+  const [refCopied, setRefCopied] = useState(false);
 
   async function refresh() {
     const r = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "me" }) });
@@ -65,6 +67,8 @@ export default function Account() {
       .then((r) => r.json()).then((d) => { if (d.ok && Array.isArray(d.leads)) setLeads(d.leads); }).catch(() => {});
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "stats" }) })
       .then((r) => r.json()).then((d) => { if (d.ok && d.stats) setStats(d.stats); if (d.ok && Array.isArray(d.series)) setSeries(d.series); }).catch(() => {});
+    fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "referrals" }) })
+      .then((r) => r.json()).then((d) => { if (d.ok) setRef({ code: d.code, count: d.count, paid: d.paid, earned: d.earned }); }).catch(() => {});
   }, [user]);
 
   async function submit(e: React.FormEvent) {
@@ -143,6 +147,7 @@ export default function Account() {
 
   const field = "w-full rounded-xl border-2 border-ink/15 px-4 py-2.5 outline-none focus:border-ink text-sm";
   const needsSetup = !!bot && !bot.industry && !bot.about && !bot.facts && !wizardDone;
+  const refLink = ref ? `${typeof window !== "undefined" ? window.location.origin : "https://www.mascotchatbot.com"}/?ref=${ref.code}` : "";
 
   return (
     <main className="flex min-h-screen flex-col bg-paper text-ink" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
@@ -372,6 +377,26 @@ export default function Account() {
                     )}
                   </div>
                 </div>
+
+                {ref && (
+                  <div className="rounded-3xl border-2 border-ink bg-ink p-6 text-paper">
+                    <h2 className="text-lg font-bold">Refer &amp; earn 💸</h2>
+                    <p className="mt-0.5 text-sm text-smoke">Share your link. When a business you refer becomes a paying customer, you earn <b className="text-paper">20% of their first payment</b> in cash.</p>
+                    <div className="mt-4 flex items-stretch gap-2">
+                      <code className="flex-1 overflow-auto rounded-xl bg-paper px-4 py-3 text-xs text-ink">{refLink}</code>
+                      <button onClick={() => { navigator.clipboard.writeText(refLink).then(() => { setRefCopied(true); setTimeout(() => setRefCopied(false), 1800); }); }} className="shrink-0 rounded-xl border-2 border-paper px-4 text-sm font-semibold">{refCopied ? "Copied ✓" : "Copy"}</button>
+                    </div>
+                    <div className="mt-4 grid grid-cols-3 gap-3">
+                      {([["Referrals", String(ref.count)], ["Paying", String(ref.paid)], ["Earned", "$" + ref.earned.toLocaleString()]] as [string, string][]).map(([k, v]) => (
+                        <div key={k} className="rounded-2xl bg-paper/10 p-4 text-center">
+                          <div className="text-2xl font-bold tracking-tightest">{v}</div>
+                          <div className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-smoke">{k}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-xs text-smoke">Paid out monthly. <a href="/affiliate" className="underline">How it works →</a></p>
+                  </div>
+                )}
 
                 <div className="rounded-3xl border-2 border-ink p-6">
                   <h2 className="text-lg font-bold">Leads {leads.length > 0 && <span className="ml-1 inline-block rounded-full bg-[#e3342b] px-2 py-0.5 align-middle text-xs font-bold text-white">{leads.length}</span>}</h2>
