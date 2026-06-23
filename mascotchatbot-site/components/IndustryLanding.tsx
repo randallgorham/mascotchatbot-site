@@ -9,6 +9,25 @@ type Ind = {
 
 const BOOKING = "https://api.leadconnectorhq.com/widget/booking/bYPWHLo2QmfN4WVHqVr1";
 
+const TALK_CSS = `
+@keyframes mcShine{0%{background-position:120% 0}100%{background-position:-120% 0}}
+@keyframes mcEq{0%,100%{transform:scaleY(.22)}50%{transform:scaleY(1)}}
+.mc-talk{background-image:linear-gradient(90deg,currentColor 0%,currentColor 42%,#2bc4e6 50%,currentColor 58%,currentColor 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:mcShine 2.6s linear infinite}
+.mc-eq{display:inline-flex;align-items:flex-end;gap:.045em;height:.5em;margin-left:.16em;vertical-align:baseline}
+.mc-eq i{width:.09em;min-width:3px;height:100%;background:#2bc4e6;border-radius:2px;transform-origin:bottom;animation:mcEq .9s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.mc-talk{animation:none;background:none;-webkit-text-fill-color:currentColor;color:inherit}.mc-eq i{animation:none}}
+`;
+
+const Eq = () => (
+  <span className="mc-eq" aria-hidden="true"><i style={{ animationDelay: "0s" }} /><i style={{ animationDelay: ".15s" }} /><i style={{ animationDelay: ".3s" }} /><i style={{ animationDelay: ".2s" }} /></span>
+);
+
+function Headline({ text }: { text: string }) {
+  const idx = text.toLowerCase().lastIndexOf("talking");
+  if (idx < 0) return <>{text}</>;
+  return (<>{text.slice(0, idx)}<span className="mc-talk">talking</span><Eq />{text.slice(idx + 7)}</>);
+}
+
 export const INDUSTRIES: Record<string, Ind> = {
   electricians: {
     slug: "electricians", label: "Electricians", role: "electrical company", img: "dr-volt-1.png", name: "Dr. Volt",
@@ -193,7 +212,8 @@ export default function IndustryLanding({ slug }: { slug: string }) {
               <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e3342b] opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[#e3342b]" /></span>
               AI mascots for {ind.label.toLowerCase()}
             </p>
-            <h1 className="text-[12vw] font-bold leading-[0.9] tracking-tightest md:text-[5.5rem]">{ind.headline}</h1>
+            <style dangerouslySetInnerHTML={{ __html: TALK_CSS }} />
+            <h1 className="text-[12vw] font-bold leading-[0.9] tracking-tightest md:text-[5.5rem]"><Headline text={ind.headline} /></h1>
             <p className="mt-7 max-w-md text-lg leading-relaxed text-smoke">{ind.sub}</p>
             <div className="mt-9 flex flex-wrap gap-3">
               <a href="#book" className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 font-semibold text-paper shadow-[0_8px_22px_rgba(10,10,10,0.28)] transition-all duration-300 hover:-translate-y-0.5">Book a free demo <span className="transition-transform duration-300 group-hover:translate-x-1">→</span></a>
