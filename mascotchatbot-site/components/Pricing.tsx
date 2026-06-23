@@ -1,7 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/components/CartProvider";
+
+// A/B experiment: half of new visitors see "Monthly" as the default billing
+// toggle, half see "Annual". We measure which default drives more add-to-cart.
+function abBeacon(event: string, variant: string) {
+  if (!variant) return;
+  try {
+    fetch("/api/ab", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event, variant }), keepalive: true }).catch(() => {});
+  } catch {
+    /* ignore */
+  }
+}
 
 type Plan = { id: string; name: string; monthly: number; annual: number; setup: number; featured?: boolean; label: string; feats: string[] };
 
@@ -20,8 +31,23 @@ function money(n: number) {
 export default function Pricing() {
   const [billing, setBilling] = useState<Billing>("annual");
   const [mascot, setMascot] = useState<"predesigned" | "custom">("predesigned");
+  const [abVariant, setAbVariant] = useState<"monthly" | "annual" | "">("");
   const CUSTOM_FEE = 300;
   const { add, setOpen } = useCart();
+
+  // Assign (or re-read) the visitor's billing-default variant once, persist it
+  // for 180 days, set the toggle to that default, and log a one-time view.
+  useEffect(() => {
+    const m = document.cookie.match(/mcb_abp=(monthly|annual)/);
+    let v = m ? (m[1] as "monthly" | "annual") : "";
+    if (!v) {
+      v = Math.random() < 0.5 ? "monthly" : "annual";
+      document.cookie = "mcb_abp=" + v + "; path=/; max-age=15552000; samesite=lax";
+      abBeacon("view", v);
+    }
+    setAbVariant(v);
+    setBilling(v);
+  }, []);
 
   function perMonth(p: Plan) {
     return billing === "monthly" ? p.monthly : p.annual;
@@ -45,6 +71,7 @@ export default function Pricing() {
         ? "Billed yearly (save 20%)"
         : "Billed monthly";
     add({ id: "plan-" + p.id, name: p.name + " plan", kind: "plan", monthly: perMonth(p), oneTime: oneTimeFor(p), billing, detail: detail + (mascot === "custom" ? " · custom mascot" : " · predesigned mascot") });
+    if (abVariant) abBeacon("cart", abVariant);
   }
   function addService(id: string, name: string, price: number, detail: string) {
     add({ id, name, kind: "addon", monthly: 0, oneTime: price, detail });
