@@ -6,9 +6,9 @@ import { useCart } from "@/components/CartProvider";
 type Plan = { id: string; name: string; monthly: number; annual: number; setup: number; featured?: boolean; label: string; feats: string[] };
 
 const PLANS: Plan[] = [
-  { id: "starter", name: "Starter", monthly: 249, annual: 199, setup: 500, label: "Get started", feats: ["Custom animated mascot", "FAQ brain trained on your business", "Text chat + lead capture to email/CRM", "Fully hosted & maintained", "1 website"] },
-  { id: "pro", name: "Pro", monthly: 599, annual: 479, setup: 1500, featured: true, label: "Most popular", feats: ["Everything in Starter", "Talking voice mascot (natural voice + lip-sync)", "Booking + calendar", "CRM / SMS routing", "Monthly tuning + performance report", "Priority build"] },
-  { id: "premium", name: "Premium", monthly: 1199, annual: 959, setup: 2500, label: "Premium", feats: ["Everything in Pro", "Multi-page knowledge + custom integrations", "Multiple mascots / multi-location", "A/B tuning", "Priority support"] },
+  { id: "starter", name: "Starter", monthly: 99, annual: 79, setup: 500, label: "Get started", feats: ["Custom animated mascot", "FAQ brain trained on your business", "Text chat + lead capture to email/CRM", "Fully hosted & maintained", "1 website"] },
+  { id: "pro", name: "Pro", monthly: 249, annual: 199, setup: 500, featured: true, label: "Most popular", feats: ["Everything in Starter", "Talking voice mascot (natural voice + lip-sync)", "Booking + calendar", "CRM / SMS routing", "Monthly tuning + performance report", "Priority build"] },
+  { id: "premium", name: "Premium", monthly: 499, annual: 399, setup: 500, label: "Premium", feats: ["Everything in Pro", "Multi-page knowledge + custom integrations", "Multiple mascots / multi-location", "A/B tuning", "Priority support"] },
 ];
 
 type Billing = "monthly" | "annual" | "prepay3";
