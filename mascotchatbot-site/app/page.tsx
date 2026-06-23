@@ -54,7 +54,6 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "05-fitness-coach-male", name: "Coach Rex", niche: "Fitness", say: "Pick me!" },
   { img: "14-fitness-coach-female", name: "Coach Tara", niche: "Fitness", say: "Let's go!" },
   { img: "18-gym-instructor-female-blonde", name: "Brooke", niche: "Gym", say: "Pick me!" },
-  { img: "06-plumber-home-services-male", name: "Max", niche: "Home Services", say: "Pick me!" },
   { img: "08-electrician-male", name: "Sparky", niche: "Electrician", say: "Pick me!" },
   { img: "19-mechanic-male", name: "Gus", niche: "Auto Repair", say: "Pick me!" },
   { img: "09-contractor-male-cap-vest", name: "Bo", niche: "Contractor", say: "Pick me!" },
