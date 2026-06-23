@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { BOTS, VOICES, defaultVoiceFor } from "@/lib/bots";
 
 type Stat = { set: boolean; last4: string; source: string };
+type UsageRow = { id: string; business: string; owner: string; industry: string; plan: string; messages: number; convos: number; leads: number; updatedAt: string };
+type Usage = { ok: boolean; customers: UsageRow[]; totals: { messages: number; convos: number; leads: number }; count: number; error?: string };
 type Member = { email: string; role: string; addedAt?: string };
 type Settings = { brain: string; voice: string; openaiVoice: string; elevenVoiceId: string; botVoices: Record<string, string>; ghlCalendarUrl: string };
 type Status = {
@@ -60,6 +62,7 @@ const MANAGER_TABS: [string, string][] = [
   ["voices", "Voices"],
   ["orders", "Orders"],
   ["customers", "Customers"],
+  ["usage", "Usage"],
   ["onboarding", "Onboarding"],
   ["team", "Team"],
 ];
@@ -78,6 +81,8 @@ export default function Admin() {
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const [previewing, setPreviewing] = useState("");
+  const [usage, setUsage] = useState<Usage | null>(null);
+  const [usageBusy, setUsageBusy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   // owner sign-in
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -92,6 +97,19 @@ export default function Admin() {
     if (d.auth && !d.manage) setTab("orders"); // staff land on Orders
   }
   useEffect(() => { load(); }, []);
+
+  async function loadUsage() {
+    setUsageBusy(true);
+    try {
+      const r = await fetch("/api/admin/customers", { cache: "no-store" });
+      const d: Usage = await r.json();
+      setUsage(d);
+    } catch {
+      setUsage({ ok: false, customers: [], totals: { messages: 0, convos: 0, leads: 0 }, count: 0, error: "Couldn't load usage." });
+    }
+    setUsageBusy(false);
+  }
+  useEffect(() => { if (tab === "usage" && status?.manage && !usage) loadUsage(); }, [tab, status?.manage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function addMember(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setMsg("");
@@ -327,6 +345,64 @@ export default function Admin() {
 
             {(tab === "orders" || tab === "customers" || tab === "onboarding") && (
               <DataList rows={(status?.data as any)?.[tab] || []} kind={tab} onDelete={tab === "customers" && status?.manage ? deleteCustomer : undefined} />
+            )}
+
+            {tab === "usage" && status?.manage && (
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold">Live chatbot usage</h2>
+                    <p className="mt-0.5 text-sm text-neutral-500">Conversations, messages &amp; captured leads across every customer&apos;s bot.</p>
+                  </div>
+                  <button onClick={loadUsage} disabled={usageBusy} className="rounded-xl border-2 border-neutral-200 px-4 py-2 text-sm font-semibold transition hover:border-neutral-900 disabled:opacity-50">{usageBusy ? "Refreshing…" : "Refresh"}</button>
+                </div>
+
+                {usage && usage.ok && (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {([["Bots", usage.count], ["Conversations", usage.totals.convos], ["Messages", usage.totals.messages], ["Leads", usage.totals.leads]] as [string, number][]).map(([k, v]) => (
+                      <div key={k} className="rounded-2xl border border-neutral-200 bg-white p-4 text-center shadow-sm">
+                        <div className="text-2xl font-extrabold tabular-nums">{v.toLocaleString()}</div>
+                        <div className="mt-0.5 text-xs font-medium uppercase tracking-wide text-neutral-500">{k}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {usageBusy && !usage && <p className="text-sm text-neutral-500">Loading usage…</p>}
+                {usage && !usage.ok && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{usage.error || "Couldn't load usage."}</p>}
+                {usage && usage.ok && usage.customers.length === 0 && (
+                  <p className="rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500 shadow-sm">No customer bots yet. They&apos;ll appear here as customers finish onboarding.</p>
+                )}
+
+                {usage && usage.ok && usage.customers.length > 0 && (
+                  <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+                    <table className="w-full text-sm">
+                      <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
+                        <tr>
+                          <th className="px-4 py-3 font-semibold">Business</th>
+                          <th className="px-4 py-3 font-semibold">Owner</th>
+                          <th className="px-4 py-3 font-semibold">Industry</th>
+                          <th className="px-4 py-3 text-right font-semibold">Convos</th>
+                          <th className="px-4 py-3 text-right font-semibold">Messages</th>
+                          <th className="px-4 py-3 text-right font-semibold">Leads</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {usage.customers.map((c) => (
+                          <tr key={c.id} className="border-t border-neutral-100">
+                            <td className="px-4 py-3 font-medium">{c.business || <span className="text-neutral-400">{c.id}</span>}</td>
+                            <td className="px-4 py-3 text-neutral-600">{c.owner || "—"}</td>
+                            <td className="px-4 py-3 text-neutral-600">{c.industry || "—"}</td>
+                            <td className="px-4 py-3 text-right tabular-nums">{c.convos.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-right tabular-nums">{c.messages.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-right font-semibold tabular-nums">{c.leads.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             )}
 
             {tab === "team" && status?.manage && (
