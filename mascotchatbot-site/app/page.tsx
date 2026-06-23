@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 const TALK_CSS = `
 @keyframes mcShine{0%{background-position:120% 0}100%{background-position:-120% 0}}
 @keyframes mcEq{0%,100%{transform:scaleY(.22)}50%{transform:scaleY(1)}}
-.mc-talk{background-image:linear-gradient(90deg,currentColor 0%,currentColor 42%,#2bc4e6 50%,currentColor 58%,currentColor 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:mcShine 2.6s linear infinite}
+.mc-talk{background-image:linear-gradient(90deg,#0a0a0a 0%,#0a0a0a 42%,#2bc4e6 50%,#0a0a0a 58%,#0a0a0a 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:mcShine 2.6s linear infinite}
 .mc-eq{display:inline-flex;align-items:flex-end;gap:.045em;height:.5em;margin-left:.16em;vertical-align:baseline}
 .mc-eq i{width:.09em;min-width:3px;height:100%;background:#2bc4e6;border-radius:2px;transform-origin:bottom;animation:mcEq .9s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.mc-talk{animation:none;background:none;-webkit-text-fill-color:currentColor;color:inherit}.mc-eq i{animation:none}}
@@ -178,7 +178,7 @@ export default async function Home() {
             <style dangerouslySetInnerHTML={{ __html: TALK_CSS }} />
             <h1 className="fade-up text-[15vw] font-bold leading-[0.84] tracking-tightest md:text-[7.5rem]" style={{ animationDelay: "80ms" }}>
               Your brand,<br />
-              <span className="mc-talk">talking</span><span className="mc-eq" aria-hidden="true"><i style={{ animationDelay: "0s" }} /><i style={{ animationDelay: ".15s" }} /><i style={{ animationDelay: ".3s" }} /><i style={{ animationDelay: ".2s" }} /></span>.
+              <span className="mc-talk">talking.</span><span className="mc-eq" aria-hidden="true"><i style={{ animationDelay: "0s" }} /><i style={{ animationDelay: ".15s" }} /><i style={{ animationDelay: ".3s" }} /><i style={{ animationDelay: ".2s" }} /></span>
             </h1>
             <p className="fade-up mt-8 max-w-md text-lg leading-relaxed text-smoke" style={{ animationDelay: "160ms" }}>
               We build a custom animated mascot that lives on your site, talks to visitors, answers questions, and books the job — <b className="text-ink">24/7, done for you, hosted by us.</b>
