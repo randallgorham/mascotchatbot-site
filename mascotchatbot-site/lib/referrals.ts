@@ -13,6 +13,8 @@ export interface Referral {
   amount?: number; // first payment amount (USD)
   commission?: number; // owed to referrer (USD)
   paidAt?: string;
+  settled?: boolean; // commission has been paid out to the referrer
+  settledAt?: string;
 }
 
 function rcode(): string {
@@ -101,6 +103,27 @@ export async function summaryFor(email: string): Promise<RefSummary> {
   };
 }
 
+// Admin: mark all of a referrer's owed (paid-but-unsettled) commissions as paid out.
+// Returns how many referral records were settled.
+export async function markPayoutSettled(referrer: string): Promise<number> {
+  const lower = referrer.toLowerCase();
+  const keys = await kvList("referral:");
+  let n = 0;
+  for (let i = 0; i < keys.length; i++) {
+    const v = await kvGet(keys[i]);
+    if (!v) continue;
+    let r: Referral;
+    try { r = JSON.parse(v) as Referral; } catch { continue; }
+    if (r.referrer === lower && r.status === "paid" && !r.settled) {
+      r.settled = true;
+      r.settledAt = new Date().toISOString();
+      await kvSet(keys[i], JSON.stringify(r));
+      n++;
+    }
+  }
+  return n;
+}
+
 // Admin: total owed per referrer for payouts.
 export type Payout = { referrer: string; signups: number; conversions: number; owed: number };
 export async function payouts(): Promise<{ rows: Payout[]; totalOwed: number; totalConversions: number }> {
@@ -109,7 +132,7 @@ export async function payouts(): Promise<{ rows: Payout[]; totalOwed: number; to
   for (const r of all) {
     const p = (by[r.referrer] = by[r.referrer] || { referrer: r.referrer, signups: 0, conversions: 0, owed: 0 });
     p.signups++;
-    if (r.status === "paid") { p.conversions++; p.owed += r.commission || 0; }
+    if (r.status === "paid") { p.conversions++; if (!r.settled) p.owed += r.commission || 0; }
   }
   const rows = Object.values(by).map((p) => ({ ...p, owed: Math.round(p.owed * 100) / 100 })).sort((a, b) => b.owed - a.owed);
   return {
