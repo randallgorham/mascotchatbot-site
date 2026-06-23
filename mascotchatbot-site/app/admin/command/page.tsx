@@ -14,6 +14,7 @@ type Funnel = { signups: number; demos: number; trials: number; paid: number };
 type Customer = { id: string; business: string; owner: string; industry: string; plan: string; trialEnds: string; messages: number; convos: number; leads: number; revenue: number; referrer: string; updatedAt: string };
 type PayRow = { referrer: string; signups: number; conversions: number; owed: number };
 type Payouts = { rows: PayRow[]; totalOwed: number; totalConversions: number };
+type AB = { monthly: { views: number; carts: number }; annual: { views: number; carts: number } };
 
 type Lead = { id: string; name?: string; email?: string; phone?: string; message: string; at: string; transcript?: { role: string; content: string }[] };
 type Detail = {
@@ -45,6 +46,7 @@ export default function CommandCenter() {
   const [funnel, setFunnel] = useState<Funnel | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [pay, setPay] = useState<Payouts | null>(null);
+  const [ab, setAb] = useState<AB | null>(null);
 
   const [q, setQ] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
@@ -58,7 +60,7 @@ export default function CommandCenter() {
     const d = await get();
     if (d && d.ok) {
       setKpis(d.kpis); setSeries(d.series || []); setFunnel(d.funnel);
-      setCustomers(d.customers || []); setPay(d.payouts || null);
+      setCustomers(d.customers || []); setPay(d.payouts || null); setAb(d.ab || null);
     } else if (d && (d.error === "Forbidden")) setForbidden(true);
     else setErr((d && d.error) || "Could not load.");
     setLoading(false);
@@ -149,6 +151,36 @@ export default function CommandCenter() {
           </div>
         </section>
       )}
+
+      {/* A/B experiment: billing default */}
+      {ab && (ab.monthly.views + ab.annual.views > 0) && (() => {
+        const rate = (x: { views: number; carts: number }) => (x.views > 0 ? (x.carts / x.views) * 100 : 0);
+        const mr = rate(ab.monthly), ar = rate(ab.annual);
+        const lead = mr === ar ? "" : mr > ar ? "monthly" : "annual";
+        const lift = Math.min(mr, ar) > 0 ? Math.abs(mr - ar) / Math.min(mr, ar) * 100 : 0;
+        const Bar = ({ label, x, win }: { label: string; x: { views: number; carts: number }; win: boolean }) => (
+          <div style={{ flex: "1 1 200px", border: "1px solid " + (win ? "#0a7d33" : "#ececec"), borderRadius: 12, padding: "14px 16px", background: win ? "#f3fbf5" : "#fff" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <span style={{ fontWeight: 700, textTransform: "capitalize" }}>{label} default{win ? " 🏆" : ""}</span>
+              <span style={{ fontSize: 22, fontWeight: 800, color: win ? "#0a7d33" : "#0A0A0A" }}>{rate(x).toFixed(1)}%</span>
+            </div>
+            <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>{x.carts.toLocaleString()} add-to-cart / {x.views.toLocaleString()} visitors</div>
+          </div>
+        );
+        return (
+          <section style={{ ...card, marginTop: 22 }}>
+            <h2 style={h2}>A/B test — pricing billing default</h2>
+            <p style={{ color: "#888", fontSize: 13, margin: "4px 0 12px" }}>Add-to-cart rate by which billing option new visitors see first.</p>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <Bar label="monthly" x={ab.monthly} win={lead === "monthly"} />
+              <Bar label="annual" x={ab.annual} win={lead === "annual"} />
+            </div>
+            <p style={{ fontSize: 13, color: "#555", marginTop: 12 }}>
+              {lead ? <><strong style={{ textTransform: "capitalize" }}>{lead}</strong> is winning by {lift.toFixed(0)}%. {ab.monthly.views + ab.annual.views < 200 ? "Keep gathering data before deciding (aim for 200+ visitors per side)." : "Sample is getting meaningful — consider locking in the winner."}</> : "No difference yet — keep gathering data."}
+            </p>
+          </section>
+        );
+      })()}
 
       {/* Affiliate payouts */}
       {pay && pay.rows.length > 0 && (
