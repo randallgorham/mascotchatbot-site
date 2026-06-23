@@ -20,6 +20,7 @@ export interface BotConfig {
   image: string; // mascot image URL (optional; widget shows a default if empty)
   plan: string; // starter | pro | premium
   badge: boolean; // show "Powered by mascotchatbot.com"
+  trialEnds?: string; // ISO date the free trial ends (while plan === "trial")
   updatedAt: string;
 }
 
@@ -70,8 +71,9 @@ export async function getOrCreateBot(email: string, name?: string): Promise<BotC
     voice: "ash",
     accent: "#e3342b",
     image: "",
-    plan: "starter",
+    plan: "trial",
     badge: true,
+    trialEnds: new Date(Date.now() + 14 * 86400000).toISOString(),
     updatedAt: new Date().toISOString(),
   };
   await kvSet("botowner:" + lower, id);
