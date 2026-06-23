@@ -84,7 +84,7 @@ const PROOF_BAND = [
 ];
 
 const FAQS = [
-  { q: "How much does it cost?", a: "A one-time build starting around $1,000, then a flat monthly to host, monitor, and keep it sharp. Plans start at $300/mo — see pricing above. Cancel anytime." },
+  { q: "How much does it cost?", a: "Plans start at $99/mo, flat — no per-message credits or surprise overage bills. A one-time $500 setup covers the build (waived when you prepay 3 years). We host it, monitor it, and keep it sharp. Cancel anytime." },
   { q: "How long until it's live on my site?", a: "About a week. We design the mascot, train it on your business, and hand you one line of code to drop in — or we add it for you." },
   { q: "Do I have to do anything?", a: "No. It's fully done-for-you. We build it, host it, monitor it, and tune it every month. You just collect the leads." },
   { q: "Can it use my own mascot or logo?", a: "Yes — bring your own character, or we design one that fits your brand. Either way it's uniquely yours." },
