@@ -9,7 +9,8 @@ type Bot = {
   cta: string; ctaUrl: string; greet: boolean; wave: boolean; wink: boolean;
   voice: string; accent: string; image: string; badge: boolean; plan: string;
 };
-type LeadRow = { id: string; name?: string; email?: string; phone?: string; message: string; at: string };
+type LeadRow = { id: string; name?: string; email?: string; phone?: string; message: string; at: string; transcript?: { role: string; content: string }[] };
+type Day = { day: string; convos: number; leads: number };
 
 const MASCOTS: [string, string][] = [
   ["dr-volt-1", "Dr. Volt"], ["hvac", "Reggie"], ["06-plumber-home-services-male", "Max"],
@@ -35,6 +36,14 @@ export default function Account() {
   const [step, setStep] = useState(0);
   const [wizardDone, setWizardDone] = useState(false);
   const [stats, setStats] = useState<{ messages: number; convos: number; leads: number } | null>(null);
+  const [series, setSeries] = useState<Day[]>([]);
+  const [site, setSite] = useState("");
+  const [autoBusy, setAutoBusy] = useState(false);
+  const [autoMsg, setAutoMsg] = useState("");
+  const [openLead, setOpenLead] = useState("");
+  const [verifyUrl, setVerifyUrl] = useState("");
+  const [verifyBusy, setVerifyBusy] = useState(false);
+  const [verifyMsg, setVerifyMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   async function refresh() {
     const r = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "me" }) });
@@ -55,7 +64,7 @@ export default function Account() {
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "leads" }) })
       .then((r) => r.json()).then((d) => { if (d.ok && Array.isArray(d.leads)) setLeads(d.leads); }).catch(() => {});
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "stats" }) })
-      .then((r) => r.json()).then((d) => { if (d.ok && d.stats) setStats(d.stats); }).catch(() => {});
+      .then((r) => r.json()).then((d) => { if (d.ok && d.stats) setStats(d.stats); if (d.ok && Array.isArray(d.series)) setSeries(d.series); }).catch(() => {});
   }, [user]);
 
   async function submit(e: React.FormEvent) {
@@ -102,6 +111,34 @@ export default function Account() {
       if (d.ok) { setB("image", d.image as string); setSaved("Artwork uploaded ✓"); } else setSaved(d.error || "Upload failed.");
     } catch { setSaved("Upload failed — try a smaller image."); }
     setBusy(false);
+  }
+
+  async function autofill() {
+    if (!site.trim() || autoBusy) return;
+    setAutoBusy(true); setAutoMsg("");
+    try {
+      const r = await fetch("/api/scrape", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: site }) });
+      const d = await r.json();
+      if (d.ok && d.facts) {
+        setB("facts", bot && bot.facts ? bot.facts + "\n\n" + d.facts : d.facts);
+        if (!bot?.ctaUrl) setB("ctaUrl", d.source || "");
+        setAutoMsg(d.ai ? "Pulled and summarized from your site ✓ — review & edit below." : "Pulled text from your site ✓ — trim it down below.");
+      } else setAutoMsg(d.error || "Couldn't read that site.");
+    } catch { setAutoMsg("Couldn't reach that site."); }
+    setAutoBusy(false);
+  }
+  async function verifyInstall() {
+    if (!bot || verifyBusy) return;
+    const u = verifyUrl.trim() || site.trim();
+    if (!u) { setVerifyMsg({ ok: false, text: "Enter the URL where you installed the widget." }); return; }
+    setVerifyBusy(true); setVerifyMsg(null);
+    try {
+      const r = await fetch("/api/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: u, botId: bot.id }) });
+      const d = await r.json();
+      if (d.ok) setVerifyMsg({ ok: !!d.installed, text: d.message });
+      else setVerifyMsg({ ok: false, text: d.error || "Couldn't check that page." });
+    } catch { setVerifyMsg({ ok: false, text: "Couldn't reach that page." }); }
+    setVerifyBusy(false);
   }
 
   const field = "w-full rounded-xl border-2 border-ink/15 px-4 py-2.5 outline-none focus:border-ink text-sm";
@@ -182,6 +219,15 @@ export default function Account() {
                   {step === 3 && (
                     <div className="space-y-4">
                       <p className="text-sm text-smoke">Last step — what should it know, and what should it push visitors toward?</p>
+                      <div className="rounded-2xl bg-ink/[0.03] p-4">
+                        <span className="mb-1 block text-sm font-semibold">⚡ Auto-fill from your website</span>
+                        <span className="mb-2 block text-xs text-smoke">Paste your site and we&apos;ll read it to draft your facts for you.</span>
+                        <div className="flex gap-2">
+                          <input className={field} value={site} onChange={(e) => setSite(e.target.value)} placeholder="yourbusiness.com" />
+                          <button type="button" onClick={autofill} disabled={autoBusy || !site.trim()} className="shrink-0 rounded-xl bg-ink px-4 text-sm font-semibold text-paper transition hover:opacity-90 disabled:opacity-50">{autoBusy ? "Reading…" : "Auto-fill"}</button>
+                        </div>
+                        {autoMsg && <span className="mt-2 block text-xs font-medium text-smoke">{autoMsg}</span>}
+                      </div>
                       <label className="block text-sm"><span className="mb-1 block font-semibold">Key facts (hours, services, pricing, FAQs)</span>
                         <textarea className={field} rows={4} value={bot.facts} onChange={(e) => setB("facts", e.target.value)} placeholder={"Hours: Mon–Fri 7–6\nService area: ...\nServices & pricing: ..."} /></label>
                       <label className="block text-sm"><span className="mb-1 block font-semibold">Main goal (call to action)</span>
@@ -211,6 +257,32 @@ export default function Account() {
                     </div>
                   ))}
                 </div>
+                {series.length > 0 && (() => {
+                  const max = Math.max(1, ...series.map((d) => d.convos));
+                  const totalC = series.reduce((s, d) => s + d.convos, 0);
+                  const totalL = series.reduce((s, d) => s + d.leads, 0);
+                  return (
+                    <div className="rounded-3xl border-2 border-ink p-6">
+                      <div className="flex items-baseline justify-between">
+                        <h2 className="text-lg font-bold">Last 14 days</h2>
+                        <span className="text-xs font-semibold text-smoke">{totalC} conversations · {totalL} leads</span>
+                      </div>
+                      <div className="mt-5 flex h-28 items-end gap-1.5">
+                        {series.map((d) => (
+                          <div key={d.day} className="group relative flex flex-1 flex-col items-center justify-end" title={`${d.day}: ${d.convos} conversations, ${d.leads} leads`}>
+                            <div className="w-full rounded-t bg-ink/15" style={{ height: `${(d.convos / max) * 100}%`, minHeight: d.convos ? 4 : 0 }} />
+                            {d.leads > 0 && <div className="absolute bottom-0 h-1.5 w-full rounded-t" style={{ background: "#e3342b" }} />}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-2 flex justify-between text-[10px] text-smoke"><span>{series[0]?.day.slice(5)}</span><span>today</span></div>
+                      <div className="mt-3 flex gap-4 text-xs text-smoke">
+                        <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm bg-ink/15" />Conversations</span>
+                        <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "#e3342b" }} />Days with leads</span>
+                      </div>
+                    </div>
+                  );
+                })()}
                 <div className="rounded-3xl border-2 border-ink p-6">
                   <h2 className="text-lg font-bold">Your chatbot</h2>
                   <p className="mt-0.5 text-sm text-smoke">Tell your mascot about your business. It uses this to answer your visitors and guide them to act.</p>
@@ -222,6 +294,15 @@ export default function Account() {
                       <input className={field} value={bot.industry} onChange={(e) => setB("industry", e.target.value)} placeholder="Electrician / HVAC / Dental…" /></label>
                     <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">What you do</span>
                       <textarea className={field} rows={2} value={bot.about} onChange={(e) => setB("about", e.target.value)} placeholder="Residential & commercial electrical service across the metro area, 24/7 emergencies." /></label>
+                    <div className="block text-sm sm:col-span-2 rounded-2xl bg-ink/[0.03] p-4">
+                      <span className="mb-1 block font-semibold">⚡ Auto-fill from your website</span>
+                      <span className="mb-2 block text-xs text-smoke">Paste your site URL and we&apos;ll read it to draft your facts — then edit below.</span>
+                      <div className="flex gap-2">
+                        <input className={field} value={site} onChange={(e) => setSite(e.target.value)} placeholder="yourbusiness.com" />
+                        <button type="button" onClick={autofill} disabled={autoBusy || !site.trim()} className="shrink-0 rounded-xl bg-ink px-4 text-sm font-semibold text-paper transition hover:opacity-90 disabled:opacity-50">{autoBusy ? "Reading…" : "Auto-fill"}</button>
+                      </div>
+                      {autoMsg && <span className="mt-2 block text-xs font-medium text-smoke">{autoMsg}</span>}
+                    </div>
                     <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">Key facts the bot should know</span>
                       <textarea className={field} rows={4} value={bot.facts} onChange={(e) => setB("facts", e.target.value)} placeholder={"Hours: Mon–Fri 7–6\nService area: ...\nServices & typical pricing: ...\nCommon questions: ..."} />
                       <span className="mt-1 block text-xs text-smoke">Hours, service area, services, pricing, FAQs — anything you want it to answer accurately.</span></label>
@@ -280,6 +361,16 @@ export default function Account() {
                     <code className="flex-1 overflow-auto rounded-xl bg-ink px-4 py-3 text-xs text-paper">{snippet}</code>
                     <button onClick={copy} className="shrink-0 rounded-xl border-2 border-ink px-4 text-sm font-semibold transition hover:bg-ink hover:text-paper">{copied ? "Copied ✓" : "Copy"}</button>
                   </div>
+                  <div className="mt-4 border-t border-ink/10 pt-4">
+                    <span className="block text-sm font-semibold">Already added it? Check that it&apos;s live.</span>
+                    <div className="mt-2 flex gap-2">
+                      <input className={field} value={verifyUrl} onChange={(e) => setVerifyUrl(e.target.value)} placeholder="https://yourbusiness.com (page with the code)" />
+                      <button onClick={verifyInstall} disabled={verifyBusy} className="shrink-0 rounded-xl border-2 border-ink px-4 text-sm font-semibold transition hover:bg-ink hover:text-paper disabled:opacity-50">{verifyBusy ? "Checking…" : "Check"}</button>
+                    </div>
+                    {verifyMsg && (
+                      <p className={"mt-2 rounded-xl px-3 py-2 text-sm " + (verifyMsg.ok ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800")}>{verifyMsg.text}</p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="rounded-3xl border-2 border-ink p-6">
@@ -298,6 +389,22 @@ export default function Account() {
                             <span className="ml-auto text-xs text-smoke">{new Date(l.at).toLocaleString()}</span>
                           </div>
                           <p className="mt-1 text-sm text-smoke">&ldquo;{l.message}&rdquo;</p>
+                          {l.transcript && l.transcript.length > 0 && (
+                            <div className="mt-1.5">
+                              <button onClick={() => setOpenLead(openLead === l.id ? "" : l.id)} className="text-xs font-semibold text-ink underline">
+                                {openLead === l.id ? "Hide conversation" : `View conversation (${l.transcript.length})`}
+                              </button>
+                              {openLead === l.id && (
+                                <div className="mt-2 space-y-2 rounded-2xl bg-ink/[0.03] p-3">
+                                  {l.transcript.map((m, i) => (
+                                    <div key={i} className={"flex " + (m.role === "user" ? "justify-end" : "justify-start")}>
+                                      <span className={"max-w-[80%] rounded-2xl px-3 py-1.5 text-xs " + (m.role === "user" ? "bg-ink text-paper" : "bg-white border border-ink/10 text-ink")}>{m.content}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>
