@@ -17,7 +17,7 @@
 
   api("/api/chat", { action: "config", botId: botId })
     .then(function (r) { return r.json(); })
-    .then(function (d) { if (d && d.config) for (var k in d.config) if (d.config[k] != null) cfg[k] = d.config[k]; build(); })
+    .then(function (d) { if (d && d.disabled) return; if (d && d.config) for (var k in d.config) if (d.config[k] != null) cfg[k] = d.config[k]; build(); })
     .catch(function () { build(); });
 
   function el(tag, attrs, html) {
