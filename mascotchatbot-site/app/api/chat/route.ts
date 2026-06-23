@@ -64,8 +64,8 @@ export async function POST(req: Request) {
     // Analytics + lead capture.
     if (bot) {
       await kvIncr("stat:" + bot.id + ":msgs");
-      if (trimmed.filter((m) => m.role === "user").length <= 1) await kvIncr("stat:" + bot.id + ":convos");
-      const lastUser = [...trimmed].reverse().find((m) => m.role === "user");
+      if (trimmed.filter((m: { role: string; content: string }) => m.role === "user").length <= 1) await kvIncr("stat:" + bot.id + ":convos");
+      const lastUser = [...trimmed].reverse().find((m: { role: string; content: string }) => m.role === "user");
       if (lastUser && lastUser.content) {
         const c = extractContact(lastUser.content);
         if (c.email || c.phone) {
