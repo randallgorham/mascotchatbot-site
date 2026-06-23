@@ -291,15 +291,17 @@ export default async function Home() {
 
           {/* Mr Amp — live demo */}
           <OpenMascot className="group mb-10 flex w-full items-center gap-6 rounded-3xl border-2 border-ink bg-ink p-6 text-left text-paper transition hover:opacity-90 md:p-8">
-            <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-[#e3342b]">
-              <svg width="58" height="58" viewBox="0 0 200 200" aria-hidden="true">
-                <line x1="100" y1="22" x2="100" y2="6" stroke="#fff" strokeWidth="8" strokeLinecap="round" />
-                <circle cx="100" cy="5" r="8" fill="#fff" />
-                <rect x="20" y="22" width="160" height="126" rx="36" fill="#fff" />
-                <path d="M50 134 L50 180 L94 140 Z" fill="#fff" />
-                <circle cx="74" cy="76" r="13" fill="#e3342b" />
-                <circle cx="128" cy="76" r="13" fill="#e3342b" />
-                <path d="M70 104 q31 26 62 0" stroke="#e3342b" strokeWidth="11" fill="none" strokeLinecap="round" />
+            <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-paper">
+              <svg width="74" height="56" viewBox="100 52 182 138" aria-hidden="true">
+                <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+                <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+                <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+                <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
+                <rect x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+                <rect x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+                <path d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
+                <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
+                <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
               </svg>
             </span>
             <span className="flex-1">
