@@ -2,6 +2,13 @@ import { getUser, saveUser, hashPassword, makeSessionToken, sessionCookie, clear
 import { kvReady, kvGet } from "@/lib/vault";
 import { getOrCreateBot, saveBot, BotConfig } from "@/lib/botcfg";
 import { listLeads } from "@/lib/leads";
+import { recordReferral, summaryFor } from "@/lib/referrals";
+
+function readCookie(req: Request, name: string): string {
+  const raw = req.headers.get("cookie") || "";
+  const m = raw.match(new RegExp("(?:^|;\\s*)" + name + "=([^;]+)"));
+  return m ? decodeURIComponent(m[1]) : "";
+}
 
 export const runtime = "edge";
 
@@ -67,6 +74,14 @@ export async function POST(req: Request) {
     return json({ ok: true, stats: { messages: Number(msgs || 0), convos: Number(convos || 0), leads: leads.length }, series });
   }
 
+  if (action === "referrals") {
+    const em = await getSessionEmail(req);
+    if (!em) return json({ ok: false, error: "Please sign in." }, 401);
+    if (!kvReady()) return json({ ok: false, error: "Database not connected." }, 400);
+    const sum = await summaryFor(em);
+    return json({ ok: true, ...sum });
+  }
+
   if (action === "saveBot") {
     const em = await getSessionEmail(req);
     if (!em) return json({ ok: false, error: "Please sign in." }, 401);
@@ -107,6 +122,8 @@ export async function POST(req: Request) {
     const { salt, hash } = await hashPassword(password);
     const name = String(body.name || "").trim() || email.split("@")[0];
     await saveUser({ email, name, salt, hash, createdAt: new Date().toISOString() });
+    const ref = readCookie(req, "mcb_ref");
+    if (ref) { try { await recordReferral(email, ref); } catch { /* best effort */ } }
     return json({ ok: true, user: { email, name } }, 200, sessionCookie(await makeSessionToken(email)));
   }
 
