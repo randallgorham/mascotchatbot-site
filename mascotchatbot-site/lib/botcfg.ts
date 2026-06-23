@@ -78,6 +78,84 @@ export async function getOrCreateBot(email: string, name?: string): Promise<BotC
   };
   await kvSet("botowner:" + lower, id);
   await saveBot(cfg);
+  await registerBot(lower, id);
+  return cfg;
+}
+
+// ---- Agency multi-client support -------------------------------------------
+// An account (agency) can own many client bots. We track them in a list keyed
+// by the owner's email; the "primary" bot (botowner:<email>) is always included.
+
+async function botIds(email: string): Promise<string[]> {
+  const v = await kvGet("botlist:" + email.toLowerCase());
+  if (!v) return [];
+  try {
+    const a = JSON.parse(v);
+    return Array.isArray(a) ? (a as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function registerBot(email: string, id: string): Promise<void> {
+  const lower = email.toLowerCase();
+  const ids = await botIds(lower);
+  if (!ids.includes(id)) {
+    ids.push(id);
+    await kvSet("botlist:" + lower, JSON.stringify(ids));
+  }
+}
+
+// Does this account own this bot? (Either it's the bot's owner, or it's listed.)
+export async function ownsBot(email: string, id: string): Promise<boolean> {
+  const lower = email.toLowerCase();
+  const b = await getBot(id);
+  if (b && b.owner === lower) return true;
+  const ids = await botIds(lower);
+  return ids.includes(id);
+}
+
+// All bots this account manages (primary first), de-duplicated.
+export async function listBotsFor(email: string): Promise<BotConfig[]> {
+  const lower = email.toLowerCase();
+  const primary = await getOrCreateBot(lower);
+  const ids = await botIds(lower);
+  const order: string[] = [primary.id];
+  for (let i = 0; i < ids.length; i++) if (!order.includes(ids[i])) order.push(ids[i]);
+  const out: BotConfig[] = [];
+  for (let i = 0; i < order.length; i++) {
+    const b = await getBot(order[i]);
+    if (b) out.push(b);
+  }
+  return out;
+}
+
+// Create a new client bot under this account.
+export async function createBotFor(email: string, business: string, industry?: string): Promise<BotConfig> {
+  const lower = email.toLowerCase();
+  const id = rid();
+  const cfg: BotConfig = {
+    id,
+    owner: lower,
+    business: (business || "New client").slice(0, 120),
+    industry: (industry || "").slice(0, 80),
+    about: "",
+    facts: "",
+    notes: "",
+    cta: "book an appointment",
+    ctaUrl: "",
+    greet: true,
+    wave: true,
+    wink: true,
+    voice: "ash",
+    accent: "#e3342b",
+    image: "",
+    plan: "active",
+    badge: true,
+    updatedAt: new Date().toISOString(),
+  };
+  await saveBot(cfg);
+  await registerBot(lower, id);
   return cfg;
 }
 
