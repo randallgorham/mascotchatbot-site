@@ -9,7 +9,7 @@ function json(data: unknown, status = 200) {
   });
 }
 
-type Item = { name?: string; monthly?: number; oneTime?: number };
+type Item = { name?: string; monthly?: number; oneTime?: number; billing?: string; kind?: string };
 
 export async function POST(req: Request) {
   try {
@@ -21,8 +21,15 @@ export async function POST(req: Request) {
     const key = await getSecret("STRIPE_SECRET_KEY");
     if (!key) return json({ ok: false, stripe: false }); // caller falls back to invoice flow
 
-    let monthly = 0;
-    for (let i = 0; i < items.length; i++) monthly += Number(items[i].oneTime ? 0 : 0) + (Number(items[i].monthly) || 0);
+    // Term-aware totals. The plan item carries its billing term; the recurring
+    // portion is prepaid for that term (1 / 12 / 36 months).
+    const plan = items.find((it) => (Number(it.monthly) || 0) > 0);
+    const term = (plan && plan.billing) || "monthly";
+    const months = term === "annual" ? 12 : term === "prepay3" ? 36 : 1;
+    let monthly = 0, oneTime = 0;
+    for (let i = 0; i < items.length; i++) { monthly += Number(items[i].monthly) || 0; oneTime += Number(items[i].oneTime) || 0; }
+    const prepaid = monthly * months;        // recurring portion, paid up front
+    const totalDue = prepaid + oneTime;      // full amount on the payment link
 
     const params = new URLSearchParams();
     params.set("mode", "payment");
@@ -30,9 +37,12 @@ export async function POST(req: Request) {
     params.set("cancel_url", origin + "/checkout?canceled=1");
     if (email) params.set("customer_email", email);
     params.set("metadata[monthly_total]", String(monthly));
+    params.set("metadata[term]", term);
+    params.set("metadata[total_due]", String(totalDue));
     params.set("metadata[email]", email);
 
     let li = 0;
+    // One-time fees (setup + add-on services), itemised.
     for (let i = 0; i < items.length; i++) {
       const amt = Math.round((Number(items[i].oneTime) || 0) * 100);
       if (amt > 0) {
@@ -43,12 +53,18 @@ export async function POST(req: Request) {
         li++;
       }
     }
-    // If nothing one-time (e.g. 3-year prepay, setup waived), charge the first month today.
-    if (li === 0 && monthly > 0) {
-      params.set("line_items[0][price_data][currency]", "usd");
-      params.set("line_items[0][price_data][product_data][name]", "First month");
-      params.set("line_items[0][price_data][unit_amount]", String(Math.round(monthly * 100)));
-      params.set("line_items[0][quantity]", "1");
+    // Recurring portion, prepaid for the chosen term.
+    if (prepaid > 0) {
+      const planName = (plan && plan.name) || "Plan";
+      const label = term === "prepay3"
+        ? `${planName} — 3 years prepaid (${months} × $${monthly}/mo)`
+        : term === "annual"
+        ? `${planName} — 1 year prepaid (12 × $${monthly}/mo)`
+        : `${planName} — first month`;
+      params.set(`line_items[${li}][price_data][currency]`, "usd");
+      params.set(`line_items[${li}][price_data][product_data][name]`, label);
+      params.set(`line_items[${li}][price_data][unit_amount]`, String(Math.round(prepaid * 100)));
+      params.set(`line_items[${li}][quantity]`, "1");
       li++;
     }
     if (li === 0) return json({ ok: false, stripe: true, error: "Nothing to charge." });
