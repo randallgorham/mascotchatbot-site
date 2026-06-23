@@ -44,7 +44,20 @@ export default function Checkout() {
     <main className="min-h-screen bg-paper text-ink" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
       <header className="border-b-2 border-ink">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-          <a href="/" className="text-xl font-bold tracking-tight">Mascot<span className="text-smoke">Chatbot</span></a>
+          <a href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+            <svg width="34" height="26" viewBox="100 52 182 138" aria-hidden="true">
+              <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+              <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+              <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+              <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
+              <rect x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+              <rect x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+              <path d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
+              <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
+              <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
+            </svg>
+            <span>Mascot<span className="text-smoke">Chatbot</span></span>
+          </a>
           <a href="/" className="text-sm font-medium text-smoke hover:text-ink">← Back to site</a>
         </div>
       </header>
@@ -107,10 +120,39 @@ export default function Checkout() {
                     </li>
                   ))}
                 </ul>
-                <div className="mt-4 space-y-1">
-                  <div className="flex justify-between"><span className="text-smoke">Monthly</span><span className="font-bold">{money(monthlyTotal)}/mo</span></div>
-                  <div className="flex justify-between"><span className="text-smoke">Due today (one-time)</span><span className="font-bold">{money(oneTimeTotal)}</span></div>
-                </div>
+                {(() => {
+                  const plan = items.find((i) => i.kind === "plan");
+                  const term = (plan && plan.billing) || "monthly";
+                  const months = term === "annual" ? 12 : term === "prepay3" ? 36 : 1;
+                  const termLabel = term === "annual" ? "Annual (billed yearly)" : term === "prepay3" ? "3-year prepay" : "Monthly";
+                  const prepaid = monthlyTotal * months;
+                  const total = prepaid + oneTimeTotal;
+                  return (
+                    <>
+                      <div className="mt-4 space-y-1.5 border-t border-ink/10 pt-4 text-sm">
+                        <div className="flex justify-between"><span className="text-smoke">Plan</span><span className="font-semibold">{money(monthlyTotal)}/mo</span></div>
+                        <div className="flex justify-between"><span className="text-smoke">Billing term</span><span className="font-semibold">{termLabel}</span></div>
+                        {months > 1 ? (
+                          <div className="flex justify-between"><span className="text-smoke">{months} months prepaid ({months} &times; {money(monthlyTotal)})</span><span className="font-semibold">{money(prepaid)}</span></div>
+                        ) : (
+                          <div className="flex justify-between"><span className="text-smoke">First month</span><span className="font-semibold">{money(monthlyTotal)}</span></div>
+                        )}
+                        <div className="flex justify-between"><span className="text-smoke">Setup &amp; one-time</span><span className="font-semibold">{oneTimeTotal > 0 ? money(oneTimeTotal) : "Waived"}</span></div>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between border-t-2 border-ink pt-3">
+                        <span className="text-base font-bold">Total to get started</span>
+                        <span className="text-xl font-bold">{money(total)}</span>
+                      </div>
+                      <p className="mt-1.5 text-xs text-smoke">
+                        {term === "prepay3"
+                          ? "Paid once — covers 3 full years, then renews."
+                          : term === "annual"
+                          ? "Billed yearly — renews at " + money(monthlyTotal * 12) + "/yr."
+                          : "Then " + money(monthlyTotal) + "/mo — cancel anytime."}
+                      </p>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
