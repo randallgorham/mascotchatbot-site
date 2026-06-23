@@ -246,6 +246,16 @@ export default function Admin() {
               <button onClick={signOut} className="text-sm font-medium text-neutral-500 underline hover:text-neutral-900">Sign out</button>
             </div>
 
+            {status?.manage && (
+              <a href="/admin/command" className="mb-6 flex flex-col items-start justify-between gap-3 rounded-2xl bg-neutral-900 p-5 text-white transition hover:opacity-90 sm:flex-row sm:items-center">
+                <div>
+                  <span className="font-bold">Command center 📊</span>
+                  <span className="mt-0.5 block text-sm text-white/70">Full business overview — revenue, trends, funnel, affiliate payouts, and per-customer controls.</span>
+                </div>
+                <span className="shrink-0 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-neutral-900">Open command center →</span>
+              </a>
+            )}
+
             {!status?.kv && (
               <div className="mb-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
                 <b>Database not connected.</b> Create a free Vercel KV store so saved keys, orders, and customers persist.
