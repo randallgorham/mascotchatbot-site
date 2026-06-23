@@ -141,8 +141,32 @@ export default function IndustryLanding({ slug }: { slug: string }) {
   const ind = INDUSTRIES[slug];
   if (!ind) return null;
 
+  const ld = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Service",
+        name: `AI Mascot Chatbot for ${ind.label}`,
+        serviceType: "AI chatbot and lead capture",
+        description: ind.sub,
+        provider: { "@type": "Organization", name: "MascotChatbot", url: "https://mascotchatbot.com", logo: "https://mascotchatbot.com/icon.svg" },
+        areaServed: "United States",
+        audience: { "@type": "Audience", audienceType: ind.role },
+        url: `https://mascotchatbot.com/industry/${ind.slug}`,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://mascotchatbot.com/" },
+          { "@type": "ListItem", position: 2, name: ind.label, item: `https://mascotchatbot.com/industry/${ind.slug}` },
+        ],
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-paper text-ink">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       <header className="sticky top-0 z-50 border-b border-ink/10 bg-paper/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
           <Logo />
