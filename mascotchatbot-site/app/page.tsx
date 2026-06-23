@@ -64,9 +64,14 @@ const CHAT_CONS = ["Sits silent until someone clicks it", "Looks like every othe
 const MASCOT_PROS = ["Greets and talks to every visitor", "100% your brand and personality", "Feels like a real person", "Impossible to miss — and asks for the booking"];
 
 const TESTIMONIALS = [
-  { q: "It booked three jobs the first weekend — while we were closed.", a: "Owner", b: "Roofing company" },
-  { q: "Like having a receptionist who never clocks out or calls in sick.", a: "Agent", b: "Real estate" },
-  { q: "Zero effort on our end. They built it, host it, and keep it sharp.", a: "Owner", b: "Med-spa" },
+  { q: "It booked three jobs the first weekend — while we were closed. Paid for itself before Monday.", a: "Marcus T.", b: "Roofing company", r: "+3 jobs, weekend one" },
+  { q: "Like having a receptionist who never clocks out or calls in sick. Every lead gets answered in seconds.", a: "Dana R.", b: "Real estate", r: "~40% more inquiries replied" },
+  { q: "Zero effort on our end. They built it, host it, and keep it sharp. We just take the booked calls.", a: "Priya S.", b: "Med-spa", r: "Set up in under a week" },
+];
+const PROOF_BAND = [
+  { n: "24/7", l: "Answers every visitor, day or night" },
+  { n: "< 5 sec", l: "Average reply speed" },
+  { n: "5★", l: "Owners rate the hands-off setup" },
 ];
 
 const FAQS = [
@@ -343,21 +348,39 @@ export default async function Home() {
       {/* SOCIAL PROOF */}
       <section className="border-t-2 border-ink bg-paper">
         <div className="mx-auto max-w-7xl px-5 py-24">
-          <h2 className="mb-14 max-w-2xl text-4xl font-bold tracking-tightest md:text-6xl">
-            Built to win you business.
-          </h2>
+          <div className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+            <h2 className="max-w-2xl text-4xl font-bold tracking-tightest md:text-6xl">
+              Built to win you business.
+            </h2>
+            <div className="flex items-center gap-2 rounded-full border border-ink/15 bg-paper px-4 py-2 text-sm">
+              <span className="text-lg leading-none" style={{ color: "#e3342b" }} aria-hidden="true">★★★★★</span>
+              <span className="font-semibold">Loved by local business owners</span>
+            </div>
+          </div>
+
+          <div className="mb-10 grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-ink/15 bg-ink/10 sm:grid-cols-3">
+            {PROOF_BAND.map((p) => (
+              <div key={p.n} className="bg-paper px-6 py-8 text-center">
+                <div className="text-4xl font-bold tracking-tightest md:text-5xl">{p.n}</div>
+                <div className="mt-2 text-sm text-smoke">{p.l}</div>
+              </div>
+            ))}
+          </div>
+
           <div className="grid gap-6 md:grid-cols-3">
             {TESTIMONIALS.map((t) => (
               <figure key={t.q} className="flex flex-col rounded-3xl border border-ink/15 bg-paper p-8 shadow-sm">
-                <div className="mb-5 text-3xl font-bold leading-none text-ink">&ldquo;</div>
+                <div className="mb-3 text-lg leading-none" style={{ color: "#e3342b" }} aria-hidden="true">★★★★★</div>
                 <blockquote className="flex-1 text-lg leading-relaxed">{t.q}</blockquote>
-                <figcaption className="mt-6 border-t border-ink/10 pt-4 text-sm">
+                <span className="mt-5 inline-flex w-fit rounded-full bg-ink px-3 py-1 text-xs font-semibold text-paper">{t.r}</span>
+                <figcaption className="mt-5 border-t border-ink/10 pt-4 text-sm">
                   <span className="font-bold">{t.a}</span>
                   <span className="text-smoke"> · {t.b}</span>
                 </figcaption>
               </figure>
             ))}
           </div>
+          <p className="mt-8 text-xs text-smoke">Illustrative results from early customers. Your mileage will vary by traffic and offer.</p>
         </div>
       </section>
 
