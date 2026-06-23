@@ -124,6 +124,18 @@ export async function GET(req: Request) {
 
   const pay = await payouts();
 
+  // A/B: pricing billing-default experiment counters.
+  const [mv, mc, av, ac] = await Promise.all([
+    kvGet("stat:ab:billing:monthly:views"),
+    kvGet("stat:ab:billing:monthly:carts"),
+    kvGet("stat:ab:billing:annual:views"),
+    kvGet("stat:ab:billing:annual:carts"),
+  ]);
+  const ab = {
+    monthly: { views: Number(mv || 0), carts: Number(mc || 0) },
+    annual: { views: Number(av || 0), carts: Number(ac || 0) },
+  };
+
   const kpis = {
     customers: customers.length,
     active: planCount["active"] || 0,
@@ -149,7 +161,7 @@ export async function GET(req: Request) {
     paid: (planCount["active"] || 0),
   };
 
-  return json({ ok: true, kpis, series, funnel, customers, planCount, payouts: pay });
+  return json({ ok: true, kpis, series, funnel, customers, planCount, payouts: pay, ab });
 }
 
 export async function POST(req: Request) {
