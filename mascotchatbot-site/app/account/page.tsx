@@ -264,6 +264,13 @@ export default function Account() {
                     <a href="/#pricing" className="shrink-0 rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-paper transition hover:opacity-90">Upgrade now →</a>
                   </div>
                 )}
+                <a href="/account/clients" className="flex flex-col items-start justify-between gap-3 rounded-2xl border-2 border-ink bg-ink p-5 text-paper transition hover:opacity-90 sm:flex-row sm:items-center">
+                  <div>
+                    <span className="font-bold">Managing mascots for clients? 🏢</span>
+                    <span className="mt-0.5 block text-sm text-paper/70">Add unlimited client bots, white-label them under your brand, and grab each embed code from one console.</span>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-paper px-6 py-2.5 text-sm font-semibold text-ink">Open agency console →</span>
+                </a>
                 <div className="grid grid-cols-3 gap-3">
                   {([["Conversations", stats?.convos], ["Messages", stats?.messages], ["Leads", stats?.leads]] as [string, number | undefined][]).map(([label, val]) => (
                     <div key={label} className="rounded-2xl border-2 border-ink p-4 text-center">
