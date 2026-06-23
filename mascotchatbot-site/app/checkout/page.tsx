@@ -124,30 +124,41 @@ export default function Checkout() {
                   const plan = items.find((i) => i.kind === "plan");
                   const term = (plan && plan.billing) || "monthly";
                   const months = term === "annual" ? 12 : term === "prepay3" ? 36 : 1;
-                  const termLabel = term === "annual" ? "Annual (billed yearly)" : term === "prepay3" ? "3-year prepay" : "Monthly";
+                  const subLabel = term === "annual" ? "Billed yearly" : term === "prepay3" ? "Billed once for 3 years" : "Billed monthly";
                   const prepaid = monthlyTotal * months;
                   const total = prepaid + oneTimeTotal;
                   return (
                     <>
-                      <div className="mt-4 space-y-1.5 border-t border-ink/10 pt-4 text-sm">
-                        <div className="flex justify-between"><span className="text-smoke">Plan</span><span className="font-semibold">{money(monthlyTotal)}/mo</span></div>
-                        <div className="flex justify-between"><span className="text-smoke">Billing term</span><span className="font-semibold">{termLabel}</span></div>
-                        {months > 1 ? (
-                          <div className="flex justify-between"><span className="text-smoke">{months} months prepaid ({months} &times; {money(monthlyTotal)})</span><span className="font-semibold">{money(prepaid)}</span></div>
-                        ) : (
-                          <div className="flex justify-between"><span className="text-smoke">First month</span><span className="font-semibold">{money(monthlyTotal)}</span></div>
-                        )}
-                        <div className="flex justify-between"><span className="text-smoke">Setup &amp; one-time</span><span className="font-semibold">{oneTimeTotal > 0 ? money(oneTimeTotal) : "Waived"}</span></div>
+                      {/* Lead with the monthly rate; the total is the secondary line. */}
+                      <div className="mt-4 border-t border-ink/10 pt-4">
+                        <div className="flex items-end gap-1.5">
+                          <span className="text-4xl font-bold tracking-tightest">{money(monthlyTotal)}</span>
+                          <span className="mb-1.5 text-smoke">/mo</span>
+                        </div>
+                        <p className="mt-1 text-sm text-smoke">
+                          {subLabel}
+                          {term === "prepay3" ? " · setup waived" : oneTimeTotal > 0 ? " · " + money(oneTimeTotal) + " setup" : ""}
+                        </p>
                       </div>
-                      <div className="mt-3 flex items-center justify-between border-t-2 border-ink pt-3">
-                        <span className="text-base font-bold">Total to get started</span>
-                        <span className="text-xl font-bold">{money(total)}</span>
+                      <div className="mt-4 space-y-1.5 text-sm">
+                        {months > 1 ? (
+                          <div className="flex justify-between"><span className="text-smoke">{months} months prepaid ({months} &times; {money(monthlyTotal)})</span><span className="font-medium">{money(prepaid)}</span></div>
+                        ) : (
+                          <div className="flex justify-between"><span className="text-smoke">First month</span><span className="font-medium">{money(monthlyTotal)}</span></div>
+                        )}
+                        {oneTimeTotal > 0 && (
+                          <div className="flex justify-between"><span className="text-smoke">Setup &amp; one-time</span><span className="font-medium">{money(oneTimeTotal)}</span></div>
+                        )}
+                      </div>
+                      <div className="mt-3 flex items-center justify-between border-t border-ink/10 pt-3 text-sm">
+                        <span className="text-smoke">Total billed today</span>
+                        <span className="font-bold">{money(total)}</span>
                       </div>
                       <p className="mt-1.5 text-xs text-smoke">
                         {term === "prepay3"
-                          ? "Paid once — covers 3 full years, then renews."
+                          ? "One payment covers 3 full years, then renews at " + money(monthlyTotal) + "/mo."
                           : term === "annual"
-                          ? "Billed yearly — renews at " + money(monthlyTotal * 12) + "/yr."
+                          ? "Renews yearly at " + money(monthlyTotal * 12) + "/yr."
                           : "Then " + money(monthlyTotal) + "/mo — cancel anytime."}
                       </p>
                     </>
