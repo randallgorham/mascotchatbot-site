@@ -50,9 +50,18 @@ export async function POST(req: Request) {
     const botId = body && typeof body.botId === "string" ? body.botId : "";
     const bot = botId ? await getBot(botId) : null;
 
+    // A bot whose plan is "disabled" is taken fully offline: the widget hides
+    // itself and the bot refuses to answer (no analytics, no lead capture).
+    const disabled = !!(bot && bot.plan === "disabled");
+
     // Public config fetch for the embeddable widget.
     if (body && body.action === "config") {
+      if (disabled) return json({ ok: true, config: null, disabled: true });
       return json({ ok: true, config: bot ? publicConfig(bot) : null });
+    }
+
+    if (disabled) {
+      return json({ reply: "This assistant is currently unavailable.", disabled: true });
     }
 
     const messages = Array.isArray(body && body.messages) ? body.messages : [];
