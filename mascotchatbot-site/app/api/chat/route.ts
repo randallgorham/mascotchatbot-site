@@ -1,6 +1,6 @@
 import { getSecret, getSetting, kvIncr } from "@/lib/vault";
 import { getBot, publicConfig, botSystemPrompt } from "@/lib/botcfg";
-import { extractContact, saveLead, emailOwner } from "@/lib/leads";
+import { extractContact, saveLead, emailOwner, emailLead, getLead } from "@/lib/leads";
 
 export const runtime = "edge";
 
@@ -63,16 +63,26 @@ export async function POST(req: Request) {
 
     // Analytics + lead capture.
     if (bot) {
+      const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD for daily trend buckets
       await kvIncr("stat:" + bot.id + ":msgs");
-      if (trimmed.filter((m: { role: string; content: string }) => m.role === "user").length <= 1) await kvIncr("stat:" + bot.id + ":convos");
+      await kvIncr("stat:" + bot.id + ":msgs:" + day);
+      if (trimmed.filter((m: { role: string; content: string }) => m.role === "user").length <= 1) {
+        await kvIncr("stat:" + bot.id + ":convos");
+        await kvIncr("stat:" + bot.id + ":convos:" + day);
+      }
       const lastUser = [...trimmed].reverse().find((m: { role: string; content: string }) => m.role === "user");
       if (lastUser && lastUser.content) {
         const c = extractContact(lastUser.content);
         if (c.email || c.phone) {
           const id = (c.email || c.phone || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 40) || Date.now().toString(36);
-          const lead = { id, botId: bot.id, name: c.name, email: c.email, phone: c.phone, message: lastUser.content.slice(0, 500), at: new Date().toISOString() };
+          const already = await getLead(bot.id, id);
+          const lead = { id, botId: bot.id, name: c.name, email: c.email, phone: c.phone, message: lastUser.content.slice(0, 500), at: new Date().toISOString(), transcript: trimmed.slice(-12) };
           await saveLead(lead);
-          if (bot.owner) await emailOwner(bot.owner, bot.business, lead);
+          // Only fire notifications the first time we see this contact (avoid spamming on repeat messages).
+          if (!already) {
+            if (bot.owner) await emailOwner(bot.owner, bot.business, lead);
+            await emailLead(bot.business, "", lead);
+          }
         }
       }
     }
