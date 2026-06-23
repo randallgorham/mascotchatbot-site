@@ -54,7 +54,17 @@ export async function POST(req: Request) {
     const bot = await getOrCreateBot(em, u?.name);
     const [msgs, convos] = await Promise.all([kvGet("stat:" + bot.id + ":msgs"), kvGet("stat:" + bot.id + ":convos")]);
     const leads = await listLeads(bot.id, 1000);
-    return json({ ok: true, stats: { messages: Number(msgs || 0), convos: Number(convos || 0), leads: leads.length } });
+    // 14-day trend: conversations per day (from daily counters) + leads per day (bucketed from lead timestamps).
+    const days: string[] = [];
+    for (let i = 13; i >= 0; i--) days.push(new Date(Date.now() - i * 86400000).toISOString().slice(0, 10));
+    const leadsByDay: Record<string, number> = {};
+    for (let i = 0; i < leads.length; i++) {
+      const d = String(leads[i].at || "").slice(0, 10);
+      if (d) leadsByDay[d] = (leadsByDay[d] || 0) + 1;
+    }
+    const convoCounts = await Promise.all(days.map((d) => kvGet("stat:" + bot.id + ":convos:" + d)));
+    const series = days.map((d, i) => ({ day: d, convos: Number(convoCounts[i] || 0), leads: leadsByDay[d] || 0 }));
+    return json({ ok: true, stats: { messages: Number(msgs || 0), convos: Number(convos || 0), leads: leads.length }, series });
   }
 
   if (action === "saveBot") {
