@@ -4,6 +4,7 @@
 import { getSecret, kvSet } from "@/lib/vault";
 import { getUser, saveUser } from "@/lib/auth";
 import { getOrCreateBot } from "@/lib/botcfg";
+import { markReferralPaid } from "@/lib/referrals";
 
 export const runtime = "edge";
 
@@ -92,11 +93,14 @@ export async function POST(req: Request) {
       await getOrCreateBot(email);
       // Record the paid order for the admin.
       const orderId = String(s.id || Date.now().toString(36));
+      const amount = Number(s.amount_total || 0) / 100;
       await kvSet("order:" + orderId, JSON.stringify({
         id: orderId, email, status: "paid",
-        amount: Number(s.amount_total || 0) / 100,
+        amount,
         createdAt: new Date().toISOString(),
       }));
+      // Book affiliate commission if this buyer was referred.
+      try { await markReferralPaid(email, amount); } catch { /* best effort */ }
       await sendWelcome(email, origin);
     }
   }
