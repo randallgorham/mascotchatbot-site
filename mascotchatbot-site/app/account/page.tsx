@@ -7,7 +7,7 @@ type U = { email: string; name: string } | null;
 type Bot = {
   id: string; business: string; industry: string; about: string; facts: string; notes: string;
   cta: string; ctaUrl: string; greet: boolean; wave: boolean; wink: boolean;
-  voice: string; accent: string; image: string; badge: boolean; plan: string;
+  voice: string; accent: string; image: string; badge: boolean; plan: string; trialEnds?: string;
 };
 type LeadRow = { id: string; name?: string; email?: string; phone?: string; message: string; at: string; transcript?: { role: string; content: string }[] };
 type Day = { day: string; convos: number; leads: number };
@@ -148,6 +148,7 @@ export default function Account() {
   const field = "w-full rounded-xl border-2 border-ink/15 px-4 py-2.5 outline-none focus:border-ink text-sm";
   const needsSetup = !!bot && !bot.industry && !bot.about && !bot.facts && !wizardDone;
   const refLink = ref ? `${typeof window !== "undefined" ? window.location.origin : "https://www.mascotchatbot.com"}/?ref=${ref.code}` : "";
+  const trialDays = bot && bot.plan === "trial" && bot.trialEnds ? Math.max(0, Math.ceil((new Date(bot.trialEnds).getTime() - Date.now()) / 86400000)) : null;
 
   return (
     <main className="flex min-h-screen flex-col bg-paper text-ink" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
@@ -254,6 +255,15 @@ export default function Account() {
               </div>
             ) : (
               <div className="mt-8 space-y-6">
+                {trialDays !== null && (
+                  <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border-2 border-ink bg-paper p-5 sm:flex-row sm:items-center">
+                    <div>
+                      <span className="font-bold">{trialDays > 0 ? `${trialDays} day${trialDays === 1 ? "" : "s"} left in your free trial` : "Your free trial has ended"}</span>
+                      <span className="mt-0.5 block text-sm text-smoke">{trialDays > 0 ? "Your mascot is live. Upgrade anytime to keep it running and unlock everything." : "Upgrade to keep your mascot live and capturing leads."}</span>
+                    </div>
+                    <a href="/#pricing" className="shrink-0 rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-paper transition hover:opacity-90">Upgrade now →</a>
+                  </div>
+                )}
                 <div className="grid grid-cols-3 gap-3">
                   {([["Conversations", stats?.convos], ["Messages", stats?.messages], ["Leads", stats?.leads]] as [string, number | undefined][]).map(([label, val]) => (
                     <div key={label} className="rounded-2xl border-2 border-ink p-4 text-center">
