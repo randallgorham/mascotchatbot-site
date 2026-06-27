@@ -1,5 +1,6 @@
 "use client";
 
+import SiteHeader from "@/components/SiteHeader";
 import { useEffect, useState } from "react";
 import { VOICES } from "@/lib/bots";
 
@@ -152,12 +153,7 @@ export default function Account() {
 
   return (
     <main className="flex min-h-screen flex-col bg-paper text-ink" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
-      <header className="border-b-2 border-ink">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-          <a href="/" className="text-xl font-bold tracking-tight">Mascot<span className="text-smoke">Chatbot</span></a>
-          <a href="/" className="text-sm font-medium text-smoke hover:text-ink">← Back to site</a>
-        </div>
-      </header>
+      <SiteHeader />
 
       <div className="mx-auto w-full max-w-3xl flex-1 px-5 py-12">
         {loading ? (
