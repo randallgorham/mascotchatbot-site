@@ -1,3 +1,4 @@
+import SiteHeader from "@/components/SiteHeader";
 import type { Metadata } from "next";
 import NavActions from "@/components/NavActions";
 
@@ -26,19 +27,7 @@ export default function Affiliate() {
   return (
     <main className="min-h-screen bg-paper text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <header className="sticky top-0 z-50 border-b border-ink/10 bg-paper/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
-          <a href="/" className="text-2xl font-bold tracking-tightest">Mascot<span className="text-smoke">Chatbot</span></a>
-          <div className="flex items-center gap-3 md:gap-6">
-            <nav className="hidden gap-7 text-sm font-medium text-smoke lg:flex">
-              <a href="/#how" className="hover:text-ink">How it works</a>
-              <a href="/#pricing" className="hover:text-ink">Pricing</a>
-              <a href="/blog" className="hover:text-ink">Blog</a>
-            </nav>
-            <NavActions />
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="relative overflow-hidden border-b-2 border-ink">
         <div className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[720px] -translate-x-1/2 rounded-full opacity-70 blur-3xl" style={{ background: "radial-gradient(closest-side, rgba(43,196,230,0.18), rgba(43,196,230,0) 70%)" }} />
