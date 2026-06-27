@@ -198,12 +198,9 @@ export default function Admin() {
     <main className="min-h-screen bg-neutral-50 text-neutral-900" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
       <SiteHeader />
       <div className="mx-auto max-w-4xl px-5 py-12">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-900 font-bold text-white">M</div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">MascotChatbot — Owner Admin</h1>
-            <p className="text-sm text-neutral-500">Integrations, orders & customers</p>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold tracking-tight">Owner Admin</h1>
+          <p className="text-sm text-neutral-500">Integrations, orders & customers</p>
         </div>
 
         {!status && <p className="text-neutral-500">Loading…</p>}
