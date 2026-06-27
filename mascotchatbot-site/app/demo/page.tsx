@@ -1,5 +1,6 @@
 "use client";
 
+import SiteHeader from "@/components/SiteHeader";
 import { useEffect, useState } from "react";
 
 type Cfg = { business?: string; image?: string; accent?: string } | null;
@@ -73,12 +74,7 @@ export default function Demo() {
   if (bot) {
     return (
       <main className="flex min-h-screen flex-col bg-paper text-ink" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
-        <header className="border-b border-ink/10">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-            <a href="/" className="text-lg font-bold tracking-tight">Mascot<span className="text-smoke">Chatbot</span></a>
-            <a href="/#book" className="rounded-full bg-ink px-5 py-2 text-sm font-semibold text-paper">Book a call →</a>
-          </div>
-        </header>
+        <SiteHeader />
         <section className="mx-auto grid w-full max-w-5xl flex-1 items-center gap-10 px-5 py-16 md:grid-cols-2">
           <div>
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-ink/15 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest">
@@ -109,12 +105,7 @@ export default function Demo() {
 
   return (
     <main className="flex min-h-screen flex-col bg-paper text-ink" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
-      <header className="border-b-2 border-ink">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
-          <a href="/" className="text-lg font-bold tracking-tight">Mascot<span className="text-smoke">Chatbot</span></a>
-          <a href="/account" className="text-sm font-medium text-smoke hover:text-ink">Account →</a>
-        </div>
-      </header>
+      <SiteHeader />
       <div className="mx-auto w-full max-w-2xl flex-1 px-5 py-12">
         <h1 className="text-3xl font-bold tracking-tightest">Prospect demo generator</h1>
         <p className="mt-2 text-smoke">Make a live, personalized mascot demo for any local business in seconds — then send them the link. Perfect for outreach: &ldquo;I built your shop a mascot — try it.&rdquo;</p>
