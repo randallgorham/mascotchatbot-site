@@ -1,5 +1,6 @@
 "use client";
 
+import SiteHeader from "@/components/SiteHeader";
 import { useState } from "react";
 import { useCart } from "@/components/CartProvider";
 
@@ -42,25 +43,7 @@ export default function Checkout() {
 
   return (
     <main className="min-h-screen bg-paper text-ink" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
-      <header className="border-b-2 border-ink">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-          <a href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
-            <svg width="34" height="26" viewBox="100 52 182 138" aria-hidden="true">
-              <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
-              <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
-              <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-              <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
-              <rect x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
-              <rect x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
-              <path d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
-              <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
-              <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
-            </svg>
-            <span>Mascot<span className="text-smoke">Chatbot</span></span>
-          </a>
-          <a href="/" className="text-sm font-medium text-smoke hover:text-ink">← Back to site</a>
-        </div>
-      </header>
+      <SiteHeader />
 
       <div className="mx-auto max-w-5xl px-5 py-12">
         <h1 className="mb-8 text-4xl font-bold tracking-tightest">Checkout</h1>
