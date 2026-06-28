@@ -3,31 +3,39 @@
 import { useEffect, useRef } from "react";
 
 /** The MascotChatbot brand bot — the original logo robot head/face/eyes/smile/headset
- *  mic boom reproduced EXACTLY (from public/icon.svg), with a body built beneath it in
- *  the logo's own coordinate space. idPrefix keeps the hero and floating copies apart. */
+ *  mic boom reproduced EXACTLY (from public/icon.svg), with a body built beneath it.
+ *  Head, body, and each arm are separate groups so they animate independently.
+ *  idPrefix keeps the hero and floating copies apart. */
 function RobotSVG({ idPrefix }: { idPrefix: string }) {
   const p = idPrefix;
   return (
     <svg className="bot-svg" viewBox="94 40 192 264" aria-hidden="true">
-      {/* ===== body — built onto the original logo, separated slightly from the head ===== */}
-      <rect x="124" y="200" width="15" height="48" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-      <g id={`${p}-arm`} className="bot-arm">
+      {/* ===== arms — both swing from the shoulders ===== */}
+      <g className="bot-arm-l">
+        <rect x="124" y="200" width="15" height="48" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      </g>
+      <g className="bot-arm-r">
         <rect x="241" y="200" width="15" height="48" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
       </g>
-      <rect x="146" y="190" width="88" height="82" rx="28" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-      <circle cx="190" cy="226" r="10" fill="#2bc4e6" className="bot-core" />
-      <rect x="173" y="250" width="34" height="7" rx="3.5" fill="#cbd3dc" />
-      {/* ===== head — EXACT original logo (public/icon.svg / Logo component) ===== */}
-      <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
-      <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
-      <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-      <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
-      <rect id={`${p}-eye-l`} className="bot-eye" x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
-      <rect id={`${p}-eye-r`} className="bot-eye" x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
-      <path id={`${p}-mouth`} className="bot-mouth" d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
-      {/* headset mic boom — EXACT original logo */}
-      <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
-      <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
+      {/* ===== body (its own group, stays put while the head moves) ===== */}
+      <g className="bot-torso">
+        <rect x="146" y="190" width="88" height="82" rx="28" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+        <circle cx="190" cy="226" r="10" fill="#2bc4e6" className="bot-core" />
+        <rect x="173" y="250" width="34" height="7" rx="3.5" fill="#cbd3dc" />
+      </g>
+      {/* ===== head — EXACT original logo; tilts on its own at the neck ===== */}
+      <g className="bot-head">
+        <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+        <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+        <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+        <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
+        <rect id={`${p}-eye-l`} className="bot-eye" x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+        <rect id={`${p}-eye-r`} className="bot-eye" x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+        <path id={`${p}-mouth`} className="bot-mouth" d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
+        {/* headset mic boom — EXACT original logo */}
+        <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
+        <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
+      </g>
     </svg>
   );
 }
@@ -277,18 +285,20 @@ const CSS = `
 .bot-eye{ transform-box:fill-box; transform-origin:center; animation:botBlink 5.2s infinite; }
 @keyframes botBlink{0%,3.4%,100%{transform:scaleY(1)}1.4%,2.2%{transform:scaleY(.08)}}
 .bot-mouth{ transform-box:fill-box; transform-origin:center; transition:transform .05s linear; }
-.bot-body.bot-talking .bot-svg{ animation:botHeadTalk .9s ease-in-out infinite; }
-.bot-body.bot-nodding .bot-svg{ animation:botNod .6s cubic-bezier(.3,1.4,.5,1); }
+.bot-head{ transform-box:fill-box; transform-origin:50% 97%; animation:botHeadIdle 6s ease-in-out infinite; }
+.bot-body.bot-talking .bot-head{ animation:botHeadTalk .9s ease-in-out infinite; }
+@keyframes botHeadIdle{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+.bot-body.bot-nodding .bot-head{ animation:botNod .6s cubic-bezier(.3,1.4,.5,1); }
 @keyframes botHeadTalk{0%{transform:rotate(0)}25%{transform:rotate(1.6deg) translateY(-2px)}60%{transform:rotate(-1.4deg) translateY(1px)}100%{transform:rotate(0)}}
 @keyframes botNod{0%,100%{transform:rotate(0)}45%{transform:rotate(2.4deg) translateY(3px)}}
 .bot-core{ animation:botCore 2.4s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
 @keyframes botCore{0%,100%{opacity:.6;transform:scale(.9)}50%{opacity:1;transform:scale(1.12)}}
 .bot-bulb{ animation:botCore 2s ease-in-out infinite; }
-.bot-ant{ transform-box:fill-box; transform-origin:50% 100%; animation:botAnt 5s ease-in-out infinite; }
-@keyframes botAnt{0%,100%{transform:rotate(0)}50%{transform:rotate(2.5deg)}}
-.bot-arm{ transform-box:fill-box; transform-origin:50% 8%; }
-.bot-body.bot-talking .bot-arm{ animation:botWave .6s ease-in-out infinite; }
-@keyframes botWave{0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
+.bot-arm-l,.bot-arm-r{ transform-box:fill-box; transform-origin:50% 8%; }
+.bot-body.bot-talking .bot-arm-l{ animation:botWaveL .62s ease-in-out infinite; }
+.bot-body.bot-talking .bot-arm-r{ animation:botWaveR .62s ease-in-out infinite; }
+@keyframes botWaveL{0%,100%{transform:rotate(0)}50%{transform:rotate(16deg)}}
+@keyframes botWaveR{0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
 .bot-aura{ position:absolute; left:50%; top:46%; width:140px; height:140px; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(43,196,230,.22),transparent 62%); z-index:0; animation:botAura 3.4s ease-in-out infinite; }
 @keyframes botAura{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.95)}50%{opacity:.9;transform:translate(-50%,-50%) scale(1.08)}}
 .bot-shadow{ position:absolute; left:50%; bottom:-6px; width:96px; height:13px; transform:translateX(-50%); background:radial-gradient(50% 100% at 50% 50%,rgba(0,0,0,.38),transparent 70%); z-index:0; }
@@ -319,7 +329,7 @@ const CSS = `
 .bot-send{ width:36px; height:36px; flex:0 0 auto; border:none; border-radius:50%; cursor:pointer; color:#fff; background:linear-gradient(160deg,var(--cy),var(--cy-d)); display:grid; place-items:center; transition:transform .2s; box-shadow:0 4px 11px rgba(43,196,230,.4); }
 .bot-send:hover{ transform:scale(1.08) rotate(8deg); }
 @media (max-width:560px){ #bot{right:12px;bottom:10px} .bot-body{width:112px;height:156px} .bot-panel{right:104px;width:62vw} }
-@media (prefers-reduced-motion:reduce){ #bot .bot-stage,#bot .bot-eye,#bot .bot-core,#bot .bot-bulb,#bot .bot-ant{animation:none!important} }
+@media (prefers-reduced-motion:reduce){ #bot .bot-stage,#bot .bot-head,#bot .bot-eye,#bot .bot-core,#bot .bot-bulb,#bot .bot-arm-l,#bot .bot-arm-r{animation:none!important} }
 
 /* hero variant */
 .hb{ display:block; }
