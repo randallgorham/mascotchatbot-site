@@ -37,7 +37,7 @@ export const INDUSTRIES: Record<string, Ind> = {
     ],
   },
   dentists: {
-    slug: "dentists", label: "Dentists", role: "dental practice", img: "04-dentist-male.jpg", name: "Dr. Bright",
+    slug: "dentists", label: "Dentists", role: "dental practice", img: "dentist.svg", name: "Dr. Bright",
     headline: "Your dental practice, talking.",
     sub: "A warm mascot that answers insurance and new-patient questions and books cleanings while your front desk is busy.",
     pains: [
@@ -47,7 +47,7 @@ export const INDUSTRIES: Record<string, Ind> = {
     ],
   },
   realtors: {
-    slug: "realtors", label: "Realtors", role: "real estate agent", img: "01-realtor-female-classic.jpg", name: "Ava",
+    slug: "realtors", label: "Realtors", role: "real estate agent", img: "realtor.svg", name: "Ava",
     headline: "Your real estate brand, talking.",
     sub: "A mascot that engages buyers and sellers, answers listing questions, and books showings and valuations instantly.",
     pains: [
@@ -57,7 +57,7 @@ export const INDUSTRIES: Record<string, Ind> = {
     ],
   },
   "med-spas": {
-    slug: "med-spas", label: "Med-spas", role: "med-spa", img: "15-medspa-female.jpg", name: "Skye",
+    slug: "med-spas", label: "Med-spas", role: "med-spa", img: "medspa.svg", name: "Skye",
     headline: "Your med-spa, talking.",
     sub: "An on-brand mascot that explains treatments, answers pricing, and books consultations around the clock.",
     pains: [
@@ -67,7 +67,7 @@ export const INDUSTRIES: Record<string, Ind> = {
     ],
   },
   "law-firms": {
-    slug: "law-firms", label: "Law firms", role: "law firm", img: "20-attorney-male.jpg", name: "Vance",
+    slug: "law-firms", label: "Law firms", role: "law firm", img: "attorney.svg", name: "Vance",
     headline: "Your law firm, talking.",
     sub: "A professional mascot that screens cases, answers common questions, and books consultations 24/7.",
     pains: [
@@ -77,7 +77,7 @@ export const INDUSTRIES: Record<string, Ind> = {
     ],
   },
   gyms: {
-    slug: "gyms", label: "Gyms", role: "gym", img: "18-gym-instructor-female-blonde.jpg", name: "Brooke",
+    slug: "gyms", label: "Gyms", role: "gym", img: "gym.svg", name: "Brooke",
     headline: "Your gym, talking.",
     sub: "An energetic mascot that answers membership questions, books tours, and signs up new members 24/7.",
     pains: [
