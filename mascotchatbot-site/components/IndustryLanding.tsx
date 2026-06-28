@@ -1,11 +1,9 @@
-import type { Metadata } from "next";
 import NavActions from "@/components/NavActions";
 import Pricing from "@/components/Pricing";
+import SiteFooter from "@/components/SiteFooter";
+import { INDUSTRIES, industryMeta } from "@/lib/industries";
 
-type Ind = {
-  slug: string; label: string; role: string; img: string; name: string;
-  headline: string; sub: string; pains: { t: string; d: string }[];
-};
+export { INDUSTRIES, industryMeta };
 
 const BOOKING = "https://api.leadconnectorhq.com/widget/booking/bYPWHLo2QmfN4WVHqVr1";
 
@@ -26,120 +24,6 @@ function Headline({ text }: { text: string }) {
   const idx = text.toLowerCase().lastIndexOf("talking");
   if (idx < 0) return <>{text}</>;
   return (<>{text.slice(0, idx)}<span className="mc-talk">{"talking" + text.slice(idx + 7)}</span><Eq /></>);
-}
-
-export const INDUSTRIES: Record<string, Ind> = {
-  electricians: {
-    slug: "electricians", label: "Electricians", role: "electrical company", img: "dr-volt-1.png", name: "Dr. Volt",
-    headline: "Your electrical company, talking.",
-    sub: "A friendly mascot that answers wiring questions, calms emergencies, and books service calls — 24/7, even after hours.",
-    pains: [
-      { t: "Catch after-hours emergencies", d: "Sparking outlet at 9pm? Your mascot triages it and books the call instead of sending them to a competitor." },
-      { t: "Answer the same questions", d: "Panel upgrades, EV chargers, pricing ranges — answered instantly so your phone rings less." },
-      { t: "Book jobs while you're on a ladder", d: "Every visitor gets greeted and guided onto your calendar without you lifting a finger." },
-    ],
-  },
-  hvac: {
-    slug: "hvac", label: "HVAC", role: "HVAC company", img: "hvac.png", name: "Reggie",
-    headline: "Your HVAC business, talking.",
-    sub: "A mascot that handles no-heat and no-cool calls, explains maintenance plans, and books service the moment a visitor lands.",
-    pains: [
-      { t: "Never miss a no-heat call", d: "Peak season floods your phone. Your mascot captures and books every after-hours emergency." },
-      { t: "Sell maintenance plans", d: "It explains tune-ups and memberships in plain English and nudges visitors to sign up." },
-      { t: "Fill the schedule", d: "Turns website traffic into booked installs and service calls around the clock." },
-    ],
-  },
-  plumbers: {
-    slug: "plumbers", label: "Plumbers", role: "plumbing company", img: "06-plumber-home-services-male.jpg", name: "Max",
-    headline: "Your plumbing business, talking.",
-    sub: "A mascot that calms leaks-and-floods panic, gives quick guidance, and books the truck — day or night.",
-    pains: [
-      { t: "Capture emergency leaks", d: "Burst pipe at midnight? Your mascot books it before they call the next plumber on Google." },
-      { t: "Pre-qualify the job", d: "It gathers what's wrong and where, so you roll up prepared." },
-      { t: "Stop missed calls", d: "Every visitor is greeted and guided onto your schedule, even when you're under a sink." },
-    ],
-  },
-  dentists: {
-    slug: "dentists", label: "Dentists", role: "dental practice", img: "04-dentist-male.jpg", name: "Dr. Bright",
-    headline: "Your dental practice, talking.",
-    sub: "A warm mascot that answers insurance and new-patient questions and books cleanings while your front desk is busy.",
-    pains: [
-      { t: "Book new patients 24/7", d: "Most people search for a dentist after hours — your mascot turns them into appointments." },
-      { t: "Answer insurance questions", d: "Plans accepted, new-patient specials, what to expect — handled instantly." },
-      { t: "Reduce front-desk load", d: "Routine questions get answered automatically so your team focuses on patients." },
-    ],
-  },
-  realtors: {
-    slug: "realtors", label: "Realtors", role: "real estate agent", img: "01-realtor-female-classic.jpg", name: "Ava",
-    headline: "Your real estate brand, talking.",
-    sub: "A mascot that engages buyers and sellers, answers listing questions, and books showings and valuations instantly.",
-    pains: [
-      { t: "Capture every lead", d: "Buyers browse late at night — your mascot greets them and books the showing." },
-      { t: "Qualify buyers and sellers", d: "It gathers budget, timeline, and area, then routes hot leads to you." },
-      { t: "Book valuations", d: "Turns 'what's my home worth?' visitors into booked listing appointments." },
-    ],
-  },
-  "med-spas": {
-    slug: "med-spas", label: "Med-spas", role: "med-spa", img: "15-medspa-female.jpg", name: "Skye",
-    headline: "Your med-spa, talking.",
-    sub: "An on-brand mascot that explains treatments, answers pricing, and books consultations around the clock.",
-    pains: [
-      { t: "Book consultations 24/7", d: "Botox, fillers, facials — your mascot guides interest into booked appointments." },
-      { t: "Answer treatment questions", d: "Downtime, pricing ranges, packages — answered instantly and on-brand." },
-      { t: "Fill slow days", d: "Promote specials and memberships to every visitor automatically." },
-    ],
-  },
-  "law-firms": {
-    slug: "law-firms", label: "Law firms", role: "law firm", img: "20-attorney-male.jpg", name: "Vance",
-    headline: "Your law firm, talking.",
-    sub: "A professional mascot that screens cases, answers common questions, and books consultations 24/7.",
-    pains: [
-      { t: "Capture cases after hours", d: "People search for a lawyer in a crisis — your mascot books the consult immediately." },
-      { t: "Pre-screen matters", d: "It gathers case type and details so you only spend time on the right clients." },
-      { t: "Never miss an inquiry", d: "Every visitor is greeted and guided to schedule, even mid-trial." },
-    ],
-  },
-  gyms: {
-    slug: "gyms", label: "Gyms", role: "gym", img: "18-gym-instructor-female-blonde.jpg", name: "Brooke",
-    headline: "Your gym, talking.",
-    sub: "An energetic mascot that answers membership questions, books tours, and signs up new members 24/7.",
-    pains: [
-      { t: "Sign up members 24/7", d: "New Year's resolutions don't wait for business hours — your mascot books the tour." },
-      { t: "Answer membership questions", d: "Plans, classes, hours, day passes — handled instantly." },
-      { t: "Book tours and trials", d: "Turns curious visitors into booked walk-throughs and free trials." },
-    ],
-  },
-  salons: {
-    slug: "salons", label: "Salons", role: "salon", img: "hair.png", name: "Gigi",
-    headline: "Your salon, talking.",
-    sub: "A stylish mascot that answers service and pricing questions and books appointments while you're behind the chair.",
-    pains: [
-      { t: "Book while you style", d: "You can't answer the phone mid-color — your mascot books the next client for you." },
-      { t: "Answer service questions", d: "Pricing, stylists, availability — answered instantly, on-brand." },
-      { t: "Fill the chair", d: "Turns every website visit into a booked cut, color, or treatment." },
-    ],
-  },
-  veterinary: {
-    slug: "veterinary", label: "Veterinary clinics", role: "veterinary clinic", img: "vet.png", name: "Bella",
-    headline: "Your vet clinic, talking.",
-    sub: "A caring mascot that calms worried pet parents, answers questions, and books visits 24/7.",
-    pains: [
-      { t: "Help worried pet parents", d: "After-hours concerns get a calm, helpful answer and a booked appointment." },
-      { t: "Answer the basics", d: "Hours, services, new-patient info, what to bring — handled instantly." },
-      { t: "Fill the schedule", d: "Turns anxious late-night searches into booked wellness and sick visits." },
-    ],
-  },
-};
-
-export function industryMeta(slug: string): Metadata {
-  const ind = INDUSTRIES[slug];
-  if (!ind) return { title: "Industry" };
-  const title = `AI Mascot Chatbot for ${ind.label} — ${ind.headline}`;
-  return {
-    title, description: ind.sub,
-    alternates: { canonical: `/industry/${ind.slug}` },
-    openGraph: { title, description: ind.sub, url: `https://mascotchatbot.com/industry/${ind.slug}`, images: ["/og.png"] },
-  };
 }
 
 const Logo = () => (
@@ -221,15 +105,15 @@ export default function IndustryLanding({ slug }: { slug: string }) {
             </div>
           </div>
           <div className="flex justify-center md:justify-end">
-            <div className="relative w-full max-w-[380px]">
-              <div className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e3342b]/10 blur-3xl" />
-              <img src={`/mascots/${ind.img}`} alt={`${ind.name} — mascot for ${ind.role}`} className="relative mx-auto w-full max-w-[340px] drop-shadow-[0_22px_34px_rgba(10,10,10,0.18)]" />
+            <div className="relative w-full max-w-[300px]">
+              <div className="pointer-events-none absolute left-1/2 top-1/2 h-60 w-60 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e3342b]/5 blur-3xl" />
+              <img src={`/mascots/${ind.img}`} alt={`${ind.name} — mascot for ${ind.role}`} className="relative mx-auto w-full max-w-[240px] mix-blend-multiply drop-shadow-[0_18px_28px_rgba(10,10,10,0.16)]" />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-y-2 border-ink bg-ink py-4 text-paper">
+      <section className="overflow-hidden border-y-2 border-ink bg-ink py-4 text-paper">
         <div className="flex w-max animate-marquee whitespace-nowrap">
           {[0, 1].map((k) => (
             <span key={k} className="mx-6 text-2xl font-bold tracking-tight">Built for {ind.label.toLowerCase()} <span className="mx-2 text-smoke">/</span> 24/7 booking <span className="mx-2 text-smoke">/</span> Done for you <span className="mx-2 text-smoke">/</span></span>
@@ -261,13 +145,7 @@ export default function IndustryLanding({ slug }: { slug: string }) {
         </div>
       </section>
 
-      <footer className="border-t-2 border-paper bg-ink text-paper">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-8 text-sm text-smoke sm:flex-row">
-          <Logo />
-          <span>© {new Date().getFullYear()} MascotChatbot. All rights reserved.</span>
-          <a href="/" className="hover:text-paper">← Back to home</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
