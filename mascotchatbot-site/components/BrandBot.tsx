@@ -235,7 +235,19 @@ export default function BrandBot() {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
     document.addEventListener("keydown", onKey);
     hintTimer = window.setTimeout(() => { if (W.getAttribute("data-state") !== "open" && HINT) HINT.style.opacity = "1"; }, 3500);
-    return () => { document.removeEventListener("keydown", onKey); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); };
+    // Auto-greet visitors when they land (once per browser session)
+    let greetTimer = 0;
+    try {
+      if (!sessionStorage.getItem("mcb_greeted")) {
+        greetTimer = window.setTimeout(() => {
+          try { sessionStorage.setItem("mcb_greeted", "1"); } catch {}
+          if (W.getAttribute("data-state") !== "open") open();
+        }, 1600);
+      }
+    } catch {
+      greetTimer = window.setTimeout(() => { if (W.getAttribute("data-state") !== "open") open(); }, 1600);
+    }
+    return () => { window.clearTimeout(greetTimer); document.removeEventListener("keydown", onKey); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); };
   }, []);
 
   return (
