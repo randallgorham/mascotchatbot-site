@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-/** Shared inline-SVG robot puppet (the MascotChatbot brand bot, "Robo").
- *  idPrefix keeps the hero copy and the floating copy from colliding. */
+/** The MascotChatbot brand bot — our original logo robot (head + body + headset mic
+ *  boom), with blinking eyes and a lip-syncing mouth. idPrefix keeps the hero copy and
+ *  the floating copy from colliding. */
 function RobotSVG({ idPrefix }: { idPrefix: string }) {
   const p = idPrefix;
   return (
@@ -16,31 +17,35 @@ function RobotSVG({ idPrefix }: { idPrefix: string }) {
         <circle cx="138" cy="30" r="7" fill="#2bc4e6" className="bot-bulb" />
       </g>
       {/* ears */}
-      <rect x="32" y="104" width="15" height="44" rx="7" fill="#3a434f" />
-      <rect x="173" y="104" width="15" height="44" rx="7" fill="#3a434f" />
-      {/* head */}
-      <rect x="46" y="56" width="128" height="104" rx="38" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-      {/* face screen */}
-      <ellipse cx="110" cy="110" rx="52" ry="40" fill="#2b333d" />
-      {/* eyes */}
-      <rect id={`${p}-eye-l`} className="bot-eye" x="86" y="92" width="13" height="26" rx="6.5" fill="#2bc4e6" />
-      <rect id={`${p}-eye-r`} className="bot-eye" x="121" y="92" width="13" height="26" rx="6.5" fill="#2bc4e6" />
-      {/* mouth (lip-syncs) */}
-      <rect id={`${p}-mouth`} className="bot-mouth" x="92" y="126" width="36" height="9" rx="5" fill="#2bc4e6" />
-      {/* body */}
-      <rect x="64" y="178" width="92" height="86" rx="26" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-      <circle cx="110" cy="214" r="11" fill="#2bc4e6" className="bot-core" />
-      <rect x="92" y="236" width="36" height="8" rx="4" fill="#cbd3dc" />
+      <rect x="32" y="100" width="15" height="44" rx="7" fill="#3a434f" />
+      <rect x="173" y="100" width="15" height="44" rx="7" fill="#3a434f" />
+      {/* body (pulled up tight under the head) */}
+      <rect x="66" y="170" width="88" height="80" rx="26" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      <circle cx="110" cy="202" r="10" fill="#2bc4e6" className="bot-core" />
+      <rect x="93" y="224" width="34" height="7" rx="3.5" fill="#cbd3dc" />
       {/* arms */}
-      <rect x="46" y="188" width="16" height="46" rx="8" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      <rect x="50" y="180" width="15" height="42" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
       <g id={`${p}-arm`} className="bot-arm">
-        <rect x="158" y="188" width="16" height="46" rx="8" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+        <rect x="155" y="180" width="15" height="42" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
       </g>
+      {/* head */}
+      <rect x="46" y="54" width="128" height="104" rx="38" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      {/* face screen */}
+      <ellipse cx="110" cy="106" rx="52" ry="40" fill="#2b333d" />
+      {/* eyes */}
+      <rect id={`${p}-eye-l`} className="bot-eye" x="86" y="88" width="13" height="26" rx="6.5" fill="#2bc4e6" />
+      <rect id={`${p}-eye-r`} className="bot-eye" x="121" y="88" width="13" height="26" rx="6.5" fill="#2bc4e6" />
+      {/* mouth (lip-syncs) */}
+      <rect id={`${p}-mouth`} className="bot-mouth" x="92" y="122" width="36" height="9" rx="5" fill="#2bc4e6" />
+      {/* headset mic boom (from the original logo) */}
+      <path d="M62 148 C 66 182, 104 192, 138 172" fill="none" stroke="#3a434f" strokeWidth="7" strokeLinecap="round" />
+      <ellipse cx="140" cy="171" rx="9" ry="6.5" fill="#3a434f" />
+      <circle cx="140" cy="171" r="3" fill="#2bc4e6" className="bot-bulb" />
     </svg>
   );
 }
 
-/** Big animated robot for the hero — clicking it opens the floating widget. */
+/** Big animated logo for the hero — clicking it opens the floating widget. */
 export function HeroBot() {
   return (
     <div className="relative mx-auto w-full max-w-[440px]">
@@ -48,7 +53,7 @@ export function HeroBot() {
       <div className="pointer-events-none absolute left-1/2 top-[42%] h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#2bc4e6]/15 blur-3xl" />
       <button
         type="button"
-        className="hb group relative mx-auto block w-[300px] max-w-full cursor-pointer border-0 bg-transparent"
+        className="hb group relative mx-auto block w-[320px] max-w-full cursor-pointer border-0 bg-transparent"
         aria-label="Talk to our mascot"
         onClick={() => {
           const el = document.querySelector("#bot-stage") as HTMLElement | null;
@@ -75,7 +80,7 @@ export default function BrandBot() {
 
     const CFG = {
       greeting:
-        "Hey! 👋 I'm Robo, the MascotChatbot mascot — a live example of exactly what we build for your business: a talking mascot that greets visitors, answers questions, and books appointments 24/7. Want one for your site?",
+        "Hey! 👋 I'm the MascotChatbot mascot — a live example of exactly what we build for your business: a talking mascot that greets visitors, answers questions, and books appointments 24/7. Want one for your site?",
       quick: ["What is this?", "Pricing", "Book a demo"],
       answers: [
         { k: ["what", "this", "who", "explain", "how", "work", "mascot", "chatbot", "do"], a: "I'm a MascotChatbot — a custom animated mascot that lives on your website, talks to every visitor, answers their questions 24/7, captures leads, and books appointments. Basically a salesperson that never sleeps. Want a free demo?" },
@@ -264,7 +269,7 @@ export default function BrandBot() {
       <div className="bot-body" id="bot-body">
         <button className="bot-stage" id="bot-stage" aria-label="Talk to our mascot">
           <span className="bot-aura"></span>
-          <FloatRobot />
+          <span className="bot-puppet"><RobotSVG idPrefix="float" /></span>
           <span className="bot-shadow"></span>
         </button>
         <span className="bot-hint" id="bot-hint">Click me 👋</span>
@@ -273,43 +278,40 @@ export default function BrandBot() {
   );
 }
 
-/** Floating-size robot (uses #float-* ids for lip-sync binding). */
-function FloatRobot() { return <span className="bot-puppet"><RobotSVG idPrefix="float" /></span>; }
-
 const CSS = `
-#bot{ --cy:#2bc4e6; --cy-d:#1597b4; --char:#14171c; --ink:#1d2127; position:fixed; right:20px; bottom:14px; z-index:60; font-family:ui-sans-serif,system-ui,Arial,sans-serif; transition:bottom .32s cubic-bezier(.34,1.4,.5,1); }
+#bot{ --cy:#2bc4e6; --cy-d:#1597b4; --char:#14171c; --ink:#1d2127; position:fixed; right:20px; bottom:16px; z-index:60; font-family:ui-sans-serif,system-ui,Arial,sans-serif; transition:bottom .32s cubic-bezier(.34,1.4,.5,1); }
 #bot[data-state="open"]{ bottom:58px; }
 #bot *{ box-sizing:border-box; }
-.bot-body{ position:relative; width:150px; height:220px; }
+.bot-body{ position:relative; width:150px; height:208px; }
 .bot-stage{ position:absolute; inset:0; width:100%; height:100%; border:none; background:none; padding:0; cursor:pointer; animation:botBreathe 4.6s ease-in-out infinite, botSway 7s ease-in-out infinite; transform-origin:50% 100%; }
 .bot-body.bot-intro .bot-stage{ animation:botIntro .9s cubic-bezier(.2,1.35,.4,1) both, botBreathe 4.6s ease-in-out 1s infinite, botSway 7s ease-in-out 1s infinite; }
 .bot-puppet,.bot-svg{ position:absolute; inset:0; width:100%; height:100%; }
-.bot-svg{ filter:drop-shadow(0 10px 10px rgba(0,0,0,.30)); overflow:visible; }
+.bot-svg{ filter:drop-shadow(0 8px 9px rgba(0,0,0,.28)); overflow:visible; }
 .bot-eye{ transform-box:fill-box; transform-origin:center; animation:botBlink 5.2s infinite; }
 @keyframes botBlink{0%,3.4%,100%{transform:scaleY(1)}1.4%,2.2%{transform:scaleY(.08)}}
 .bot-mouth{ transform-box:fill-box; transform-origin:center; transition:transform .05s linear; }
+.bot-body.bot-talking .bot-svg{ animation:botHeadTalk .9s ease-in-out infinite; }
+.bot-body.bot-nodding .bot-svg{ animation:botNod .6s cubic-bezier(.3,1.4,.5,1); }
+@keyframes botHeadTalk{0%{transform:rotate(0)}25%{transform:rotate(1.6deg) translateY(-2px)}60%{transform:rotate(-1.4deg) translateY(1px)}100%{transform:rotate(0)}}
+@keyframes botNod{0%,100%{transform:rotate(0)}45%{transform:rotate(2.4deg) translateY(3px)}}
 .bot-core{ animation:botCore 2.4s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
 @keyframes botCore{0%,100%{opacity:.6;transform:scale(.9)}50%{opacity:1;transform:scale(1.12)}}
 .bot-bulb{ animation:botCore 2s ease-in-out infinite; }
 .bot-ant{ transform-box:fill-box; transform-origin:50% 100%; animation:botAnt 5s ease-in-out infinite; }
 @keyframes botAnt{0%,100%{transform:rotate(0)}50%{transform:rotate(2.5deg)}}
-.bot-arm{ transform-box:fill-box; transform-origin:50% 6%; }
+.bot-arm{ transform-box:fill-box; transform-origin:50% 8%; }
 .bot-body.bot-talking .bot-arm{ animation:botWave .6s ease-in-out infinite; }
-@keyframes botWave{0%,100%{transform:rotate(0)}50%{transform:rotate(-20deg)}}
-.bot-body.bot-talking .bot-svg{ animation:botHeadTalk .9s ease-in-out infinite; }
-.bot-body.bot-nodding .bot-svg{ animation:botNod .6s cubic-bezier(.3,1.4,.5,1); }
-@keyframes botHeadTalk{0%{transform:rotate(0)}25%{transform:rotate(1.5deg) translateY(-2px)}60%{transform:rotate(-1.3deg) translateY(1px)}100%{transform:rotate(0)}}
-@keyframes botNod{0%,100%{transform:rotate(0)}45%{transform:rotate(2.2deg) translateY(3px)}}
-.bot-aura{ position:absolute; left:52%; top:38%; width:150px; height:150px; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(43,196,230,.22),transparent 62%); z-index:0; animation:botAura 3.4s ease-in-out infinite; }
+@keyframes botWave{0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
+.bot-aura{ position:absolute; left:50%; top:46%; width:140px; height:140px; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(43,196,230,.22),transparent 62%); z-index:0; animation:botAura 3.4s ease-in-out infinite; }
 @keyframes botAura{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.95)}50%{opacity:.9;transform:translate(-50%,-50%) scale(1.08)}}
-.bot-shadow{ position:absolute; left:50%; bottom:-4px; width:110px; height:14px; transform:translateX(-50%); background:radial-gradient(50% 100% at 50% 50%,rgba(0,0,0,.4),transparent 70%); z-index:0; }
-.bot-hint{ position:absolute; left:50%; top:-12px; transform:translateX(-50%); background:var(--char); color:#fff; font-size:12px; font-weight:600; padding:5px 11px; border-radius:14px; white-space:nowrap; box-shadow:0 6px 16px rgba(0,0,0,.25); transition:opacity .3s; }
+.bot-shadow{ position:absolute; left:50%; bottom:-6px; width:96px; height:13px; transform:translateX(-50%); background:radial-gradient(50% 100% at 50% 50%,rgba(0,0,0,.38),transparent 70%); z-index:0; }
+.bot-hint{ position:absolute; left:50%; top:-14px; transform:translateX(-50%); background:var(--char); color:#fff; font-size:12px; font-weight:600; padding:5px 11px; border-radius:14px; white-space:nowrap; box-shadow:0 6px 16px rgba(0,0,0,.25); transition:opacity .3s; }
 .bot-hint::after{ content:""; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%) rotate(45deg); width:9px; height:9px; background:var(--char); }
 #bot[data-state="open"] .bot-hint{ display:none; }
 @keyframes botBreathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.012)}}
 @keyframes botSway{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
 @keyframes botIntro{0%{transform:translateY(150px) scale(.7);opacity:0}60%{transform:translateY(-12px) scale(1.03)}100%{transform:translateY(0) scale(1);opacity:1}}
-.bot-panel{ position:absolute; right:140px; bottom:6px; width:280px; max-width:74vw; display:flex; flex-direction:column; align-items:flex-start; gap:9px; opacity:0; transform:translateY(10px) scale(.96); transform-origin:bottom right; pointer-events:none; transition:opacity .28s ease, transform .34s cubic-bezier(.34,1.4,.5,1); }
+.bot-panel{ position:absolute; right:130px; bottom:6px; width:280px; max-width:74vw; display:flex; flex-direction:column; align-items:flex-start; gap:9px; opacity:0; transform:translateY(10px) scale(.96); transform-origin:bottom right; pointer-events:none; transition:opacity .28s ease, transform .34s cubic-bezier(.34,1.4,.5,1); }
 #bot[data-state="open"] .bot-panel{ opacity:1; transform:none; pointer-events:auto; }
 .bot-x{ align-self:flex-end; width:26px; height:26px; border:none; border-radius:50%; cursor:pointer; background:var(--char); color:#fff; font-size:16px; line-height:1; box-shadow:0 4px 12px rgba(0,0,0,.25); }
 .bot-bubble{ position:relative; background:#fff; color:var(--ink); border:2px solid var(--char); border-radius:16px; padding:13px 15px 14px; font-size:14.5px; line-height:1.42; width:100%; box-shadow:0 14px 34px rgba(0,0,0,.16); min-height:20px; }
@@ -329,17 +331,16 @@ const CSS = `
 @keyframes botMic{0%,100%{box-shadow:0 0 0 0 rgba(43,196,230,.5)}50%{box-shadow:0 0 0 7px rgba(43,196,230,0)}}
 .bot-send{ width:36px; height:36px; flex:0 0 auto; border:none; border-radius:50%; cursor:pointer; color:#fff; background:linear-gradient(160deg,var(--cy),var(--cy-d)); display:grid; place-items:center; transition:transform .2s; box-shadow:0 4px 11px rgba(43,196,230,.4); }
 .bot-send:hover{ transform:scale(1.08) rotate(8deg); }
-@media (max-width:560px){ #bot{right:10px;bottom:8px} .bot-body{width:118px;height:176px} .bot-panel{right:110px;width:62vw} }
+@media (max-width:560px){ #bot{right:12px;bottom:10px} .bot-body{width:112px;height:156px} .bot-panel{right:104px;width:62vw} }
 @media (prefers-reduced-motion:reduce){ #bot .bot-stage,#bot .bot-eye,#bot .bot-core,#bot .bot-bulb,#bot .bot-ant{animation:none!important} }
 
 /* hero variant */
 .hb{ display:block; }
-.hb-stage{ position:relative; display:block; width:300px; max-width:100%; margin:0 auto; animation:botBreathe 4.6s ease-in-out infinite, botSway 7s ease-in-out infinite; transform-origin:50% 100%; }
-.hb-stage .bot-svg{ position:relative; inset:auto; width:100%; height:auto; filter:drop-shadow(0 18px 22px rgba(0,0,0,.18)); }
+.hb-stage{ position:relative; display:block; width:320px; max-width:100%; margin:0 auto; animation:botBreathe 4.6s ease-in-out infinite, botSway 7s ease-in-out infinite; transform-origin:50% 100%; }
+.hb-stage .bot-svg{ position:relative; inset:auto; width:100%; height:auto; filter:drop-shadow(0 18px 22px rgba(0,0,0,.16)); }
 .hb-stage .bot-eye{ transform-box:fill-box; transform-origin:center; animation:botBlink 5.2s infinite; }
-.hb-stage .bot-core,.hb-stage .bot-bulb{ animation:botCore 2.4s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
-.hb-bubble{ position:absolute; left:50%; top:-6px; transform:translateX(-50%); background:#fff; border:2px solid var(--char,#14171c); color:#1d2127; font-size:13px; font-weight:600; padding:8px 13px; border-radius:16px; box-shadow:0 10px 26px rgba(0,0,0,.14); white-space:nowrap; max-width:92vw; z-index:5; }
-.hb-shadow{ position:absolute; left:50%; bottom:46px; width:170px; height:20px; transform:translateX(-50%); background:radial-gradient(50% 100% at 50% 50%,rgba(0,0,0,.18),transparent 70%); }
-.hb-pill{ display:inline-flex; align-items:center; gap:7px; margin-top:10px; background:#14171c; color:#fff; font-size:12px; font-weight:700; letter-spacing:.04em; padding:7px 14px; border-radius:999px; }
+.hb-bubble{ position:absolute; left:50%; top:-14px; transform:translateX(-50%); background:#fff; border:2px solid var(--char,#14171c); color:#1d2127; font-size:13px; font-weight:600; padding:8px 13px; border-radius:16px; box-shadow:0 10px 26px rgba(0,0,0,.14); white-space:nowrap; max-width:92vw; z-index:5; }
+.hb-shadow{ position:absolute; left:50%; bottom:30px; width:180px; height:20px; transform:translateX(-50%); background:radial-gradient(50% 100% at 50% 50%,rgba(0,0,0,.16),transparent 70%); }
+.hb-pill{ display:inline-flex; align-items:center; gap:7px; margin-top:14px; background:#14171c; color:#fff; font-size:12px; font-weight:700; letter-spacing:.04em; padding:7px 14px; border-radius:999px; }
 .hb-dot{ width:8px; height:8px; border-radius:50%; background:#22e07a; box-shadow:0 0 0 0 rgba(34,224,122,.6); animation:botMic 1.6s infinite; }
 `;
