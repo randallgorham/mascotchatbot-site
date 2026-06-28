@@ -27,7 +27,7 @@ export const INDUSTRIES: Record<string, Ind> = {
     ],
   },
   plumbers: {
-    slug: "plumbers", label: "Plumbers", role: "plumbing company", img: "06-plumber-home-services-male.jpg", name: "Max",
+    slug: "plumbers", label: "Plumbers", role: "plumbing company", img: "plumber.svg", name: "Max",
     headline: "Your plumbing business, talking.",
     sub: "A mascot that calms leaks-and-floods panic, gives quick guidance, and books the truck — day or night.",
     pains: [
