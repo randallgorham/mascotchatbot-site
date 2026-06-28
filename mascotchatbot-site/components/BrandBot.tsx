@@ -8,15 +8,15 @@ import { useEffect, useRef } from "react";
 function RobotSVG({ idPrefix }: { idPrefix: string }) {
   const p = idPrefix;
   return (
-    <svg className="bot-svg" viewBox="94 40 192 250" aria-hidden="true">
-      {/* ===== body — built onto the original logo, in the logo's own coordinates ===== */}
-      <rect x="126" y="180" width="15" height="44" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+    <svg className="bot-svg" viewBox="94 40 192 264" aria-hidden="true">
+      {/* ===== body — built onto the original logo, separated slightly from the head ===== */}
+      <rect x="124" y="200" width="15" height="48" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
       <g id={`${p}-arm`} className="bot-arm">
-        <rect x="239" y="180" width="15" height="44" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+        <rect x="241" y="200" width="15" height="48" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
       </g>
-      <rect x="146" y="168" width="88" height="84" rx="28" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-      <circle cx="190" cy="206" r="10" fill="#2bc4e6" className="bot-core" />
-      <rect x="173" y="230" width="34" height="7" rx="3.5" fill="#cbd3dc" />
+      <rect x="146" y="190" width="88" height="82" rx="28" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      <circle cx="190" cy="226" r="10" fill="#2bc4e6" className="bot-core" />
+      <rect x="173" y="250" width="34" height="7" rx="3.5" fill="#cbd3dc" />
       {/* ===== head — EXACT original logo (public/icon.svg / Logo component) ===== */}
       <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
       <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
@@ -97,7 +97,7 @@ export default function BrandBot() {
       } catch {}
     }
     function stopAudio() { if (curAudio) { try { curAudio.pause(); } catch {} curAudio = null; } }
-    function setMouth(open: number) { if (MOUTH) MOUTH.style.transform = "scaleY(" + (1 + Math.max(0, Math.min(1, open)) * 2.6).toFixed(2) + ")"; }
+    function setMouth(open: number) { if (MOUTH) MOUTH.style.transform = "scaleY(" + (1 + Math.max(0, Math.min(1, open)) * 0.55).toFixed(2) + ")"; }
     function lipLoop() {
       if (!speaking || !analyser) return;
       const data = new Uint8Array(analyser.frequencyBinCount);
