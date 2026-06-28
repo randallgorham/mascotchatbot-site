@@ -2,45 +2,32 @@
 
 import { useEffect, useRef } from "react";
 
-/** The MascotChatbot brand bot — our original logo robot (head + body + headset mic
- *  boom), with blinking eyes and a lip-syncing mouth. idPrefix keeps the hero copy and
- *  the floating copy from colliding. */
+/** The MascotChatbot brand bot — the original logo robot head/face/eyes/smile/headset
+ *  mic boom reproduced EXACTLY (from public/icon.svg), with a body built beneath it in
+ *  the logo's own coordinate space. idPrefix keeps the hero and floating copies apart. */
 function RobotSVG({ idPrefix }: { idPrefix: string }) {
   const p = idPrefix;
   return (
-    <svg className="bot-svg" viewBox="0 0 220 300" aria-hidden="true">
-      {/* antennae */}
-      <g className="bot-ant">
-        <rect x="79" y="34" width="6" height="26" rx="3" fill="#3a434f" />
-        <circle cx="82" cy="30" r="7" fill="#2bc4e6" className="bot-bulb" />
-        <rect x="135" y="34" width="6" height="26" rx="3" fill="#3a434f" />
-        <circle cx="138" cy="30" r="7" fill="#2bc4e6" className="bot-bulb" />
-      </g>
-      {/* ears */}
-      <rect x="32" y="100" width="15" height="44" rx="7" fill="#3a434f" />
-      <rect x="173" y="100" width="15" height="44" rx="7" fill="#3a434f" />
-      {/* body (pulled up tight under the head) */}
-      <rect x="66" y="170" width="88" height="80" rx="26" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-      <circle cx="110" cy="202" r="10" fill="#2bc4e6" className="bot-core" />
-      <rect x="93" y="224" width="34" height="7" rx="3.5" fill="#cbd3dc" />
-      {/* arms */}
-      <rect x="50" y="180" width="15" height="42" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+    <svg className="bot-svg" viewBox="94 40 192 250" aria-hidden="true">
+      {/* ===== body — built onto the original logo, in the logo's own coordinates ===== */}
+      <rect x="126" y="180" width="15" height="44" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
       <g id={`${p}-arm`} className="bot-arm">
-        <rect x="155" y="180" width="15" height="42" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+        <rect x="239" y="180" width="15" height="44" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
       </g>
-      {/* head */}
-      <rect x="46" y="54" width="128" height="104" rx="38" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-      {/* face screen */}
-      <ellipse cx="110" cy="106" rx="52" ry="40" fill="#2b333d" />
-      {/* eyes */}
-      <rect id={`${p}-eye-l`} className="bot-eye" x="86" y="88" width="13" height="26" rx="6.5" fill="#2bc4e6" />
-      <rect id={`${p}-eye-r`} className="bot-eye" x="121" y="88" width="13" height="26" rx="6.5" fill="#2bc4e6" />
-      {/* mouth (lip-syncs) */}
-      <rect id={`${p}-mouth`} className="bot-mouth" x="92" y="122" width="36" height="9" rx="5" fill="#2bc4e6" />
-      {/* headset mic boom (from the original logo) */}
-      <path d="M62 148 C 66 182, 104 192, 138 172" fill="none" stroke="#3a434f" strokeWidth="7" strokeLinecap="round" />
-      <ellipse cx="140" cy="171" rx="9" ry="6.5" fill="#3a434f" />
-      <circle cx="140" cy="171" r="3" fill="#2bc4e6" className="bot-bulb" />
+      <rect x="146" y="168" width="88" height="84" rx="28" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      <circle cx="190" cy="206" r="10" fill="#2bc4e6" className="bot-core" />
+      <rect x="173" y="230" width="34" height="7" rx="3.5" fill="#cbd3dc" />
+      {/* ===== head — EXACT original logo (public/icon.svg / Logo component) ===== */}
+      <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+      <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
+      <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
+      <rect id={`${p}-eye-l`} className="bot-eye" x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+      <rect id={`${p}-eye-r`} className="bot-eye" x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+      <path id={`${p}-mouth`} className="bot-mouth" d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
+      {/* headset mic boom — EXACT original logo */}
+      <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
+      <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
     </svg>
   );
 }
