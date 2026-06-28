@@ -122,7 +122,7 @@ export default function BrandBot() {
     }
     function talk(on: boolean) {
       if (on) { speaking = true; BODY?.classList.add("bot-talking"); }
-      else { speaking = false; BODY?.classList.remove("bot-talking"); setMouth(0); }
+      else { speaking = false; BODY?.classList.remove("bot-talking"); setMouth(0); relisten(); }
     }
     function nod() { BODY?.classList.remove("bot-nodding"); void BODY?.offsetWidth; BODY?.classList.add("bot-nodding"); window.setTimeout(() => BODY?.classList.remove("bot-nodding"), 620); }
     function flapFor(t: string) { talk(true); loopMouth(); window.setTimeout(() => talk(false), Math.max(900, t.length * 42)); }
@@ -175,6 +175,7 @@ export default function BrandBot() {
       ensureCtx();
       window.clearTimeout(hintTimer); if (HINT) HINT.style.opacity = "0";
       BODY?.classList.remove("bot-intro"); void BODY?.offsetWidth; BODY?.classList.add("bot-intro");
+      try { if (sessionStorage.getItem("mcb_mic")) convo = true; } catch {}
       if (!started) { started = true; renderQuick(); window.setTimeout(() => say(CFG.greeting), 380); }
       window.setTimeout(() => TEXT?.focus(), 360);
     }
@@ -211,17 +212,30 @@ export default function BrandBot() {
     }
 
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    let recog: any = null;
+    let recog: any = null, convo = false;
+    function startListening() {
+      if (!SR || listening || speaking) return;
+      ensureCtx();
+      try {
+        recog = new SR(); recog.lang = "en-US"; recog.interimResults = false; recog.maxAlternatives = 1;
+        recog.onstart = () => { listening = true; MIC?.classList.add("bot-live"); try { sessionStorage.setItem("mcb_mic", "1"); } catch {} };
+        recog.onresult = (e: any) => { const t = e.results[0][0].transcript; if (t) send(t); };
+        recog.onerror = () => { listening = false; MIC?.classList.remove("bot-live"); };
+        recog.onend = () => { listening = false; MIC?.classList.remove("bot-live"); };
+        recog.start();
+      } catch { listening = false; }
+    }
+    // Hands-free: once the visitor has used the mic, reopen it after Robo finishes talking.
+    function relisten() {
+      if (!convo || muted || !SR) return;
+      if (W.getAttribute("data-state") !== "open") return;
+      window.setTimeout(() => { if (!speaking && !listening) startListening(); }, 380);
+    }
     function toggleMic() {
       if (!SR) { say("Voice input isn't supported in this browser — just type to me instead!"); return; }
-      if (listening && recog) { try { recog.stop(); } catch {} return; }
-      ensureCtx();
-      recog = new SR(); recog.lang = "en-US"; recog.interimResults = false; recog.maxAlternatives = 1;
-      recog.onstart = () => { listening = true; MIC?.classList.add("bot-live"); };
-      recog.onresult = (e: any) => { const t = e.results[0][0].transcript; if (t) send(t); };
-      recog.onerror = () => { listening = false; MIC?.classList.remove("bot-live"); };
-      recog.onend = () => { listening = false; MIC?.classList.remove("bot-live"); };
-      try { recog.start(); } catch {}
+      if (listening) { convo = false; try { recog && recog.stop(); } catch {} return; }
+      convo = true; // tapping the mic turns on hands-free conversation mode
+      startListening();
     }
 
     STAGE?.addEventListener("click", open);
