@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-/** The MascotChatbot brand bot — the original logo robot head/face/eyes/smile/headset
- *  mic boom reproduced EXACTLY (from public/icon.svg), with a body built beneath it.
- *  Head, body, and each arm are separate groups so they animate independently.
+/** The MascotChatbot brand bot "Robo" — the original logo robot head/face/eyes/smile/
+ *  headset mic boom reproduced EXACTLY (from public/icon.svg), with a body built beneath
+ *  it. Head, body, and each arm are separate groups so they animate independently.
  *  idPrefix keeps the hero and floating copies apart. */
 function RobotSVG({ idPrefix }: { idPrefix: string }) {
   const p = idPrefix;
@@ -30,7 +30,7 @@ function RobotSVG({ idPrefix }: { idPrefix: string }) {
         <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
         <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
         <rect id={`${p}-eye-l`} className="bot-eye" x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
-        <rect id={`${p}-eye-r`} className="bot-eye" x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
+        <rect id={`${p}-eye-r`} className="bot-eye bot-eye-r" x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
         <path id={`${p}-mouth`} className="bot-mouth" d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
         {/* headset mic boom — EXACT original logo */}
         <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
@@ -55,7 +55,7 @@ export function HeroBot() {
           el?.click();
         }}
       >
-        <span className="hb-bubble">Hi! I'm your 24/7 mascot — ask me anything 👋</span>
+        <span className="hb-bubble">Hi! I'm Robo — your 24/7 mascot. Ask me anything 👋</span>
         <span className="hb-stage"><RobotSVG idPrefix="hero" /></span>
         <span className="hb-shadow" />
         <span className="hb-pill"><span className="hb-dot" /> LIVE — TALK TO ME</span>
@@ -64,7 +64,7 @@ export function HeroBot() {
   );
 }
 
-/** Floating, click-to-talk MascotChatbot brand bot (site-wide). */
+/** Floating, click-to-talk MascotChatbot brand bot "Robo" (site-wide). */
 export default function BrandBot() {
   const root = useRef<HTMLDivElement>(null);
 
@@ -75,16 +75,16 @@ export default function BrandBot() {
 
     const CFG = {
       greeting:
-        "Hey! 👋 I'm the MascotChatbot mascot — a live example of exactly what we build for your business: a talking mascot that greets visitors, answers questions, and books appointments 24/7. Want one for your site?",
+        "Hey! 👋 I'm Robo — the MascotChatbot mascot, and a live example of exactly what we build for your business: a talking mascot that greets visitors, answers questions, and books appointments 24/7. Want one for your site?",
       quick: ["What is this?", "Pricing", "Book a demo"],
       answers: [
-        { k: ["what", "this", "who", "explain", "how", "work", "mascot", "chatbot", "do"], a: "I'm a MascotChatbot — a custom animated mascot that lives on your website, talks to every visitor, answers their questions 24/7, captures leads, and books appointments. Basically a salesperson that never sleeps. Want a free demo?" },
+        { k: ["what", "this", "who", "explain", "how", "work", "mascot", "chatbot", "do"], a: "I'm Robo — a MascotChatbot. I'm a custom animated mascot that lives on your website, talks to every visitor, answers their questions 24/7, captures leads, and books appointments. Basically a salesperson that never sleeps. Want a free demo?" },
         { k: ["price", "pricing", "cost", "how much", "plan", "plans", "rates"], a: "Plans start at $99/mo flat — no per-message fees — with a one-time setup (waived if you prepay). We design it, host it, and keep it sharp. Want me to book you a quick demo to walk through it?" },
         { k: ["book", "demo", "call", "talk", "human", "start", "appointment", "schedule", "get one", "sign up"], a: "Love it — let's get you a free demo! Drop your name and email in the form on this page, or head to the pricing section to get started. 🚀" },
         { k: ["industry", "business", "work for", "fit", "niche"], a: "We build mascots for any business — electricians, dentists, realtors, gyms, salons, restaurants and more. If you've got a website, we've got a mascot for it. Want a free demo?" },
-        { k: ["hi", "hey", "hello", "yo", "sup"], a: "Hey there! 👋 I'm the MascotChatbot mascot. Ask me what we do, our pricing, or say 'book a demo' and I'll get you set up!" },
+        { k: ["hi", "hey", "hello", "yo", "sup"], a: "Hey there! 👋 I'm Robo, the MascotChatbot mascot. Ask me what we do, our pricing, or say 'book a demo' and I'll get you set up!" },
       ],
-      fallback: "Great question! I'm a MascotChatbot demo — I answer visitors 24/7 and book appointments. Want one like me for your site? Drop your email in the form or book a free demo. 🚀",
+      fallback: "Great question! I'm Robo, a MascotChatbot demo — I answer visitors 24/7 and book appointments. Want one like me for your site? Drop your email in the form or book a free demo. 🚀",
     };
 
     const W = r;
@@ -247,7 +247,13 @@ export default function BrandBot() {
     } catch {
       greetTimer = window.setTimeout(() => { if (W.getAttribute("data-state") !== "open") open(); }, 1600);
     }
-    return () => { window.clearTimeout(greetTimer); document.removeEventListener("keydown", onKey); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); };
+    // Periodic "hey, look at me" — wave + wink every several seconds (skips while talking)
+    const attnTimer = window.setInterval(() => {
+      if (speaking) return;
+      BODY?.classList.remove("bot-attn"); void BODY?.offsetWidth; BODY?.classList.add("bot-attn");
+      window.setTimeout(() => BODY?.classList.remove("bot-attn"), 1600);
+    }, 6500);
+    return () => { window.clearTimeout(greetTimer); window.clearInterval(attnTimer); document.removeEventListener("keydown", onKey); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); };
   }, []);
 
   return (
@@ -263,7 +269,7 @@ export default function BrandBot() {
         </div>
         <div className="bot-quick" id="bot-quick"></div>
         <form className="bot-input" id="bot-form" autoComplete="off">
-          <input id="bot-text" type="text" placeholder="Ask our mascot…" aria-label="Ask our mascot" />
+          <input id="bot-text" type="text" placeholder="Ask Robo…" aria-label="Ask Robo" />
           <button type="button" className="bot-mic" id="bot-mic" aria-label="Talk to the mascot">
             <svg viewBox="0 0 24 24" width="17" height="17"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z" fill="currentColor" /><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" /></svg>
           </button>
@@ -311,6 +317,9 @@ const CSS = `
 .bot-body.bot-talking .bot-arm-r{ animation:botWaveR .62s ease-in-out infinite; }
 @keyframes botWaveL{0%,100%{transform:rotate(0)}50%{transform:rotate(16deg)}}
 @keyframes botWaveR{0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
+.bot-body.bot-attn .bot-arm-r{ animation:botWaveR .53s ease-in-out 3; }
+.bot-body.bot-attn .bot-eye-r{ animation:botWink .9s ease-in-out; }
+@keyframes botWink{0%,100%{transform:scaleY(1)}28%,52%{transform:scaleY(.08)}}
 .bot-aura{ position:absolute; left:50%; top:46%; width:140px; height:140px; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(43,196,230,.22),transparent 62%); z-index:0; animation:botAura 3.4s ease-in-out infinite; }
 @keyframes botAura{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.95)}50%{opacity:.9;transform:translate(-50%,-50%) scale(1.08)}}
 .bot-shadow{ position:absolute; left:50%; bottom:-6px; width:96px; height:13px; transform:translateX(-50%); background:radial-gradient(50% 100% at 50% 50%,rgba(0,0,0,.38),transparent 70%); z-index:0; }
@@ -341,7 +350,7 @@ const CSS = `
 .bot-send{ width:36px; height:36px; flex:0 0 auto; border:none; border-radius:50%; cursor:pointer; color:#fff; background:linear-gradient(160deg,var(--cy),var(--cy-d)); display:grid; place-items:center; transition:transform .2s; box-shadow:0 4px 11px rgba(43,196,230,.4); }
 .bot-send:hover{ transform:scale(1.08) rotate(8deg); }
 @media (max-width:560px){ #bot{right:12px;bottom:10px} .bot-body{width:112px;height:156px} .bot-panel{right:104px;width:62vw} }
-@media (prefers-reduced-motion:reduce){ #bot .bot-stage,#bot .bot-head,#bot .bot-eye,#bot .bot-core,#bot .bot-bulb,#bot .bot-arm-l,#bot .bot-arm-r{animation:none!important} }
+@media (prefers-reduced-motion:reduce){ #bot .bot-stage,#bot .bot-head,#bot .bot-eye,#bot .bot-eye-r,#bot .bot-core,#bot .bot-bulb,#bot .bot-arm-l,#bot .bot-arm-r{animation:none!important} }
 
 /* hero variant */
 .hb{ display:block; }
