@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-import MrAmp from "@/components/MrAmp";
+import BrandBot from "@/components/BrandBot";
 import { CartProvider } from "@/components/CartProvider";
 import RefCapture from "@/components/RefCapture";
 
@@ -62,7 +62,7 @@ gtag('config', 'G-JX2ET1Q1HL');`}
         <CartProvider>
           <RefCapture />
           {children}
-          <MrAmp />
+          <BrandBot />
         </CartProvider>
       </body>
     </html>
