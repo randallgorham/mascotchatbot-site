@@ -4,6 +4,7 @@ import OpenMascot from "@/components/OpenMascot";
 import MobileNav from "@/components/MobileNav";
 import NavActions from "@/components/NavActions";
 import Pricing from "@/components/Pricing";
+import SiteFooter from "@/components/SiteFooter";
 import { getSetting } from "@/lib/vault";
 
 export const dynamic = "force-dynamic";
@@ -453,43 +454,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t-2 border-paper bg-ink text-paper">
-        <div className="mx-auto max-w-7xl px-5 pt-10">
-          <div className="text-xs font-bold uppercase tracking-widest text-smoke">Mascots for every business</div>
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-paper/80">
-            <a href="/industry/electricians" className="hover:text-paper">Electricians</a>
-            <a href="/industry/hvac" className="hover:text-paper">HVAC</a>
-            <a href="/industry/plumbers" className="hover:text-paper">Plumbers</a>
-            <a href="/industry/dentists" className="hover:text-paper">Dentists</a>
-            <a href="/industry/realtors" className="hover:text-paper">Realtors</a>
-            <a href="/industry/med-spas" className="hover:text-paper">Med-spas</a>
-            <a href="/industry/law-firms" className="hover:text-paper">Law firms</a>
-            <a href="/industry/gyms" className="hover:text-paper">Gyms</a>
-            <a href="/industry/salons" className="hover:text-paper">Salons</a>
-            <a href="/industry/veterinary" className="hover:text-paper">Veterinary</a>
-          </div>
-          <div className="mt-6 h-px w-full bg-paper/15" />
-        </div>
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-8 text-sm text-smoke sm:flex-row">
-          <a href="#top" className="flex items-center gap-2 text-base font-bold tracking-tight text-paper">
-            <svg width="34" height="26" viewBox="100 52 182 138" aria-hidden="true">
-              <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
-              <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
-              <rect x="115" y="58" width="150" height="116" rx="42" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
-              <ellipse cx="190" cy="118" rx="60" ry="44" fill="#2b333d" />
-              <rect x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
-              <rect x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
-              <path d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
-              <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
-              <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
-            </svg>
-            <span>Mascot<span className="text-smoke">Chatbot</span></span>
-          </a>
-          <span>© {new Date().getFullYear()} MascotChatbot. All rights reserved.</span>
-          <a href="#top" className="hover:text-paper">Back to top ↑</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
