@@ -279,14 +279,14 @@ export default function BrandBot() {
 }
 
 const CSS = `
-#bot{ --cy:#2bc4e6; --cy-d:#1597b4; --char:#14171c; --ink:#1d2127; position:fixed; right:20px; bottom:16px; z-index:60; font-family:ui-sans-serif,system-ui,Arial,sans-serif; transition:bottom .32s cubic-bezier(.34,1.4,.5,1); }
+#bot{ --cy:#2bc4e6; --cy-d:#1597b4; --char:#14171c; --ink:#1d2127; position:fixed; right:20px; bottom:16px; z-index:60; font-family:ui-sans-serif,system-ui,Arial,sans-serif; transition:bottom .32s cubic-bezier(.34,1.4,.5,1); will-change:transform; transform:translateZ(0); backface-visibility:hidden; }
 #bot[data-state="open"]{ bottom:58px; }
 #bot *{ box-sizing:border-box; }
 .bot-body{ position:relative; width:150px; height:208px; }
-.bot-stage{ position:absolute; inset:0; width:100%; height:100%; border:none; background:none; padding:0; cursor:pointer; animation:botBreathe 4.6s ease-in-out infinite, botSway 7s ease-in-out infinite; transform-origin:50% 100%; }
+.bot-stage{ position:absolute; inset:0; width:100%; height:100%; border:none; background:none; padding:0; cursor:pointer; animation:botBreathe 4.6s ease-in-out infinite, botSway 7s ease-in-out infinite; transform-origin:50% 100%; will-change:transform; }
 .bot-body.bot-intro .bot-stage{ animation:botIntro .9s cubic-bezier(.2,1.35,.4,1) both, botBreathe 4.6s ease-in-out 1s infinite, botSway 7s ease-in-out 1s infinite; }
 .bot-puppet,.bot-svg{ position:absolute; inset:0; width:100%; height:100%; }
-.bot-svg{ filter:drop-shadow(0 8px 9px rgba(0,0,0,.28)); overflow:visible; }
+.bot-svg{ overflow:visible; will-change:transform; }
 .bot-eye{ transform-box:fill-box; transform-origin:center; animation:botBlink 5.2s infinite; }
 @keyframes botBlink{0%,3.4%,100%{transform:scaleY(1)}1.4%,2.2%{transform:scaleY(.08)}}
 .bot-mouth{ transform-box:fill-box; transform-origin:center; transition:transform .05s linear; }
@@ -336,8 +336,8 @@ const CSS = `
 
 /* hero variant */
 .hb{ display:block; }
-.hb-stage{ position:relative; display:block; width:320px; max-width:100%; margin:0 auto; animation:botBreathe 4.6s ease-in-out infinite, botSway 7s ease-in-out infinite; transform-origin:50% 100%; }
-.hb-stage .bot-svg{ position:relative; inset:auto; width:100%; height:auto; filter:drop-shadow(0 18px 22px rgba(0,0,0,.16)); }
+.hb-stage{ position:relative; display:block; width:320px; max-width:100%; margin:0 auto; animation:botBreathe 4.6s ease-in-out infinite, botSway 7s ease-in-out infinite; transform-origin:50% 100%; will-change:transform; }
+.hb-stage .bot-svg{ position:relative; inset:auto; width:100%; height:auto; will-change:transform; }
 .hb-stage .bot-eye{ transform-box:fill-box; transform-origin:center; animation:botBlink 5.2s infinite; }
 .hb-bubble{ position:absolute; left:50%; top:-14px; transform:translateX(-50%); background:#fff; border:2px solid var(--char,#14171c); color:#1d2127; font-size:13px; font-weight:600; padding:8px 13px; border-radius:16px; box-shadow:0 10px 26px rgba(0,0,0,.14); white-space:nowrap; max-width:92vw; z-index:5; }
 .hb-shadow{ position:absolute; left:50%; bottom:30px; width:180px; height:20px; transform:translateX(-50%); background:radial-gradient(50% 100% at 50% 50%,rgba(0,0,0,.16),transparent 70%); }
