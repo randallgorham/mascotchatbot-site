@@ -75,7 +75,7 @@ export default function BrandBot() {
 
     const CFG = {
       greeting:
-        "Hey! 👋 I'm Robo — the MascotChatbot mascot, and a live example of exactly what we build for your business: a talking mascot that greets visitors, answers questions, and books appointments 24/7. Want one for your site?",
+        "Hi, I'm Robo — the MascotChatbot! 👋 I'm a live example of exactly what we build for your business: a talking mascot that greets visitors, answers questions, and books appointments 24/7. And the best part — you don't have to type a thing. Just tap the mic and talk to me, and I'll answer any question you've got!",
       quick: ["What is this?", "Pricing", "Book a demo"],
       answers: [
         { k: ["what", "this", "who", "explain", "how", "work", "mascot", "chatbot", "do"], a: "I'm Robo — a MascotChatbot. I'm a custom animated mascot that lives on your website, talks to every visitor, answers their questions 24/7, captures leads, and books appointments. Basically a salesperson that never sleeps. Want a free demo?" },
