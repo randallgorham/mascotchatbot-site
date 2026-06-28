@@ -183,6 +183,9 @@ export default async function Home() {
             <p className="fade-up mt-8 max-w-md text-lg leading-relaxed text-smoke" style={{ animationDelay: "160ms" }}>
               We build a custom animated mascot that lives on your site, talks to visitors, answers questions, and books the job — <b className="text-ink">24/7, done for you, hosted by us.</b>
             </p>
+            <p className="fade-up mt-4 max-w-md text-base font-semibold leading-relaxed text-ink" style={{ animationDelay: "200ms" }}>
+              Your 24/7 digital salesman — setting appointments, answering questions, and assisting your clients.
+            </p>
             <div className="fade-up mt-9 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}>
               <a href="/account" className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 font-semibold text-paper shadow-[0_8px_22px_rgba(10,10,10,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(10,10,10,0.35)]">
                 Start free <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
