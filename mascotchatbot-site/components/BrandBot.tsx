@@ -1,0 +1,345 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+
+/** Shared inline-SVG robot puppet (the MascotChatbot brand bot, "Robo").
+ *  idPrefix keeps the hero copy and the floating copy from colliding. */
+function RobotSVG({ idPrefix }: { idPrefix: string }) {
+  const p = idPrefix;
+  return (
+    <svg className="bot-svg" viewBox="0 0 220 300" aria-hidden="true">
+      {/* antennae */}
+      <g className="bot-ant">
+        <rect x="79" y="34" width="6" height="26" rx="3" fill="#3a434f" />
+        <circle cx="82" cy="30" r="7" fill="#2bc4e6" className="bot-bulb" />
+        <rect x="135" y="34" width="6" height="26" rx="3" fill="#3a434f" />
+        <circle cx="138" cy="30" r="7" fill="#2bc4e6" className="bot-bulb" />
+      </g>
+      {/* ears */}
+      <rect x="32" y="104" width="15" height="44" rx="7" fill="#3a434f" />
+      <rect x="173" y="104" width="15" height="44" rx="7" fill="#3a434f" />
+      {/* head */}
+      <rect x="46" y="56" width="128" height="104" rx="38" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      {/* face screen */}
+      <ellipse cx="110" cy="110" rx="52" ry="40" fill="#2b333d" />
+      {/* eyes */}
+      <rect id={`${p}-eye-l`} className="bot-eye" x="86" y="92" width="13" height="26" rx="6.5" fill="#2bc4e6" />
+      <rect id={`${p}-eye-r`} className="bot-eye" x="121" y="92" width="13" height="26" rx="6.5" fill="#2bc4e6" />
+      {/* mouth (lip-syncs) */}
+      <rect id={`${p}-mouth`} className="bot-mouth" x="92" y="126" width="36" height="9" rx="5" fill="#2bc4e6" />
+      {/* body */}
+      <rect x="64" y="178" width="92" height="86" rx="26" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      <circle cx="110" cy="214" r="11" fill="#2bc4e6" className="bot-core" />
+      <rect x="92" y="236" width="36" height="8" rx="4" fill="#cbd3dc" />
+      {/* arms */}
+      <rect x="46" y="188" width="16" height="46" rx="8" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      <g id={`${p}-arm`} className="bot-arm">
+        <rect x="158" y="188" width="16" height="46" rx="8" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
+      </g>
+    </svg>
+  );
+}
+
+/** Big animated robot for the hero — clicking it opens the floating widget. */
+export function HeroBot() {
+  return (
+    <div className="relative mx-auto w-full max-w-[440px]">
+      <style>{CSS}</style>
+      <div className="pointer-events-none absolute left-1/2 top-[42%] h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#2bc4e6]/15 blur-3xl" />
+      <button
+        type="button"
+        className="hb group relative mx-auto block w-[300px] max-w-full cursor-pointer border-0 bg-transparent"
+        aria-label="Talk to our mascot"
+        onClick={() => {
+          const el = document.querySelector("#bot-stage") as HTMLElement | null;
+          el?.click();
+        }}
+      >
+        <span className="hb-bubble">Hi! I'm your 24/7 mascot — ask me anything 👋</span>
+        <span className="hb-stage"><RobotSVG idPrefix="hero" /></span>
+        <span className="hb-shadow" />
+        <span className="hb-pill"><span className="hb-dot" /> LIVE — TALK TO ME</span>
+      </button>
+    </div>
+  );
+}
+
+/** Floating, click-to-talk MascotChatbot brand bot (site-wide). */
+export default function BrandBot() {
+  const root = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const r = root.current;
+    if (!r) return;
+    const $ = (s: string) => r.querySelector(s) as HTMLElement | null;
+
+    const CFG = {
+      greeting:
+        "Hey! 👋 I'm Robo, the MascotChatbot mascot — a live example of exactly what we build for your business: a talking mascot that greets visitors, answers questions, and books appointments 24/7. Want one for your site?",
+      quick: ["What is this?", "Pricing", "Book a demo"],
+      answers: [
+        { k: ["what", "this", "who", "explain", "how", "work", "mascot", "chatbot", "do"], a: "I'm a MascotChatbot — a custom animated mascot that lives on your website, talks to every visitor, answers their questions 24/7, captures leads, and books appointments. Basically a salesperson that never sleeps. Want a free demo?" },
+        { k: ["price", "pricing", "cost", "how much", "plan", "plans", "rates"], a: "Plans start at $99/mo flat — no per-message fees — with a one-time setup (waived if you prepay). We design it, host it, and keep it sharp. Want me to book you a quick demo to walk through it?" },
+        { k: ["book", "demo", "call", "talk", "human", "start", "appointment", "schedule", "get one", "sign up"], a: "Love it — let's get you a free demo! Drop your name and email in the form on this page, or head to the pricing section to get started. 🚀" },
+        { k: ["industry", "business", "work for", "fit", "niche"], a: "We build mascots for any business — electricians, dentists, realtors, gyms, salons, restaurants and more. If you've got a website, we've got a mascot for it. Want a free demo?" },
+        { k: ["hi", "hey", "hello", "yo", "sup"], a: "Hey there! 👋 I'm the MascotChatbot mascot. Ask me what we do, our pricing, or say 'book a demo' and I'll get you set up!" },
+      ],
+      fallback: "Great question! I'm a MascotChatbot demo — I answer visitors 24/7 and book appointments. Want one like me for your site? Drop your email in the form or book a free demo. 🚀",
+    };
+
+    const W = r;
+    const STAGE = $("#bot-stage"), BODY = $("#bot-body"),
+      MOUTH = $("#float-mouth"), SAY = $("#bot-say"), YOU = $("#bot-you"),
+      QUICK = $("#bot-quick"), FORM = $("#bot-form") as HTMLFormElement | null,
+      TEXT = $("#bot-text") as HTMLInputElement | null, MUTE = $("#bot-mute"),
+      MIC = $("#bot-mic"), HINT = $("#bot-hint");
+    let started = false, muted = false, speaking = false, listening = false, hintTimer: number;
+    const history: { role: string; content: string }[] = [];
+
+    let audioCtx: AudioContext | null = null, analyser: AnalyserNode | null = null, curAudio: HTMLAudioElement | null = null;
+    function ensureCtx() {
+      try {
+        const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (AC && !audioCtx) audioCtx = new AC();
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      } catch {}
+    }
+    function stopAudio() { if (curAudio) { try { curAudio.pause(); } catch {} curAudio = null; } }
+    function setMouth(open: number) { if (MOUTH) MOUTH.style.transform = "scaleY(" + (1 + Math.max(0, Math.min(1, open)) * 2.6).toFixed(2) + ")"; }
+    function lipLoop() {
+      if (!speaking || !analyser) return;
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(data);
+      let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i];
+      const avg = sum / data.length;
+      setMouth((avg - 6) / 70);
+      requestAnimationFrame(lipLoop);
+    }
+    function loopMouth() {
+      if (!speaking) { setMouth(0); return; }
+      setMouth(0.15 + Math.random() * 0.7);
+      window.setTimeout(loopMouth, 70 + Math.random() * 70);
+    }
+    function talk(on: boolean) {
+      if (on) { speaking = true; BODY?.classList.add("bot-talking"); }
+      else { speaking = false; BODY?.classList.remove("bot-talking"); setMouth(0); }
+    }
+    function nod() { BODY?.classList.remove("bot-nodding"); void BODY?.offsetWidth; BODY?.classList.add("bot-nodding"); window.setTimeout(() => BODY?.classList.remove("bot-nodding"), 620); }
+    function flapFor(t: string) { talk(true); loopMouth(); window.setTimeout(() => talk(false), Math.max(900, t.length * 42)); }
+
+    let voice: SpeechSynthesisVoice | null = null;
+    function pickVoice() {
+      const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+      if (!vs.length) return null;
+      for (const p of ["Google US English", "Samantha", "Microsoft", "female"]) for (const v of vs) if (v.name.toLowerCase().includes(p.toLowerCase()) && v.lang.startsWith("en")) return v;
+      return vs.find((v) => v.lang.startsWith("en")) || vs[0];
+    }
+    if (window.speechSynthesis) { voice = pickVoice(); speechSynthesis.onvoiceschanged = () => { voice = pickVoice(); }; }
+    function speakBrowser(text: string) {
+      if (!window.speechSynthesis) { flapFor(text); return; }
+      try {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        if (voice) u.voice = voice; u.rate = 1.03; u.pitch = 1.1;
+        u.onstart = () => { talk(true); loopMouth(); }; u.onend = () => talk(false); u.onerror = () => talk(false);
+        speechSynthesis.speak(u);
+      } catch { flapFor(text); }
+    }
+
+    async function say(text: string) {
+      if (SAY) SAY.textContent = text; nod();
+      if (muted) { flapFor(text); return; }
+      ensureCtx();
+      try {
+        const res = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+        if (!res.ok || res.status === 204) { speakBrowser(text); return; }
+        const buf = await res.arrayBuffer();
+        if (!buf || buf.byteLength < 200) { speakBrowser(text); return; }
+        stopAudio();
+        const url = URL.createObjectURL(new Blob([buf], { type: "audio/mpeg" }));
+        const a = new Audio(url); curAudio = a; a.crossOrigin = "anonymous";
+        try {
+          ensureCtx();
+          if (audioCtx) { const src = audioCtx.createMediaElementSource(a); analyser = audioCtx.createAnalyser(); analyser.fftSize = 256; src.connect(analyser); analyser.connect(audioCtx.destination); }
+        } catch { analyser = null; }
+        a.onplay = () => { speaking = true; BODY?.classList.add("bot-talking"); if (analyser) lipLoop(); else loopMouth(); };
+        a.onended = () => { talk(false); URL.revokeObjectURL(url); };
+        a.onerror = () => { talk(false); speakBrowser(text); };
+        await a.play();
+      } catch { speakBrowser(text); }
+    }
+
+    function open() {
+      if (W.getAttribute("data-state") === "open") return;
+      W.setAttribute("data-state", "open");
+      ensureCtx();
+      window.clearTimeout(hintTimer); if (HINT) HINT.style.opacity = "0";
+      BODY?.classList.remove("bot-intro"); void BODY?.offsetWidth; BODY?.classList.add("bot-intro");
+      if (!started) { started = true; renderQuick(); window.setTimeout(() => say(CFG.greeting), 380); }
+      window.setTimeout(() => TEXT?.focus(), 360);
+    }
+    function close() { W.setAttribute("data-state", "idle"); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); talk(false); }
+
+    function renderQuick() {
+      if (!QUICK) return; QUICK.innerHTML = "";
+      CFG.quick.forEach((q) => {
+        const b = document.createElement("button"); b.className = "bot-chip"; b.textContent = q;
+        if (/book|demo|appointment|schedule/i.test(q)) b.addEventListener("click", () => { try { window.location.href = "/#book"; } catch {} });
+        else if (/pricing|price/i.test(q)) b.addEventListener("click", () => { try { window.location.href = "/#pricing"; } catch {} send(q); });
+        else b.addEventListener("click", () => send(q));
+        QUICK.appendChild(b);
+      });
+    }
+    function offlineReply(text: string) {
+      const q = " " + text.toLowerCase().replace(/[^a-z0-9\s]/g, " ") + " ";
+      for (const s of CFG.answers) for (const k of s.k) if (q.includes(" " + k + " ")) return s.a;
+      return CFG.fallback;
+    }
+    async function send(text: string) {
+      text = (text || "").trim(); if (!text) return;
+      if (YOU) YOU.textContent = "You: " + text; if (SAY) SAY.textContent = "…"; if (TEXT) TEXT.value = "";
+      history.push({ role: "user", content: text });
+      ensureCtx();
+      try {
+        const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history, persona: "brand" }) });
+        if (!res.ok) throw new Error("bad");
+        const data = await res.json();
+        const reply = data && data.reply ? String(data.reply) : offlineReply(text);
+        history.push({ role: "assistant", content: reply });
+        say(reply);
+      } catch { say(offlineReply(text)); }
+    }
+
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    let recog: any = null;
+    function toggleMic() {
+      if (!SR) { say("Voice input isn't supported in this browser — just type to me instead!"); return; }
+      if (listening && recog) { try { recog.stop(); } catch {} return; }
+      ensureCtx();
+      recog = new SR(); recog.lang = "en-US"; recog.interimResults = false; recog.maxAlternatives = 1;
+      recog.onstart = () => { listening = true; MIC?.classList.add("bot-live"); };
+      recog.onresult = (e: any) => { const t = e.results[0][0].transcript; if (t) send(t); };
+      recog.onerror = () => { listening = false; MIC?.classList.remove("bot-live"); };
+      recog.onend = () => { listening = false; MIC?.classList.remove("bot-live"); };
+      try { recog.start(); } catch {}
+    }
+
+    STAGE?.addEventListener("click", open);
+    $(".bot-x")?.addEventListener("click", (e) => { e.stopPropagation(); close(); });
+    FORM?.addEventListener("submit", (e) => { e.preventDefault(); if (TEXT) send(TEXT.value); });
+    MIC?.addEventListener("click", toggleMic);
+    MUTE?.addEventListener("click", () => {
+      muted = !muted; MUTE.classList.toggle("bot-off", muted); MUTE.innerHTML = muted ? "&#128263;" : "&#128266;";
+      if (muted) { if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); talk(false); }
+    });
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    document.addEventListener("keydown", onKey);
+    hintTimer = window.setTimeout(() => { if (W.getAttribute("data-state") !== "open" && HINT) HINT.style.opacity = "1"; }, 3500);
+    return () => { document.removeEventListener("keydown", onKey); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); };
+  }, []);
+
+  return (
+    <div id="bot" ref={root} data-state="idle" aria-live="polite">
+      <style>{CSS}</style>
+      <div className="bot-panel">
+        <button className="bot-x" aria-label="Close chat">&times;</button>
+        <div className="bot-bubble">
+          <button className="bot-mute" id="bot-mute" aria-label="Mute voice">&#128266;</button>
+          <span className="bot-you" id="bot-you"></span>
+          <span className="bot-say" id="bot-say"></span>
+          <span className="bot-tail"></span>
+        </div>
+        <div className="bot-quick" id="bot-quick"></div>
+        <form className="bot-input" id="bot-form" autoComplete="off">
+          <input id="bot-text" type="text" placeholder="Ask our mascot…" aria-label="Ask our mascot" />
+          <button type="button" className="bot-mic" id="bot-mic" aria-label="Talk to the mascot">
+            <svg viewBox="0 0 24 24" width="17" height="17"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z" fill="currentColor" /><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" /></svg>
+          </button>
+          <button type="submit" className="bot-send" aria-label="Send">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 11.5 21 3l-8.5 18-2.2-7.3z" fill="currentColor" /></svg>
+          </button>
+        </form>
+      </div>
+
+      <div className="bot-body" id="bot-body">
+        <button className="bot-stage" id="bot-stage" aria-label="Talk to our mascot">
+          <span className="bot-aura"></span>
+          <FloatRobot />
+          <span className="bot-shadow"></span>
+        </button>
+        <span className="bot-hint" id="bot-hint">Click me 👋</span>
+      </div>
+    </div>
+  );
+}
+
+/** Floating-size robot (uses #float-* ids for lip-sync binding). */
+function FloatRobot() { return <span className="bot-puppet"><RobotSVG idPrefix="float" /></span>; }
+
+const CSS = `
+#bot{ --cy:#2bc4e6; --cy-d:#1597b4; --char:#14171c; --ink:#1d2127; position:fixed; right:20px; bottom:14px; z-index:60; font-family:ui-sans-serif,system-ui,Arial,sans-serif; transition:bottom .32s cubic-bezier(.34,1.4,.5,1); }
+#bot[data-state="open"]{ bottom:58px; }
+#bot *{ box-sizing:border-box; }
+.bot-body{ position:relative; width:150px; height:220px; }
+.bot-stage{ position:absolute; inset:0; width:100%; height:100%; border:none; background:none; padding:0; cursor:pointer; animation:botBreathe 4.6s ease-in-out infinite, botSway 7s ease-in-out infinite; transform-origin:50% 100%; }
+.bot-body.bot-intro .bot-stage{ animation:botIntro .9s cubic-bezier(.2,1.35,.4,1) both, botBreathe 4.6s ease-in-out 1s infinite, botSway 7s ease-in-out 1s infinite; }
+.bot-puppet,.bot-svg{ position:absolute; inset:0; width:100%; height:100%; }
+.bot-svg{ filter:drop-shadow(0 10px 10px rgba(0,0,0,.30)); overflow:visible; }
+.bot-eye{ transform-box:fill-box; transform-origin:center; animation:botBlink 5.2s infinite; }
+@keyframes botBlink{0%,3.4%,100%{transform:scaleY(1)}1.4%,2.2%{transform:scaleY(.08)}}
+.bot-mouth{ transform-box:fill-box; transform-origin:center; transition:transform .05s linear; }
+.bot-core{ animation:botCore 2.4s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+@keyframes botCore{0%,100%{opacity:.6;transform:scale(.9)}50%{opacity:1;transform:scale(1.12)}}
+.bot-bulb{ animation:botCore 2s ease-in-out infinite; }
+.bot-ant{ transform-box:fill-box; transform-origin:50% 100%; animation:botAnt 5s ease-in-out infinite; }
+@keyframes botAnt{0%,100%{transform:rotate(0)}50%{transform:rotate(2.5deg)}}
+.bot-arm{ transform-box:fill-box; transform-origin:50% 6%; }
+.bot-body.bot-talking .bot-arm{ animation:botWave .6s ease-in-out infinite; }
+@keyframes botWave{0%,100%{transform:rotate(0)}50%{transform:rotate(-20deg)}}
+.bot-body.bot-talking .bot-svg{ animation:botHeadTalk .9s ease-in-out infinite; }
+.bot-body.bot-nodding .bot-svg{ animation:botNod .6s cubic-bezier(.3,1.4,.5,1); }
+@keyframes botHeadTalk{0%{transform:rotate(0)}25%{transform:rotate(1.5deg) translateY(-2px)}60%{transform:rotate(-1.3deg) translateY(1px)}100%{transform:rotate(0)}}
+@keyframes botNod{0%,100%{transform:rotate(0)}45%{transform:rotate(2.2deg) translateY(3px)}}
+.bot-aura{ position:absolute; left:52%; top:38%; width:150px; height:150px; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(43,196,230,.22),transparent 62%); z-index:0; animation:botAura 3.4s ease-in-out infinite; }
+@keyframes botAura{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.95)}50%{opacity:.9;transform:translate(-50%,-50%) scale(1.08)}}
+.bot-shadow{ position:absolute; left:50%; bottom:-4px; width:110px; height:14px; transform:translateX(-50%); background:radial-gradient(50% 100% at 50% 50%,rgba(0,0,0,.4),transparent 70%); z-index:0; }
+.bot-hint{ position:absolute; left:50%; top:-12px; transform:translateX(-50%); background:var(--char); color:#fff; font-size:12px; font-weight:600; padding:5px 11px; border-radius:14px; white-space:nowrap; box-shadow:0 6px 16px rgba(0,0,0,.25); transition:opacity .3s; }
+.bot-hint::after{ content:""; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%) rotate(45deg); width:9px; height:9px; background:var(--char); }
+#bot[data-state="open"] .bot-hint{ display:none; }
+@keyframes botBreathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.012)}}
+@keyframes botSway{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
+@keyframes botIntro{0%{transform:translateY(150px) scale(.7);opacity:0}60%{transform:translateY(-12px) scale(1.03)}100%{transform:translateY(0) scale(1);opacity:1}}
+.bot-panel{ position:absolute; right:140px; bottom:6px; width:280px; max-width:74vw; display:flex; flex-direction:column; align-items:flex-start; gap:9px; opacity:0; transform:translateY(10px) scale(.96); transform-origin:bottom right; pointer-events:none; transition:opacity .28s ease, transform .34s cubic-bezier(.34,1.4,.5,1); }
+#bot[data-state="open"] .bot-panel{ opacity:1; transform:none; pointer-events:auto; }
+.bot-x{ align-self:flex-end; width:26px; height:26px; border:none; border-radius:50%; cursor:pointer; background:var(--char); color:#fff; font-size:16px; line-height:1; box-shadow:0 4px 12px rgba(0,0,0,.25); }
+.bot-bubble{ position:relative; background:#fff; color:var(--ink); border:2px solid var(--char); border-radius:16px; padding:13px 15px 14px; font-size:14.5px; line-height:1.42; width:100%; box-shadow:0 14px 34px rgba(0,0,0,.16); min-height:20px; }
+.bot-mute{ position:absolute; top:8px; right:9px; border:none; background:none; cursor:pointer; font-size:14px; opacity:.55; line-height:1; } .bot-mute:hover{opacity:1} .bot-mute.bot-off{opacity:.3;text-decoration:line-through}
+.bot-you{ display:block; font-size:12px; color:#9aa3ad; margin-bottom:4px; } .bot-you:empty{display:none}
+.bot-say{ display:block; font-weight:500; }
+.bot-tail{ position:absolute; right:-12px; bottom:20px; width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; border-left:13px solid var(--char); }
+.bot-tail::after{ content:""; position:absolute; right:3px; top:-7px; border-top:7px solid transparent; border-bottom:7px solid transparent; border-left:10px solid #fff; }
+.bot-quick{ display:flex; flex-wrap:wrap; gap:6px; width:100%; }
+.bot-chip{ border:1.5px solid #d9dee5; background:#fff; color:var(--ink); font-size:12px; font-weight:600; padding:6px 10px; border-radius:16px; cursor:pointer; transition:all .16s; box-shadow:0 3px 10px rgba(0,0,0,.06); }
+.bot-chip:hover{ border-color:var(--cy); color:var(--cy-d); transform:translateY(-1px); }
+.bot-input{ display:flex; gap:6px; width:100%; background:#fff; border:1.5px solid #d9dee5; border-radius:24px; padding:5px 5px 5px 14px; box-shadow:0 8px 22px rgba(0,0,0,.12); align-items:center; }
+#bot-text{ flex:1; border:none; outline:none; font-size:14px; background:none; color:var(--ink); }
+.bot-mic{ width:34px; height:34px; flex:0 0 auto; border:1.5px solid #d9dee5; border-radius:50%; cursor:pointer; color:var(--ink); background:#fff; display:grid; place-items:center; transition:all .18s; }
+.bot-mic:hover{ border-color:var(--cy); color:var(--cy-d); }
+.bot-mic.bot-live{ background:var(--cy); color:#fff; border-color:var(--cy); animation:botMic 1s ease-in-out infinite; }
+@keyframes botMic{0%,100%{box-shadow:0 0 0 0 rgba(43,196,230,.5)}50%{box-shadow:0 0 0 7px rgba(43,196,230,0)}}
+.bot-send{ width:36px; height:36px; flex:0 0 auto; border:none; border-radius:50%; cursor:pointer; color:#fff; background:linear-gradient(160deg,var(--cy),var(--cy-d)); display:grid; place-items:center; transition:transform .2s; box-shadow:0 4px 11px rgba(43,196,230,.4); }
+.bot-send:hover{ transform:scale(1.08) rotate(8deg); }
+@media (max-width:560px){ #bot{right:10px;bottom:8px} .bot-body{width:118px;height:176px} .bot-panel{right:110px;width:62vw} }
+@media (prefers-reduced-motion:reduce){ #bot .bot-stage,#bot .bot-eye,#bot .bot-core,#bot .bot-bulb,#bot .bot-ant{animation:none!important} }
+
+/* hero variant */
+.hb{ display:block; }
+.hb-stage{ position:relative; display:block; width:300px; max-width:100%; margin:0 auto; animation:botBreathe 4.6s ease-in-out infinite, botSway 7s ease-in-out infinite; transform-origin:50% 100%; }
+.hb-stage .bot-svg{ position:relative; inset:auto; width:100%; height:auto; filter:drop-shadow(0 18px 22px rgba(0,0,0,.18)); }
+.hb-stage .bot-eye{ transform-box:fill-box; transform-origin:center; animation:botBlink 5.2s infinite; }
+.hb-stage .bot-core,.hb-stage .bot-bulb{ animation:botCore 2.4s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+.hb-bubble{ position:absolute; left:50%; top:-6px; transform:translateX(-50%); background:#fff; border:2px solid var(--char,#14171c); color:#1d2127; font-size:13px; font-weight:600; padding:8px 13px; border-radius:16px; box-shadow:0 10px 26px rgba(0,0,0,.14); white-space:nowrap; max-width:92vw; z-index:5; }
+.hb-shadow{ position:absolute; left:50%; bottom:46px; width:170px; height:20px; transform:translateX(-50%); background:radial-gradient(50% 100% at 50% 50%,rgba(0,0,0,.18),transparent 70%); }
+.hb-pill{ display:inline-flex; align-items:center; gap:7px; margin-top:10px; background:#14171c; color:#fff; font-size:12px; font-weight:700; letter-spacing:.04em; padding:7px 14px; border-radius:999px; }
+.hb-dot{ width:8px; height:8px; border-radius:50%; background:#22e07a; box-shadow:0 0 0 0 rgba(34,224,122,.6); animation:botMic 1.6s infinite; }
+`;
