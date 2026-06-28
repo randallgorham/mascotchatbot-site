@@ -125,7 +125,7 @@ export default function BrandBot() {
       else { speaking = false; BODY?.classList.remove("bot-talking"); setMouth(0); relisten(); }
     }
     function nod() { BODY?.classList.remove("bot-nodding"); void BODY?.offsetWidth; BODY?.classList.add("bot-nodding"); window.setTimeout(() => BODY?.classList.remove("bot-nodding"), 620); }
-    function flapFor(t: string) { talk(true); loopMouth(); window.setTimeout(() => talk(false), Math.max(900, t.length * 42)); }
+    function flapFor(t: string) { talk(true); loopMouth(); window.setTimeout(() => talk(false), Math.max(700, t.length * 34)); }
 
     let voice: SpeechSynthesisVoice | null = null;
     function pickVoice() {
@@ -140,7 +140,7 @@ export default function BrandBot() {
       try {
         speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        if (voice) u.voice = voice; u.rate = 1.03; u.pitch = 1.1;
+        if (voice) u.voice = voice; u.rate = 1.4; u.pitch = 1.12;
         u.onstart = () => { talk(true); loopMouth(); }; u.onend = () => talk(false); u.onerror = () => talk(false);
         speechSynthesis.speak(u);
       } catch { flapFor(text); }
@@ -151,7 +151,7 @@ export default function BrandBot() {
       if (muted) { flapFor(text); return; }
       ensureCtx();
       try {
-        const res = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+        const res = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, speed: 1.4 }) });
         if (!res.ok || res.status === 204) { speakBrowser(text); return; }
         const buf = await res.arrayBuffer();
         if (!buf || buf.byteLength < 200) { speakBrowser(text); return; }
@@ -229,7 +229,7 @@ export default function BrandBot() {
     function relisten() {
       if (!convo || muted || !SR) return;
       if (W.getAttribute("data-state") !== "open") return;
-      window.setTimeout(() => { if (!speaking && !listening) startListening(); }, 380);
+      window.setTimeout(() => { if (!speaking && !listening) startListening(); }, 300);
     }
     function toggleMic() {
       if (!SR) { say("Voice input isn't supported in this browser — just type to me instead!"); return; }
