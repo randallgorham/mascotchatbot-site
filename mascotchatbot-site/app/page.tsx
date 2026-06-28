@@ -1,4 +1,4 @@
-import HeroMascot from "@/components/HeroMascot";
+import { HeroBot } from "@/components/BrandBot";
 import LeadForm from "@/components/LeadForm";
 import OpenMascot from "@/components/OpenMascot";
 import MobileNav from "@/components/MobileNav";
@@ -29,7 +29,7 @@ const STEPS = [
   { n: "03", t: "We host it on your site", d: "One line of code. It captures leads and books jobs 24/7. You do nothing." },
 ];
 
-// Full character roster shown in the gallery. Mr Amp is the live, click-to-talk demo.
+// Full character roster shown in the gallery. Robo is the live, click-to-talk demo.
 const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?: string }[] = [
   { img: "dr-volt-1", name: "Dr. Volt", niche: "Electrical", say: "Pick me!", ext: "png" },
   { img: "tattoo", name: "Ink", niche: "Tattoo Studio", say: "Pick me!", ext: "png" },
@@ -208,7 +208,7 @@ export default async function Home() {
             </div>
           </div>
           <div className="fade-up flex justify-center md:justify-end" style={{ animationDelay: "200ms" }}>
-            <HeroMascot />
+            <HeroBot />
           </div>
         </div>
       </section>
@@ -290,10 +290,10 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-5 py-24">
           <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
             <h2 className="text-4xl font-bold tracking-tightest md:text-6xl">Meet the family.</h2>
-            <p className="max-w-sm text-smoke"><b className="text-ink">Mr Amp is live right now</b> — click him in the bottom-right corner (turn your sound on), or tap his card. Every mascot below is custom to a brand, voice, and business.</p>
+            <p className="max-w-sm text-smoke"><b className="text-ink">Robo is live right now</b> — click him in the bottom-right corner (turn your sound on), or tap his card. Every mascot below is custom to a brand, voice, and business.</p>
           </div>
 
-          {/* Mr Amp — live demo */}
+          {/* Robo — live demo */}
           <OpenMascot className="group mb-10 flex w-full items-center gap-6 rounded-3xl border-2 border-ink bg-ink p-6 text-left text-paper transition hover:opacity-90 md:p-8">
             <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-paper">
               <svg width="74" height="56" viewBox="100 52 182 138" aria-hidden="true">
@@ -310,12 +310,12 @@ export default async function Home() {
             </span>
             <span className="flex-1">
               <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-smoke">
-                Electrician <span className="rounded-full bg-[#e3342b] px-2 py-0.5 text-[10px] text-paper">LIVE</span>
+                MascotChatbot <span className="rounded-full bg-[#e3342b] px-2 py-0.5 text-[10px] text-paper">LIVE</span>
               </span>
-              <span className="mt-1 block text-3xl font-bold tracking-tight">Mr Amp</span>
-              <span className="mt-1 block text-smoke">The fully animated, talking demo — click to hear him pitch.</span>
+              <span className="mt-1 block text-3xl font-bold tracking-tight">Robo</span>
+              <span className="mt-1 block text-smoke">Our own talking mascot — click to chat with him live.</span>
             </span>
-            <span className="hidden shrink-0 text-lg font-semibold md:block">talk to him →</span>
+            <span className="hidden shrink-0 text-lg font-semibold md:block">talk to Robo →</span>
           </OpenMascot>
 
           {/* Full roster */}
