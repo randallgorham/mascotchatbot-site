@@ -204,6 +204,19 @@ export default function BrandBot() {
     }
     function say(text: string) { if (SAY) SAY.textContent = text; nod(); speakAll(text); }
 
+    // ---- session telemetry (time-on-mascot): log as the brand bot "brand" ----
+    let beatTimer: any = null;
+    let trackStarted = false;
+    function trackStart() {
+      if (trackStarted) return; trackStarted = true;
+      try { fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: "brand", ev: "start" }), keepalive: true }).catch(() => {}); } catch {}
+      try { window.clearInterval(beatTimer); } catch {}
+      beatTimer = window.setInterval(() => {
+        try { fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: "brand", ev: "beat", secs: 15 }), keepalive: true }).catch(() => {}); } catch {}
+      }, 15000);
+    }
+    function trackStop() { try { window.clearInterval(beatTimer); } catch {} beatTimer = null; }
+
     function open() {
       if (W.getAttribute("data-state") === "open") return;
       W.setAttribute("data-state", "open");
@@ -211,10 +224,11 @@ export default function BrandBot() {
       window.clearTimeout(hintTimer); if (HINT) HINT.style.opacity = "0";
       BODY?.classList.remove("bot-intro"); void BODY?.offsetWidth; BODY?.classList.add("bot-intro");
       try { if (sessionStorage.getItem("mcb_mic")) convo = true; } catch {}
+      trackStart();
       if (!started) { started = true; renderQuick(); window.setTimeout(() => say(CFG.greeting), 380); }
       window.setTimeout(() => TEXT?.focus(), 360);
     }
-    function close() { W.setAttribute("data-state", "idle"); resetSpeak(); }
+    function close() { W.setAttribute("data-state", "idle"); resetSpeak(); trackStop(); }
 
     function renderQuick() {
       if (!QUICK) return; QUICK.innerHTML = "";
@@ -255,14 +269,14 @@ export default function BrandBot() {
       if (end) { const rest = sayBuf.trim(); sayBuf = ""; if (rest) { enqueueSpeak(rest); spokeFirst = true; } }
     }
 
-    async function send(text: string) {
+    async function send(text: string, via: "text" | "voice" = "text") {
       text = (text || "").trim(); if (!text) return;
       if (YOU) YOU.textContent = "You: " + text; if (SAY) SAY.textContent = "…"; if (TEXT) TEXT.value = "";
       history.push({ role: "user", content: text });
       ensureCtx(); resetSpeak(); nod(); sayBuf = ""; spokeFirst = false;
       let full = "";
       try {
-        const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history, persona: "brand", stream: true }) });
+        const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history, persona: "brand", stream: true, via }) });
         if (!res.ok || !res.body) throw new Error("bad");
         const reader = res.body.getReader();
         const dec = new TextDecoder();
@@ -294,7 +308,7 @@ export default function BrandBot() {
       try {
         recog = new SR(); recog.lang = "en-US"; recog.interimResults = false; recog.maxAlternatives = 1;
         recog.onstart = () => { listening = true; MIC?.classList.add("bot-live"); try { sessionStorage.setItem("mcb_mic", "1"); } catch {} };
-        recog.onresult = (e: any) => { const t = e.results[0][0].transcript; if (t) send(t); };
+        recog.onresult = (e: any) => { const t = e.results[0][0].transcript; if (t) send(t, "voice"); };
         recog.onerror = () => { listening = false; MIC?.classList.remove("bot-live"); };
         recog.onend = () => { listening = false; MIC?.classList.remove("bot-live"); };
         recog.start();
