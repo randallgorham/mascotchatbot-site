@@ -1,6 +1,5 @@
 "use client";
 
-import SiteHeader from "@/components/SiteHeader";
 import { useEffect, useRef, useState } from "react";
 import { BOTS, VOICES, defaultVoiceFor } from "@/lib/bots";
 
@@ -196,7 +195,6 @@ export default function Admin() {
 
   return (
     <main className="min-h-screen bg-neutral-50 text-neutral-900" style={{ fontFamily: "ui-sans-serif,system-ui,Arial,sans-serif" }}>
-      <SiteHeader />
       <div className="mx-auto max-w-4xl px-5 py-12">
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight">Owner Admin</h1>
