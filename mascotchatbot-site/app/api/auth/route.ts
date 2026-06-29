@@ -2,6 +2,7 @@ import { getUser, saveUser, hashPassword, makeSessionToken, sessionCookie, clear
 import { kvReady, kvGet } from "@/lib/vault";
 import { getOrCreateBot, saveBot, BotConfig, getBot, ownsBot, listBotsFor, createBotFor } from "@/lib/botcfg";
 import { listLeads } from "@/lib/leads";
+import { effectiveSkillIds, BASE_SKILLS } from "@/lib/skills";
 import { recordReferral, summaryFor } from "@/lib/referrals";
 
 // Resolve which bot an action targets: a specific owned bot via body.botId
@@ -147,6 +148,13 @@ export async function POST(req: Request) {
       accent: str(b.accent, cur.accent, 16),
       image: str(b.image, cur.image, 500),
     };
+    // Skills: customer may pick within their tier's allowance only (tier itself is not customer-editable).
+    {
+      const baseIds = new Set(BASE_SKILLS.map((s) => s.id));
+      const picked = Array.isArray(b.skills) ? (b.skills as unknown[]).filter((x): x is string => typeof x === "string") : (cur.skills || []);
+      next.skills = effectiveSkillIds(cur.tier, picked).filter((id) => !baseIds.has(id));
+      next.tier = cur.tier;
+    }
     await saveBot(next);
     return json({ ok: true, bot: next });
   }
