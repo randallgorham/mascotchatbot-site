@@ -2,7 +2,6 @@
 
 // Owner command center: full business overview, trends, funnel, affiliate
 // payouts, a customer table, and per-customer drill-down with live controls.
-import SiteHeader from "@/components/SiteHeader";
 import React, { useEffect, useState, useCallback } from "react";
 
 type KPIs = {
@@ -91,7 +90,6 @@ export default function CommandCenter() {
   if (loading) return <main style={wrap}><p style={{ color: "#888" }}>Loading command center…</p></main>;
   if (forbidden) return (
     <main style={wrap}>
-      <SiteHeader />
       <h1 style={h1}>Command center</h1>
       <p style={{ color: "#555", marginTop: 10 }}>This is owner/admin only. <a href="/admin" style={link}>Sign in to the admin →</a></p>
     </main>
@@ -106,7 +104,6 @@ export default function CommandCenter() {
 
   return (
     <main style={wrap}>
-      <SiteHeader />
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
         <h1 style={h1}>Command center</h1>
         <div style={{ display: "flex", gap: 14 }}>
