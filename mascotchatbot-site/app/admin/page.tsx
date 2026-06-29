@@ -10,7 +10,7 @@ type Usage = { ok: boolean; customers: UsageRow[]; totals: { messages: number; c
 type PayoutRow = { referrer: string; signups: number; conversions: number; owed: number };
 type Payouts = { ok: boolean; rows: PayoutRow[]; totalOwed: number; totalConversions: number; error?: string };
 type Member = { email: string; role: string; addedAt?: string };
-type Settings = { brain: string; voice: string; openaiVoice: string; elevenVoiceId: string; botVoices: Record<string, string>; ghlCalendarUrl: string };
+type Settings = { brain: string; voice: string; openaiVoice: string; elevenVoiceId: string; botVoices: Record<string, string>; ghlCalendarUrl: string; alertEmail: string };
 type Status = {
   auth: boolean;
   signedIn?: boolean;
@@ -80,7 +80,7 @@ export default function Admin() {
   const [status, setStatus] = useState<Status | null>(null);
   const [tab, setTab] = useState<string>("integrations");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [settings, setSettings] = useState<Settings>({ brain: "openai", voice: "openai", openaiVoice: "ash", elevenVoiceId: "", botVoices: {}, ghlCalendarUrl: "" });
+  const [settings, setSettings] = useState<Settings>({ brain: "openai", voice: "openai", openaiVoice: "ash", elevenVoiceId: "", botVoices: {}, ghlCalendarUrl: "", alertEmail: "" });
   const [teamForm, setTeamForm] = useState({ email: "", role: "staff" });
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -328,6 +328,10 @@ export default function Admin() {
                   <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">Booking calendar link (GoHighLevel)</span>
                     <input value={settings.ghlCalendarUrl} onChange={(e) => setSettings({ ...settings, ghlCalendarUrl: e.target.value })} placeholder="https://api.leadconnectorhq.com/widget/booking/XXXXXXXX" className="w-full rounded-xl border-2 border-neutral-200 px-3 py-2.5 outline-none focus:border-neutral-900" />
                     <span className="mt-1 block text-xs text-neutral-500">GHL → Calendars → your calendar → Share/Embed → copy the <b>booking widget URL</b>. This powers the &ldquo;Book a demo&rdquo; button and the /book page.</span>
+                  </label>
+                  <label className="block text-sm sm:col-span-2"><span className="mb-1 block font-semibold">Alerts &amp; digest email</span>
+                    <input value={settings.alertEmail} onChange={(e) => setSettings({ ...settings, alertEmail: e.target.value })} placeholder="you@yourbusiness.com" className="w-full rounded-xl border-2 border-neutral-200 px-3 py-2.5 outline-none focus:border-neutral-900" />
+                    <span className="mt-1 block text-xs text-neutral-500">Where needs-attention alerts, the weekly fleet digest, and trial reminders are sent. Requires a <b>Resend</b> key (Integrations tab) and a <b>CRON_SECRET</b> env var in Vercel for the daily job to run.</span>
                   </label>
                 </div>
                 <button onClick={saveSettings} disabled={busy} className="mt-4 rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50">Save settings</button>
