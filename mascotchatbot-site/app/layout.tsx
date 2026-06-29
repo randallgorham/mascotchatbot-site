@@ -4,6 +4,7 @@ import "./globals.css";
 import BrandBot from "@/components/BrandBot";
 import { CartProvider } from "@/components/CartProvider";
 import RefCapture from "@/components/RefCapture";
+import CookieConsent from "@/components/CookieConsent";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mascotchatbot.com"),
@@ -63,6 +64,7 @@ gtag('config', 'G-JX2ET1Q1HL');`}
           <RefCapture />
           {children}
           <BrandBot />
+          <CookieConsent />
         </CartProvider>
       </body>
     </html>
