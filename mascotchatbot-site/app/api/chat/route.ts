@@ -1,4 +1,4 @@
-import { getSecret, getSetting, kvIncr } from "@/lib/vault";
+import { getSecret, getSetting, kvIncr, kvIncrBy, kvGet, kvSet } from "@/lib/vault";
 import { getBot, publicConfig, botSystemPrompt } from "@/lib/botcfg";
 import { extractContact, saveLead, emailOwner, emailLead, getLead } from "@/lib/leads";
 
@@ -48,6 +48,36 @@ export function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS });
 }
 
+// ---- telemetry helpers (apply to real bots, the brand bot "brand", and the homepage demo "demo") ----
+const FALLBACKS = new Set([
+  "Ask me that again?",
+  "Oops, I glitched for a second — try that again?",
+]);
+
+async function logQuestion(sid: string, q: string) {
+  const t = (q || "").trim().replace(/\s+/g, " ").slice(0, 160);
+  if (!t || t.length < 3) return;
+  try {
+    const raw = await kvGet("qlog:" + sid);
+    let arr: { q: string; at: number }[] = [];
+    if (raw) { try { const p = JSON.parse(raw); if (Array.isArray(p)) arr = p; } catch {} }
+    arr.push({ q: t, at: Date.now() });
+    if (arr.length > 200) arr = arr.slice(arr.length - 200);
+    await kvSet("qlog:" + sid, JSON.stringify(arr));
+  } catch {}
+}
+
+async function recordLatency(sid: string, ms: number, ttft?: number) {
+  try {
+    await kvIncrBy("stat:" + sid + ":rtsum", Math.round(ms));
+    await kvIncr("stat:" + sid + ":rtcount");
+    if (typeof ttft === "number" && ttft >= 0) {
+      await kvIncrBy("stat:" + sid + ":ttftsum", Math.round(ttft));
+      await kvIncr("stat:" + sid + ":ttftcount");
+    }
+  } catch {}
+}
+
 async function resolveBrain(): Promise<{ provider: "openai" | "anthropic"; key: string } | null> {
   const brain = await getSetting("brain", "openai");
   const [openaiKey, anthropicKey] = await Promise.all([getSecret("OPENAI_API_KEY"), getSecret("ANTHROPIC_API_KEY")]);
@@ -89,28 +119,37 @@ export async function POST(req: Request) {
       content: String((m && m.content) || "").slice(0, 600),
     }));
 
-    // Analytics + lead capture.
-    if (bot) {
+    // Telemetry id: real bots use their id; the site mascot logs as "brand"; the homepage Mr Amp demo as "demo".
+    const sid = bot ? bot.id : (persona === "brand" ? "brand" : "demo");
+    const via = body && body.via === "voice" ? "voice" : "text";
+    const lastUser = [...trimmed].reverse().find((m: { role: string; content: string }) => m.role === "user");
+
+    // Unified analytics — applies to every mascot (bot, brand, demo).
+    {
       const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD for daily trend buckets
-      await kvIncr("stat:" + bot.id + ":msgs");
-      await kvIncr("stat:" + bot.id + ":msgs:" + day);
+      await kvIncr("stat:" + sid + ":msgs");
+      await kvIncr("stat:" + sid + ":msgs:" + day);
+      await kvIncr("stat:" + sid + ":" + via); // voice vs text channel mix
+      await kvIncr("stat:" + sid + ":hr:" + new Date().getUTCHours()); // busiest-hours histogram
       if (trimmed.filter((m: { role: string; content: string }) => m.role === "user").length <= 1) {
-        await kvIncr("stat:" + bot.id + ":convos");
-        await kvIncr("stat:" + bot.id + ":convos:" + day);
+        await kvIncr("stat:" + sid + ":convos");
+        await kvIncr("stat:" + sid + ":convos:" + day);
       }
-      const lastUser = [...trimmed].reverse().find((m: { role: string; content: string }) => m.role === "user");
-      if (lastUser && lastUser.content) {
-        const c = extractContact(lastUser.content);
-        if (c.email || c.phone) {
-          const id = (c.email || c.phone || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 40) || Date.now().toString(36);
-          const already = await getLead(bot.id, id);
-          const lead = { id, botId: bot.id, name: c.name, email: c.email, phone: c.phone, message: lastUser.content.slice(0, 500), at: new Date().toISOString(), transcript: trimmed.slice(-12) };
-          await saveLead(lead);
-          // Only fire notifications the first time we see this contact (avoid spamming on repeat messages).
-          if (!already) {
-            if (bot.owner) await emailOwner(bot.owner, bot.business, lead);
-            await emailLead(bot.business, "", lead);
-          }
+      if (lastUser && lastUser.content) await logQuestion(sid, lastUser.content);
+    }
+
+    // Lead capture — only for real deployed bots.
+    if (bot && lastUser && lastUser.content) {
+      const c = extractContact(lastUser.content);
+      if (c.email || c.phone) {
+        const id = (c.email || c.phone || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 40) || Date.now().toString(36);
+        const already = await getLead(bot.id, id);
+        const lead = { id, botId: bot.id, name: c.name, email: c.email, phone: c.phone, message: lastUser.content.slice(0, 500), at: new Date().toISOString(), transcript: trimmed.slice(-12) };
+        await saveLead(lead);
+        // Only fire notifications the first time we see this contact (avoid spamming on repeat messages).
+        if (!already) {
+          if (bot.owner) await emailOwner(bot.owner, bot.business, lead);
+          await emailLead(bot.business, "", lead);
         }
       }
     }
@@ -129,12 +168,14 @@ export async function POST(req: Request) {
         async start(controller) {
           try {
             if (brain.provider === "openai") {
+              const t0 = Date.now();
+              let ttft = -1;
               const rr = await fetch("https://api.openai.com/v1/chat/completions", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: "Bearer " + brain.key },
                 body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "system", content: system }, ...trimmed], max_tokens: 120, temperature: 0.7, stream: true }),
               });
-              if (!rr.ok || !rr.body) { controller.enqueue(enc.encode("Ask me that again?")); controller.close(); return; }
+              if (!rr.ok || !rr.body) { controller.enqueue(enc.encode("Ask me that again?")); await kvIncr("stat:" + sid + ":errs"); controller.close(); return; }
               const reader = rr.body.getReader();
               const dec = new TextDecoder();
               let buf = "";
@@ -152,11 +193,13 @@ export async function POST(req: Request) {
                   try {
                     const j = JSON.parse(d);
                     const piece = j && j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content;
-                    if (piece) controller.enqueue(enc.encode(piece));
+                    if (piece) { if (ttft < 0) ttft = Date.now() - t0; controller.enqueue(enc.encode(piece)); }
                   } catch {}
                 }
               }
+              await recordLatency(sid, Date.now() - t0, ttft < 0 ? undefined : ttft);
             } else {
+              const t0 = Date.now();
               const rr = await fetch("https://api.anthropic.com/v1/messages", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "x-api-key": brain.key, "anthropic-version": "2023-06-01" },
@@ -164,10 +207,14 @@ export async function POST(req: Request) {
               });
               const j = await rr.json();
               const reply = (j && j.content && j.content[0] && String(j.content[0].text || "").trim()) || "Ask me that again?";
+              if (FALLBACKS.has(reply)) await kvIncr("stat:" + sid + ":errs");
+              const ms = Date.now() - t0;
+              await recordLatency(sid, ms, ms);
               controller.enqueue(enc.encode(reply));
             }
           } catch {
             controller.enqueue(enc.encode("Oops, I glitched for a second — try that again?"));
+            await kvIncr("stat:" + sid + ":errs");
           }
           controller.close();
         },
@@ -176,6 +223,7 @@ export async function POST(req: Request) {
     }
 
     if (brain.provider === "anthropic") {
+      const t0 = Date.now();
       const r = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-api-key": brain.key, "anthropic-version": "2023-06-01" },
@@ -183,9 +231,13 @@ export async function POST(req: Request) {
       });
       const j = await r.json();
       const reply = (j && j.content && j.content[0] && String(j.content[0].text || "").trim()) || "Ask me that again?";
+      const ms = Date.now() - t0;
+      await recordLatency(sid, ms);
+      if (!r.ok || FALLBACKS.has(reply)) await kvIncr("stat:" + sid + ":errs");
       return json({ reply });
     }
 
+    const t0 = Date.now();
     const r = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + brain.key },
@@ -200,6 +252,9 @@ export async function POST(req: Request) {
     const reply =
       (j && j.choices && j.choices[0] && j.choices[0].message && String(j.choices[0].message.content || "").trim()) ||
       "Ask me that again?";
+    const ms = Date.now() - t0;
+    await recordLatency(sid, ms);
+    if (!r.ok || FALLBACKS.has(reply)) await kvIncr("stat:" + sid + ":errs");
     return json({ reply });
   } catch {
     return json({ reply: "Oops, I glitched for a second — try that again?" });
