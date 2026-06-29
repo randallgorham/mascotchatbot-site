@@ -18,11 +18,6 @@ const TALK_CSS = `
 @media (prefers-reduced-motion:reduce){.mc-talk{animation:none;background:none;-webkit-text-fill-color:currentColor;color:inherit}.mc-eq i{animation:none}}
 `;
 
-const NICHES = [
-  "Electricians","Realtors","HVAC","Dentists","Law firms","Med-spas",
-  "Plumbers","Roofers","Auto repair","Gyms","Contractors","Clinics",
-];
-
 const STEPS = [
   { n: "01", t: "We design the mascot", d: "Your character or one we create — rigged to move, blink, and talk fluidly." },
   { n: "02", t: "We give it a brain", d: "Trained on your business so it answers accurately, in your voice." },
@@ -213,14 +208,33 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* MARQUEE */}
-      <section className="overflow-hidden border-y-2 border-ink bg-ink py-4 text-paper">
-        <div className="flex w-max animate-marquee whitespace-nowrap">
-          {[...NICHES, ...NICHES].map((n, i) => (
-            <span key={i} className="mx-6 text-2xl font-bold tracking-tight">
-              {n} <span className="mx-2 text-smoke">/</span>
-            </span>
-          ))}
+      {/* MARQUEE — mascot faces + the industries they work in */}
+      <section className="overflow-hidden border-y-2 border-ink bg-ink py-6 text-paper">
+        <style>{`
+          @keyframes mcbBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+          @keyframes mcbWiggle{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+          @keyframes mcbSway{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}
+          @keyframes mcbNod{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.06)}}
+        `}</style>
+        <div className="flex w-max animate-marquee items-end">
+          {[...CHARACTERS, ...CHARACTERS].map((c, i) => {
+            const anims = ["mcbBob", "mcbWiggle", "mcbSway", "mcbNod"];
+            const a = anims[i % anims.length];
+            return (
+              <div key={i} className="mx-4 flex w-24 shrink-0 flex-col items-center sm:w-28">
+                <span className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-paper/25 bg-paper sm:h-24 sm:w-24">
+                  <img
+                    src={`/mascots/${c.img}.${c.ext || "jpg"}`}
+                    alt={`${c.name} — ${c.niche} mascot`}
+                    loading="lazy"
+                    className="h-full w-full object-contain mix-blend-multiply"
+                    style={{ animation: `${a} ${(2.4 + (i % 5) * 0.35).toFixed(2)}s ease-in-out infinite`, animationDelay: `${((i % 7) * 0.2).toFixed(2)}s`, willChange: "transform" }}
+                  />
+                </span>
+                <span className="mt-2 whitespace-nowrap text-sm font-bold tracking-tight">{c.niche}</span>
+              </div>
+            );
+          })}
         </div>
       </section>
 
