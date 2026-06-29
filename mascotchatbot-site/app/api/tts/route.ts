@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     const r1 = await fetch("https://api.openai.com/v1/audio/speech", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + key },
-      body: JSON.stringify({ model: "gpt-4o-mini-tts", voice, input: text, instructions: ENERGY_INSTRUCTIONS, response_format: "mp3", speed }),
+      body: JSON.stringify({ model: "tts-1", voice, input: text, response_format: "mp3", speed }),
     });
     if (r1.ok) return mp3(await r1.arrayBuffer());
 
