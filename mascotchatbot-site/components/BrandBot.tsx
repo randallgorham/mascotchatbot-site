@@ -140,7 +140,7 @@ export default function BrandBot() {
       try {
         speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        if (voice) u.voice = voice; u.rate = 1.4; u.pitch = 1.12;
+        if (voice) u.voice = voice; u.rate = 1.2; u.pitch = 1.1;
         u.onstart = () => { talk(true); loopMouth(); }; u.onend = () => talk(false); u.onerror = () => talk(false);
         speechSynthesis.speak(u);
       } catch { flapFor(text); }
@@ -151,7 +151,7 @@ export default function BrandBot() {
       if (muted) { flapFor(text); return; }
       ensureCtx();
       try {
-        const res = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, speed: 1.4 }) });
+        const res = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, speed: 1.2 }) });
         if (!res.ok || res.status === 204) { speakBrowser(text); return; }
         const buf = await res.arrayBuffer();
         if (!buf || buf.byteLength < 200) { speakBrowser(text); return; }
