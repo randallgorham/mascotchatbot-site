@@ -3,6 +3,7 @@
 // Admin Fleet dashboard: every deployed mascot in one directory, a fleet roll-up with
 // "needs attention" flags, and a per-mascot analytics drill-down.
 import React, { useEffect, useState, useCallback } from "react";
+import { eligibleSkills, tierAllowance, normTier, BASE_SKILLS } from "@/lib/skills";
 
 type Row = {
   kind: string; id: string; business: string; owner: string; industry: string;
@@ -243,6 +244,8 @@ function MascotDetail({ d, row }: { d: Detail; row: Row }) {
         <Kpi label="Last active" value={d.stats.lastActive ? ago(d.stats.lastActive) : "—"} />
       </section>
 
+      {d.isBot && d.bot && <SkillsEditor bot={d.bot} />}
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 16, marginTop: 16 }}>
         <div style={card}>
           <h3 style={h3}>Messages — last 14 days</h3>
@@ -286,6 +289,58 @@ function MascotDetail({ d, row }: { d: Detail; row: Row }) {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+function SkillsEditor({ bot }: { bot: Record<string, unknown> }) {
+  const id = String(bot.id || "");
+  const [tier, setTier] = useState(normTier(String(bot.tier || "")));
+  const [sel, setSel] = useState<string[]>(Array.isArray(bot.skills) ? (bot.skills as string[]) : []);
+  const [msg, setMsg] = useState("");
+  async function cmd(action: string, extra: Record<string, unknown>) {
+    setMsg("Saving…");
+    const r = await fetch("/api/admin/command", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, botId: id, ...extra }) });
+    const dd = await r.json().catch(() => ({}));
+    if (dd && dd.ok && dd.bot) { setTier(normTier(String(dd.bot.tier || ""))); setSel(Array.isArray(dd.bot.skills) ? dd.bot.skills : []); setMsg("Saved ✓"); }
+    else setMsg(dd.error || "Failed");
+  }
+  const allow = tierAllowance(tier);
+  const elig = eligibleSkills(tier);
+  const used = sel.length;
+  const toggle = (sid: string, on: boolean) => {
+    let next = sel.filter((x) => x !== sid);
+    if (on) { if (allow !== Infinity && next.length >= allow) return; next = [...next, sid]; }
+    setSel(next); cmd("setSkills", { skills: next });
+  };
+  return (
+    <div style={{ ...card, marginTop: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+        <h3 style={h3}>Skills (admin override)</h3>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 12, color: "#888" }}>Tier</span>
+          <select value={tier} onChange={(e) => { const t = normTier(e.target.value); setTier(t); cmd("setTier", { tier: t }); }} style={input}>
+            <option value="starter">Starter (2)</option>
+            <option value="pro">Pro (5)</option>
+            <option value="premium">Premium (all)</option>
+          </select>
+          <span style={{ fontSize: 12, color: "#888" }}>{allow === Infinity ? "all" : used + "/" + allow}</span>
+          {msg && <span style={{ fontSize: 12, color: msg.includes("Fail") ? "#b91c1c" : "#0a7d33" }}>{msg}</span>}
+        </div>
+      </div>
+      <p style={{ fontSize: 12, color: "#999", margin: "4px 0 8px" }}>Always on: {BASE_SKILLS.map((s) => s.label).join(", ")}.</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 6 }}>
+        {elig.map((sk) => {
+          const on = sel.includes(sk.id);
+          const atCap = allow !== Infinity && used >= allow && !on;
+          return (
+            <label key={sk.id} style={{ display: "flex", gap: 6, alignItems: "flex-start", fontSize: 12.5, opacity: atCap ? 0.5 : 1, cursor: atCap ? "default" : "pointer", border: "1px solid #e7e9ee", borderRadius: 8, padding: "6px 8px", background: on ? "#f3fbfd" : "#fff" }}>
+              <input type="checkbox" checked={on} disabled={atCap} onChange={(e) => toggle(sk.id, e.target.checked)} />
+              <span><b>{sk.label}</b></span>
+            </label>
+          );
+        })}
+      </div>
     </div>
   );
 }
