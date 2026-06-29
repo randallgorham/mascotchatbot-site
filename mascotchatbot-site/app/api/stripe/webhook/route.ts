@@ -41,7 +41,7 @@ async function verify(payload: string, sigHeader: string, secret: string): Promi
   return v1.some((s) => timingSafeEqual(s, expected));
 }
 
-async function sendWelcome(toEmail: string, origin: string): Promise<void> {
+async function sendWelcome(toEmail: string, origin: string, botId: string): Promise<void> {
   try {
     const key = await getSecret("RESEND_API_KEY");
     if (!key || !toEmail) return;
@@ -58,7 +58,9 @@ async function sendWelcome(toEmail: string, origin: string): Promise<void> {
           `<p style="margin:0 0 12px">Thanks for your purchase. Your account and mascot have been created.</p>` +
           `<p style="margin:0 0 12px">Sign in to finish onboarding — name your business, pick your mascot, and grab your embed code:</p>` +
           `<p style="margin:0 0 16px"><a href="${origin}/account" style="display:inline-block;background:#0A0A0A;color:#fff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600">Set up my mascot →</a></p>` +
-          `<p style="margin:0;color:#888;font-size:12px">Use this same email to sign in (Google or password). — MascotChatbot</p></div>`,
+          `<p style="margin:0 0 6px;font-weight:600">Your embed code (paste before &lt;/body&gt;):</p>` +
+          `<pre style="background:#0A0A0A;color:#fff;padding:12px;border-radius:10px;font-size:12px;overflow:auto"><code>&lt;script src="${origin}/widget.js" data-bot="${botId}" async&gt;&lt;/script&gt;</code></pre>` +
+          `<p style="margin:12px 0 0;color:#888;font-size:12px">Use this same email to sign in (Google or password). — MascotChatbot</p></div>`,
       }),
     });
   } catch {
@@ -91,7 +93,14 @@ export async function POST(req: Request) {
       }
       // Provision their bot and clear any free-trial state now that they've paid.
       const provisioned = await getOrCreateBot(email);
-      try { provisioned.plan = "active"; provisioned.trialEnds = undefined; await saveBot(provisioned); } catch { /* best effort */ }
+      try {
+        provisioned.plan = "active";
+        provisioned.trialEnds = undefined;
+        const pm = (s.metadata as { tier?: string; setup?: string } | undefined) || undefined;
+        if (pm && pm.tier) provisioned.tier = String(pm.tier).toLowerCase();
+        if (pm && pm.setup) provisioned.setup = String(pm.setup);
+        await saveBot(provisioned);
+      } catch { /* best effort */ }
       // Record the paid order for the admin.
       const orderId = String(s.id || Date.now().toString(36));
       const amount = Number(s.amount_total || 0) / 100;
@@ -102,7 +111,7 @@ export async function POST(req: Request) {
       }));
       // Book affiliate commission if this buyer was referred.
       try { await markReferralPaid(email, amount); } catch { /* best effort */ }
-      await sendWelcome(email, origin);
+      await sendWelcome(email, origin, provisioned.id);
     }
   }
 
