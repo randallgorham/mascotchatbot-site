@@ -110,6 +110,7 @@ export default function CommandCenter() {
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
         <h1 style={h1}>Command center</h1>
         <div style={{ display: "flex", gap: 14 }}>
+          <a href="/admin/fleet" style={link}>🛰️ Fleet dashboard</a>
           <a href="/admin" style={link}>Admin settings</a>
           <button onClick={load} style={btnSmall}>Refresh</button>
         </div>
