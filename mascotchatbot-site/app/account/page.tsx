@@ -3,12 +3,14 @@
 import SiteHeader from "@/components/SiteHeader";
 import { useEffect, useState } from "react";
 import { VOICES } from "@/lib/bots";
+import { SKILL_CATALOG, BASE_SKILLS, eligibleSkills, tierAllowance, normTier } from "@/lib/skills";
 
 type U = { email: string; name: string } | null;
 type Bot = {
   id: string; business: string; industry: string; about: string; facts: string; notes: string;
   cta: string; ctaUrl: string; greet: boolean; wave: boolean; wink: boolean;
   voice: string; accent: string; image: string; badge: boolean; plan: string; trialEnds?: string;
+  tier?: string; skills?: string[];
 };
 type LeadRow = { id: string; name?: string; email?: string; phone?: string; message: string; at: string; transcript?: { role: string; content: string }[] };
 type Day = { day: string; convos: number; leads: number };
@@ -364,6 +366,42 @@ export default function Account() {
                       </label>
                     ))}
                   </div>
+
+                  {(() => {
+                    const tier = normTier(bot.tier);
+                    const allow = tierAllowance(bot.tier);
+                    const selected = bot.skills || [];
+                    const elig = eligibleSkills(bot.tier);
+                    const used = selected.length;
+                    const allowLabel = allow === Infinity ? "all" : String(allow);
+                    const toggle = (id: string, on: boolean) => {
+                      let next = selected.filter((x) => x !== id);
+                      if (on) { if (allow !== Infinity && next.length >= allow) return; next = [...next, id]; }
+                      setB("skills", next as never);
+                    };
+                    return (
+                      <div className="mt-6 rounded-2xl border-2 border-ink/10 bg-paper/60 p-4">
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <span className="font-semibold">Bot skills <span className="text-xs font-medium uppercase tracking-wide text-cyan-700">{tier} plan</span></span>
+                          <span className="text-xs font-medium text-smoke">{allow === Infinity ? "Unlimited skills" : used + " of " + allowLabel + " selected"}</span>
+                        </div>
+                        <p className="mt-1 text-xs text-smoke">Always on: {BASE_SKILLS.map((s) => s.label).join(", ")}. Pick the extra abilities below — the higher your plan, the more your mascot can do.</p>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {elig.map((sk) => {
+                            const on = selected.includes(sk.id);
+                            const atCap = allow !== Infinity && used >= allow && !on;
+                            return (
+                              <label key={sk.id} className={"flex cursor-pointer items-start gap-2 rounded-xl border-2 p-2.5 text-sm transition " + (on ? "border-ink bg-white" : atCap ? "border-ink/10 opacity-50" : "border-ink/15 bg-white hover:border-ink/40")}>
+                                <input type="checkbox" className="mt-0.5 h-4 w-4" checked={on} disabled={atCap} onChange={(e) => toggle(sk.id, e.target.checked)} />
+                                <span><span className="font-semibold">{sk.label}</span><span className="block text-xs text-smoke">{sk.blurb}</span></span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                        {allow !== Infinity && <p className="mt-2 text-xs text-smoke">Want more skills? <a href="/#pricing" className="font-semibold text-cyan-700 underline">Upgrade your plan →</a></p>}
+                      </div>
+                    );
+                  })()}
 
                   <div className="mt-6 flex items-center gap-3">
                     <button onClick={saveBot} disabled={busy} className="rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-paper transition hover:opacity-90 disabled:opacity-50">{busy ? "Saving…" : "Save settings"}</button>
