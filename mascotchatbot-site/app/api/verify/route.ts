@@ -1,4 +1,5 @@
 // Install verification: fetch the owner's site and confirm the widget snippet is present.
+import { getBot, saveBot } from "@/lib/botcfg";
 export const runtime = "edge";
 
 function json(data: unknown, status = 200) {
@@ -31,6 +32,20 @@ export async function POST(req: Request) {
     const hasScript = /widget\.js/i.test(html);
     const botMatch = botId ? new RegExp('data-bot=["\']?' + botId.replace(/[^a-z0-9]/gi, ""), "i").test(html.replace(/[^\x20-\x7e]/g, "")) : false;
     const installed = hasScript && (!botId || botMatch);
+
+    // Persist deployment status so the admin fleet directory knows where each mascot is live.
+    if (installed && botId) {
+      try {
+        const bot = await getBot(botId);
+        if (bot) {
+          bot.siteUrl = parsed.origin + parsed.pathname;
+          bot.installed = true;
+          if (!bot.installedAt) bot.installedAt = new Date().toISOString();
+          await saveBot(bot);
+        }
+      } catch { /* non-fatal */ }
+    }
+
     return json({
       ok: true,
       installed,
