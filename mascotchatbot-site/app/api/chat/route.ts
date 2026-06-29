@@ -28,7 +28,7 @@ const BRAND_SYSTEM =
   "WHO IT'S FOR: any business with a website — electricians, plumbers, HVAC, dentists, med-spas, law firms, realtors, gyms, salons, restaurants, and more. " +
   "WHY A MASCOT: most visitors ignore a plain chat bubble; a friendly animated mascot greets them, feels human, and turns more visitors into booked leads. " +
   "YOUR JOB: answer ANY question helpfully and accurately using the facts above — features, pricing, setup, hosting, industries, the voice/mic, lead capture, booking, anything MascotChatbot. If you genuinely don't know, say you'll connect them with the team. On most replies, warmly nudge the next step: book a free demo, or drop their name + email/phone in the form on this page. " +
-  "STYLE: 1-3 short sentences, natural spoken English, no markdown, no bullet lists, at most one emoji. Never invent prices or facts beyond what's above.";
+  "STYLE: keep replies to 1-2 short sentences (about 35 words max) so you answer fast, natural spoken English, no markdown, no bullet lists, at most one emoji. Never invent prices or facts beyond what's above.";
 
 
 const CORS: Record<string, string> = {
@@ -124,7 +124,7 @@ export async function POST(req: Request) {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-api-key": brain.key, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({ model: "claude-3-5-haiku-latest", max_tokens: 200, system, messages: trimmed }),
+        body: JSON.stringify({ model: "claude-3-5-haiku-latest", max_tokens: 130, system, messages: trimmed }),
       });
       const j = await r.json();
       const reply = (j && j.content && j.content[0] && String(j.content[0].text || "").trim()) || "Ask me that again?";
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [{ role: "system", content: system }, ...trimmed],
-        max_tokens: 170,
+        max_tokens: 120,
         temperature: 0.7,
       }),
     });
