@@ -1,5 +1,6 @@
 import { getSecret, getSetting, kvIncr, kvIncrBy } from "@/lib/vault";
 import { getBot } from "@/lib/botcfg";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 export const runtime = "edge";
 
@@ -28,6 +29,8 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({} as Record<string, unknown>));
     const text = String((body && (body as { text?: string }).text) || "").slice(0, 600);
     if (!text) return empty();
+    const rl = await rateLimit("tts:" + clientIp(req), 80, 60);
+    if (!rl.ok) return empty();
 
     const o = body as { provider?: string; openaiVoice?: string; elevenVoiceId?: string; speed?: number; botId?: string };
     const bot = typeof o.botId === "string" && o.botId ? await getBot(o.botId) : null;
