@@ -40,6 +40,13 @@ export async function POST(req: Request) {
     params.set("metadata[term]", term);
     params.set("metadata[total_due]", String(totalDue));
     params.set("metadata[email]", email);
+    // Carry the plan/tier + setup package so the webhook can provision skills correctly.
+    const planName = (plan && plan.name) || "";
+    const tierGuess = /premium/i.test(planName) ? "premium" : /pro/i.test(planName) ? "pro" : "starter";
+    params.set("metadata[plan]", planName);
+    params.set("metadata[tier]", tierGuess);
+    const setupItem = items.find((it) => (Number(it.oneTime) || 0) > 0 && /setup|mascot|design|animat/i.test(String(it.name || "")));
+    if (setupItem) params.set("metadata[setup]", String(setupItem.name || ""));
 
     let li = 0;
     // One-time fees (setup + add-on services), itemised.
