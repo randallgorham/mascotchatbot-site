@@ -21,6 +21,10 @@ export interface BotConfig {
   plan: string; // starter | pro | premium
   badge: boolean; // show "Powered by mascotchatbot.com"
   trialEnds?: string; // ISO date the free trial ends (while plan === "trial")
+  siteUrl?: string; // where the widget is installed (set on verify)
+  installed?: boolean; // widget confirmed live on the site
+  installedAt?: string; // ISO go-live (first successful verify)
+  setup?: string; // setup package: ours | animate | scratch
   updatedAt: string;
 }
 
