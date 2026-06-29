@@ -1,6 +1,7 @@
 import { getSecret, getSetting, kvIncr, kvIncrBy, kvGet, kvSet } from "@/lib/vault";
 import { getBot, publicConfig, botSystemPrompt } from "@/lib/botcfg";
 import { extractContact, saveLead, emailOwner, emailLead, getLead } from "@/lib/leads";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 export const runtime = "edge";
 
@@ -112,6 +113,10 @@ export async function POST(req: Request) {
     if (disabled) {
       return json({ reply: "This assistant is currently unavailable.", disabled: true });
     }
+
+    // Abuse protection: cap chat volume per visitor IP (protects API spend).
+    const rl = await rateLimit("chat:" + clientIp(req), 40, 60);
+    if (!rl.ok) return json({ reply: "Whoa — you're chatting fast! Give me a few seconds and try again. 🙂" }, 429);
 
     const messages = Array.isArray(body && body.messages) ? body.messages : [];
     const trimmed = messages.slice(-12).map((m: { role?: string; content?: string }) => ({
