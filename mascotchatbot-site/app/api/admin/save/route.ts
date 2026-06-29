@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     if (body.openaiVoice) await setSetting("openai_voice", String(body.openaiVoice));
     if (typeof body.elevenVoiceId === "string") await setSetting("eleven_voice_id", body.elevenVoiceId.trim());
     if (typeof body.ghlCalendarUrl === "string") await setSetting("ghl_calendar_url", body.ghlCalendarUrl.trim());
+    if (typeof body.alertEmail === "string") await setSetting("alert_email", body.alertEmail.trim());
     if (typeof body.openaiSpeed === "string" || typeof body.openaiSpeed === "number")
       await setSetting("openai_speed", String(body.openaiSpeed));
     const bv = (body as { botVoices?: Record<string, string> }).botVoices;
