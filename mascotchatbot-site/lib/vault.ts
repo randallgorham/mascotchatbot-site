@@ -45,6 +45,10 @@ export async function kvIncr(key: string): Promise<number> {
   const v = await kvCmd(["INCR", key]);
   return typeof v === "number" ? v : 0;
 }
+export async function kvIncrBy(key: string, by: number): Promise<number> {
+  const v = await kvCmd(["INCRBY", key, Math.round(by)]);
+  return typeof v === "number" ? v : 0;
+}
 export async function kvList(prefix: string): Promise<string[]> {
   const r = await kvCmd(["KEYS", prefix + "*"]);
   if (!Array.isArray(r)) return [];
