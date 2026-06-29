@@ -3,6 +3,7 @@
 import { kvList, kvGet, kvReady, getSecret } from "@/lib/vault";
 import { getSessionEmail, getRole, canManage, getUser } from "@/lib/auth";
 import { getBot, saveBot } from "@/lib/botcfg";
+import { effectiveSkillIds, BASE_SKILLS, normTier } from "@/lib/skills";
 import { listLeads } from "@/lib/leads";
 import { payouts, markPayoutSettled } from "@/lib/referrals";
 
@@ -194,6 +195,27 @@ export async function POST(req: Request) {
     if (refRaw) { try { referral = JSON.parse(refRaw); } catch { /* */ } }
     const revenue = orders.reduce((s, o) => s + Number(o.amount || 0), 0);
     return json({ ok: true, bot, user, leads, orders, referral, revenue: Math.round(revenue * 100) / 100 });
+  }
+
+  if (action === "setTier") {
+    const bot = await getBot(botId);
+    if (!bot) return json({ ok: false, error: "Not found." }, 404);
+    bot.tier = normTier(String(body.tier || ""));
+    // re-cap existing skill selection to the new tier's allowance
+    const baseIds = new Set(BASE_SKILLS.map((s) => s.id));
+    bot.skills = effectiveSkillIds(bot.tier, bot.skills || []).filter((id) => !baseIds.has(id));
+    await saveBot(bot);
+    return json({ ok: true, bot });
+  }
+
+  if (action === "setSkills") {
+    const bot = await getBot(botId);
+    if (!bot) return json({ ok: false, error: "Not found." }, 404);
+    const picked = Array.isArray(body.skills) ? (body.skills as unknown[]).filter((x): x is string => typeof x === "string") : [];
+    const baseIds = new Set(BASE_SKILLS.map((s) => s.id));
+    bot.skills = effectiveSkillIds(bot.tier, picked).filter((id) => !baseIds.has(id));
+    await saveBot(bot);
+    return json({ ok: true, bot });
   }
 
   if (action === "setPlan") {
