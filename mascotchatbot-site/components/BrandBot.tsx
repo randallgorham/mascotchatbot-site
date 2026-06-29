@@ -74,7 +74,7 @@ export default function BrandBot() {
       quick: ["What is this?", "Pricing", "Book a demo"],
       answers: [
         { k: ["what", "this", "who", "explain", "how", "work", "mascot", "chatbot", "do"], a: "I'm Robo — a MascotChatbot. I'm a custom animated mascot that lives on your website, talks to every visitor, answers their questions 24/7, captures leads, and books appointments. Basically a salesperson that never sleeps. Want a free demo?" },
-        { k: ["price", "pricing", "cost", "how much", "plan", "plans", "rates"], a: "Plans start at $99/mo flat — no per-message fees — with a one-time setup (waived if you prepay). We design it, host it, and keep it sharp. Want me to book you a quick demo to walk through it?" },
+        { k: ["price", "pricing", "cost", "how much", "plan", "plans", "rates"], a: "It's $499 if you pick one of our mascots, or $999 if we animate your own. Want me to book you a quick demo to walk through it?" },
         { k: ["book", "demo", "call", "talk", "human", "start", "appointment", "schedule", "get one", "sign up"], a: "Love it — let's get you a free demo! Drop your name and email in the form on this page, or head to the pricing section to get started. 🚀" },
         { k: ["industry", "business", "work for", "fit", "niche"], a: "We build mascots for any business — electricians, dentists, realtors, gyms, salons, restaurants and more. If you've got a website, we've got a mascot for it. Want a free demo?" },
         { k: ["hi", "hey", "hello", "yo", "sup"], a: "Hey there! 👋 I'm Robo, the MascotChatbot mascot. Ask me what we do, our pricing, or say 'book a demo' and I'll get you set up!" },
@@ -142,7 +142,7 @@ export default function BrandBot() {
     }
     function fetchTTS(text: string): Promise<ArrayBuffer | null> {
       if (muted) return Promise.resolve(null);
-      return fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, speed: 1.2 }) })
+      return fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, speed: 1.1 }) })
         .then((res) => (!res.ok || res.status === 204) ? null : res.arrayBuffer())
         .then((b) => (b && b.byteLength >= 200) ? b : null)
         .catch(() => null);
@@ -155,7 +155,7 @@ export default function BrandBot() {
         if (!window.speechSynthesis) { flapAwait(text).then(res); return; }
         try {
           const u = new SpeechSynthesisUtterance(text);
-          if (voice) u.voice = voice; u.rate = 1.2; u.pitch = 1.1;
+          if (voice) u.voice = voice; u.rate = 1.1; u.pitch = 1.1;
           u.onstart = () => loopMouth(); u.onend = () => res(); u.onerror = () => res();
           speechSynthesis.speak(u);
         } catch { flapAwait(text).then(res); }
@@ -234,27 +234,32 @@ export default function BrandBot() {
 
     // pull complete sentences out of the streaming buffer and queue them for speech
     let sayBuf = "";
+    let spokeFirst = false; // the very first chunk breaks early (clause/~5 words) so Robo starts talking fast
     function pumpSentences(end: boolean) {
       for (;;) {
         let cut = -1;
         for (let i = 0; i < sayBuf.length; i++) {
           const c = sayBuf[i], nxt = sayBuf[i + 1];
-          if (c === "\n" || ((c === "." || c === "!" || c === "?") && (nxt === undefined || nxt === " " || nxt === "\n"))) { cut = i + 1; break; }
+          const hard = c === "\n" || ((c === "." || c === "!" || c === "?") && (nxt === undefined || nxt === " " || nxt === "\n"));
+          // Until the first chunk is out, also break at a clause boundary or after ~a few words so audio starts fast.
+          const soft = !spokeFirst && (c === "," || c === ";" || c === ":") && (nxt === undefined || nxt === " ");
+          const lenBreak = !spokeFirst && i >= 24 && c === " ";
+          if (hard || soft || lenBreak) { cut = i + 1; break; }
         }
         if (cut === -1) break;
         let j = cut; while (j < sayBuf.length && (sayBuf[j] === " " || sayBuf[j] === "\n")) j++;
         const sent = sayBuf.slice(0, j).trim();
         sayBuf = sayBuf.slice(j);
-        if (sent) enqueueSpeak(sent);
+        if (sent) { enqueueSpeak(sent); spokeFirst = true; }
       }
-      if (end) { const rest = sayBuf.trim(); sayBuf = ""; if (rest) enqueueSpeak(rest); }
+      if (end) { const rest = sayBuf.trim(); sayBuf = ""; if (rest) { enqueueSpeak(rest); spokeFirst = true; } }
     }
 
     async function send(text: string) {
       text = (text || "").trim(); if (!text) return;
       if (YOU) YOU.textContent = "You: " + text; if (SAY) SAY.textContent = "…"; if (TEXT) TEXT.value = "";
       history.push({ role: "user", content: text });
-      ensureCtx(); resetSpeak(); nod(); sayBuf = "";
+      ensureCtx(); resetSpeak(); nod(); sayBuf = ""; spokeFirst = false;
       let full = "";
       try {
         const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history, persona: "brand", stream: true }) });
