@@ -66,6 +66,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const botId = body && typeof body.botId === "string" ? body.botId : "";
     const persona = body && typeof body.persona === "string" ? body.persona : "";
+    const wantStream = !!(body && body.stream);
     const bot = botId ? await getBot(botId) : null;
 
     // A bot whose plan is "disabled" is taken fully offline: the widget hides
@@ -119,6 +120,60 @@ export async function POST(req: Request) {
       return json({ reply: bot ? "I'm not fully switched on yet — please try again in a moment." : "My AI brain isn't switched on quite yet! Drop your email in the form below and the MascotChatbot team will get you set up. ⚡" });
     }
     const system = bot ? botSystemPrompt(bot) : (persona === "brand" ? BRAND_SYSTEM : SYSTEM);
+
+    // Streaming branch: emit the reply token-by-token as plain text so the client can
+    // start speaking the first sentence while the rest is still being generated.
+    if (wantStream) {
+      const enc = new TextEncoder();
+      const rs = new ReadableStream({
+        async start(controller) {
+          try {
+            if (brain.provider === "openai") {
+              const rr = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: "Bearer " + brain.key },
+                body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "system", content: system }, ...trimmed], max_tokens: 120, temperature: 0.7, stream: true }),
+              });
+              if (!rr.ok || !rr.body) { controller.enqueue(enc.encode("Ask me that again?")); controller.close(); return; }
+              const reader = rr.body.getReader();
+              const dec = new TextDecoder();
+              let buf = "";
+              for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buf += dec.decode(value, { stream: true });
+                let nl;
+                while ((nl = buf.indexOf("\n")) >= 0) {
+                  const line = buf.slice(0, nl).trim();
+                  buf = buf.slice(nl + 1);
+                  if (!line.startsWith("data:")) continue;
+                  const d = line.slice(5).trim();
+                  if (!d || d === "[DONE]") continue;
+                  try {
+                    const j = JSON.parse(d);
+                    const piece = j && j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content;
+                    if (piece) controller.enqueue(enc.encode(piece));
+                  } catch {}
+                }
+              }
+            } else {
+              const rr = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "x-api-key": brain.key, "anthropic-version": "2023-06-01" },
+                body: JSON.stringify({ model: "claude-3-5-haiku-latest", max_tokens: 130, system, messages: trimmed }),
+              });
+              const j = await rr.json();
+              const reply = (j && j.content && j.content[0] && String(j.content[0].text || "").trim()) || "Ask me that again?";
+              controller.enqueue(enc.encode(reply));
+            }
+          } catch {
+            controller.enqueue(enc.encode("Oops, I glitched for a second — try that again?"));
+          }
+          controller.close();
+        },
+      });
+      return new Response(rs, { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", ...CORS } });
+    }
 
     if (brain.provider === "anthropic") {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
