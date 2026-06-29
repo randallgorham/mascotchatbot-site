@@ -1,6 +1,7 @@
 // Per-customer chatbot configuration: stored in KV, drives the embeddable widget
 // and the bot's AI brain. Public widget only ever sees publicConfig(...).
 import { kvGet, kvSet } from "@/lib/vault";
+import { skillsSystemPrompt, effectiveSkillIds } from "@/lib/skills";
 
 export interface BotConfig {
   id: string;
@@ -25,6 +26,8 @@ export interface BotConfig {
   installed?: boolean; // widget confirmed live on the site
   installedAt?: string; // ISO go-live (first successful verify)
   setup?: string; // setup package: ours | animate | scratch
+  tier?: string; // pricing package: starter | pro | premium (drives skill allowance)
+  skills?: string[]; // selected skill ids (capped by tier allowance)
   updatedAt: string;
 }
 
@@ -78,6 +81,8 @@ export async function getOrCreateBot(email: string, name?: string): Promise<BotC
     plan: "trial",
     badge: true,
     trialEnds: new Date(Date.now() + 14 * 86400000).toISOString(),
+    tier: "starter",
+    skills: ["booking", "webknowledge"],
     updatedAt: new Date().toISOString(),
   };
   await kvSet("botowner:" + lower, id);
@@ -156,6 +161,8 @@ export async function createBotFor(email: string, business: string, industry?: s
     image: "",
     plan: "active",
     badge: true,
+    tier: "starter",
+    skills: ["booking", "webknowledge"],
     updatedAt: new Date().toISOString(),
   };
   await saveBot(cfg);
@@ -177,6 +184,7 @@ export function publicConfig(c: BotConfig) {
     accent: c.accent,
     image: c.image,
     badge: c.badge,
+    skills: effectiveSkillIds(c.tier, c.skills),
   };
 }
 
@@ -190,6 +198,7 @@ export function botSystemPrompt(c: BotConfig): string {
     c.about ? "What we do: " + c.about : "",
     c.facts ? "Key facts you can use: " + c.facts : "",
     c.notes ? "Special instructions from the business owner (follow these): " + c.notes : "",
+    skillsSystemPrompt(c.tier, c.skills),
     "On every reply, help the visitor and naturally guide them to " + (c.cta || "get in touch") + ".",
     "Keep replies short and conversational, like natural speech: one to three sentences, no markdown, no bullet points, no headings. Be warm and helpful. Never invent prices, hours, or facts you were not given — if unsure, offer to connect them with the team.",
   ];
