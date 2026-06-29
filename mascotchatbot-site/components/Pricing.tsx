@@ -14,15 +14,23 @@ function abBeacon(event: string, variant: string) {
   }
 }
 
-type Plan = { id: string; name: string; monthly: number; annual: number; setup: number; featured?: boolean; label: string; feats: string[] };
+type Plan = { id: string; name: string; monthly: number; annual: number; featured?: boolean; label: string; feats: string[] };
 
 const PLANS: Plan[] = [
-  { id: "starter", name: "Starter", monthly: 99, annual: 79, setup: 500, label: "Get started", feats: ["Custom animated mascot", "FAQ brain trained on your business", "Text chat + lead capture to email/CRM", "Fully hosted & maintained", "1 website"] },
-  { id: "pro", name: "Pro", monthly: 249, annual: 199, setup: 500, featured: true, label: "Most popular", feats: ["Everything in Starter", "Talking voice mascot (natural voice + lip-sync)", "Booking + calendar", "CRM / SMS routing", "Monthly tuning + performance report", "Priority build"] },
-  { id: "premium", name: "Premium", monthly: 499, annual: 399, setup: 500, label: "Premium", feats: ["Everything in Pro", "Multi-page knowledge + custom integrations", "Special mascot animations", "A/B tuning", "Priority support"] },
+  { id: "starter", name: "Starter", monthly: 99, annual: 79, label: "Get started", feats: ["Animated talking mascot on your site", "FAQ brain trained on your business", "Text chat + lead capture to email/CRM", "Fully hosted & maintained", "1 website"] },
+  { id: "pro", name: "Pro", monthly: 249, annual: 199, featured: true, label: "Most popular", feats: ["Everything in Starter", "Talking voice mascot (natural voice + lip-sync)", "Booking + calendar", "CRM / SMS routing", "Monthly tuning + performance report", "Priority build"] },
+  { id: "premium", name: "Premium", monthly: 499, annual: 399, label: "Premium", feats: ["Everything in Pro", "Multi-page knowledge + custom integrations", "Special mascot animations", "A/B tuning", "Priority support"] },
 ];
 
-type Billing = "monthly" | "annual" | "prepay3";
+// One-time setup packages — the design + rigging + animation work to bring a mascot to life.
+type MascotKey = "ours" | "animate" | "scratch";
+const SETUP: Record<MascotKey, { fee: number; turn: string; label: string; blurb: string }> = {
+  ours: { fee: 499, turn: "1–2 weeks", label: "Use one of our mascots", blurb: "Pick from our 30+ ready-made characters. We rig, animate, and wire it to your business — live in 1–2 weeks." },
+  animate: { fee: 999, turn: "2–4 weeks", label: "Animate your mascot", blurb: "Send us your existing mascot or artwork and we rig + animate it into a talking bot — live in 2–4 weeks." },
+  scratch: { fee: 1499, turn: "2–4 weeks", label: "Design from scratch", blurb: "We design a brand-new custom mascot for your brand and fully animate it — live in 2–4 weeks." },
+};
+
+type Billing = "monthly" | "annual";
 
 function money(n: number) {
   return "$" + n.toLocaleString();
@@ -30,9 +38,8 @@ function money(n: number) {
 
 export default function Pricing() {
   const [billing, setBilling] = useState<Billing>("annual");
-  const [mascot, setMascot] = useState<"predesigned" | "custom">("predesigned");
+  const [mascot, setMascot] = useState<MascotKey>("ours");
   const [abVariant, setAbVariant] = useState<"monthly" | "annual" | "">("");
-  const CUSTOM_FEE = 300;
   const { add, setOpen } = useCart();
 
   // Assign (or re-read) the visitor's billing-default variant once, persist it
@@ -54,25 +61,14 @@ export default function Pricing() {
   function perMonth(p: Plan) {
     return billing === "monthly" ? p.monthly : p.annual;
   }
-  function setupFor(p: Plan) {
-    return billing === "prepay3" ? 0 : p.setup;
-  }
-  function oneTimeFor(p: Plan) {
-    return setupFor(p) + (mascot === "custom" ? CUSTOM_FEE : 0);
-  }
-  function billingLabel() {
-    if (billing === "monthly") return "billed monthly";
-    if (billing === "annual") return "billed yearly";
-    return "3-year prepay";
-  }
+  const setupFee = SETUP[mascot].fee;
+  const setupTurn = SETUP[mascot].turn;
+
   function addPlan(p: Plan) {
     const detail =
-      billing === "prepay3"
-        ? "3-year prepay — setup waived"
-        : billing === "annual"
-        ? "Billed yearly (save 20%)"
-        : "Billed monthly";
-    add({ id: "plan-" + p.id, name: p.name + " plan", kind: "plan", monthly: perMonth(p), oneTime: oneTimeFor(p), billing, detail: detail + (mascot === "custom" ? " · custom mascot" : " · predesigned mascot") });
+      (billing === "annual" ? "Billed yearly (save 20%)" : "Billed monthly") +
+      " · " + SETUP[mascot].label + " (" + money(setupFee) + " setup, live in " + setupTurn + ")";
+    add({ id: "plan-" + p.id, name: p.name + " plan", kind: "plan", monthly: perMonth(p), oneTime: setupFee, billing, detail });
     if (abVariant) abBeacon("cart", abVariant);
   }
   function addService(id: string, name: string, price: number, detail: string) {
@@ -82,27 +78,44 @@ export default function Pricing() {
   const toggle: [Billing, string][] = [
     ["monthly", "Monthly"],
     ["annual", "Annual −20%"],
-    ["prepay3", "3 years · setup waived"],
   ];
 
   return (
     <section id="pricing" className="scroll-mt-24 border-t-2 border-ink">
       <div className="mx-auto max-w-7xl px-5 py-24">
         <h2 className="mb-3 text-4xl font-bold tracking-tightest md:text-6xl">Simple, honest pricing.</h2>
-        <p className="mb-8 max-w-lg text-smoke">Flat monthly — no per-message credits, no surprise overage bills. We build it, host it, and keep it sharp. Cancel anytime.</p>
+        <p className="mb-8 max-w-lg text-smoke">A flat monthly plan keeps your mascot live, answering, and improving — no per-message credits, no surprise bills. Plus a one-time setup to design &amp; rig your mascot. Cancel the monthly anytime.</p>
 
-        <div className="mb-10 flex flex-col items-start gap-3">
+        {/* Step 1 — one-time setup / mascot path */}
+        <div className="mb-8">
+          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-smoke">1 · Your mascot — one-time setup</div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {(Object.keys(SETUP) as MascotKey[]).map((k) => {
+              const s = SETUP[k];
+              const active = mascot === k;
+              return (
+                <button key={k} onClick={() => setMascot(k)} className={"flex flex-col rounded-2xl border-2 p-5 text-left transition " + (active ? "border-ink bg-ink text-paper shadow-lg" : "border-ink/15 bg-paper hover:-translate-y-0.5 hover:shadow-md")}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold tracking-tight">{s.label}</span>
+                    <span className={"flex h-5 w-5 items-center justify-center rounded-full border " + (active ? "border-paper" : "border-ink/30")}>{active ? "✓" : ""}</span>
+                  </div>
+                  <div className="mt-3 text-3xl font-bold tracking-tightest">{money(s.fee)}<span className={"ml-1 text-sm font-medium " + (active ? "text-paper/60" : "text-smoke")}>one-time</span></div>
+                  <div className={"mt-1 text-xs font-semibold uppercase tracking-wider " + (active ? "text-paper/70" : "text-smoke")}>Live in {s.turn}</div>
+                  <p className={"mt-2 text-sm leading-relaxed " + (active ? "text-paper/80" : "text-smoke")}>{s.blurb}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Step 2 — monthly plan */}
+        <div className="mb-5 flex flex-col items-start gap-3">
+          <div className="text-xs font-bold uppercase tracking-widest text-smoke">2 · Monthly hosting plan</div>
           <div className="inline-flex flex-wrap gap-1 rounded-full border-2 border-ink p-1">
             {toggle.map(([id, lbl]) => (
               <button key={id} onClick={() => setBilling(id)} className={"rounded-full px-4 py-2 text-sm font-semibold transition " + (billing === id ? "bg-ink text-paper" : "text-ink hover:bg-ink/5")}>{lbl}</button>
             ))}
           </div>
-          <div className="inline-flex flex-wrap gap-1 rounded-full border-2 border-ink p-1">
-            {(["predesigned", "custom"] as const).map((id) => (
-              <button key={id} onClick={() => setMascot(id)} className={"rounded-full px-4 py-2 text-sm font-semibold transition " + (mascot === id ? "bg-ink text-paper" : "text-ink hover:bg-ink/5")}>{id === "predesigned" ? "Predesigned mascot" : "Custom mascot"}</button>
-            ))}
-          </div>
-          <p className="max-w-lg text-sm text-smoke">{mascot === "predesigned" ? "Pick from our 30+ ready-made mascots — the fastest, most affordable option." : `We craft a one-of-a-kind mascot for you (or use your own artwork) — +${money(CUSTOM_FEE)} one-time.`}</p>
         </div>
 
         <div className="grid items-start gap-6 md:grid-cols-3">
@@ -115,10 +128,9 @@ export default function Pricing() {
                 <span className={"mb-2 " + (p.featured ? "text-paper/60" : "text-smoke")}>/mo</span>
               </div>
               <p className={"mt-1 text-sm " + (p.featured ? "text-paper/60" : "text-smoke")}>
-                {billingLabel()}
+                {billing === "annual" ? "billed yearly" : "billed monthly"}
                 {" · "}
-                {billing === "prepay3" ? "setup waived 🎉" : money(setupFor(p)) + " setup"}
-                {mascot === "custom" ? " · +" + money(CUSTOM_FEE) + " custom mascot" : ""}
+                {money(setupFee)} one-time setup
               </p>
               <div className={"my-6 h-px w-full " + (p.featured ? "bg-paper/20" : "bg-ink/10")} />
               <ul className="flex-1 space-y-3.5 text-sm">
@@ -133,7 +145,7 @@ export default function Pricing() {
                 ))}
               </ul>
               <button onClick={() => addPlan(p)} className={"mt-8 rounded-full px-6 py-3.5 text-center font-semibold transition-all duration-300 hover:-translate-y-0.5 " + (p.featured ? "bg-paper text-ink shadow-[0_8px_22px_rgba(0,0,0,0.18)] hover:shadow-[0_14px_30px_rgba(0,0,0,0.28)]" : "bg-ink text-paper shadow-[0_8px_22px_rgba(10,10,10,0.28)] hover:shadow-[0_14px_30px_rgba(10,10,10,0.35)]")}>
-                Add {p.name} to cart
+                Add {p.name} — {money(perMonth(p))}/mo + {money(setupFee)}
               </button>
             </div>
           ))}
