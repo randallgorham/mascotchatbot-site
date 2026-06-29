@@ -4,26 +4,22 @@ import { useEffect, useRef } from "react";
 
 /** The MascotChatbot brand bot "Robo" — the original logo robot head/face/eyes/smile/
  *  headset mic boom reproduced EXACTLY (from public/icon.svg), with a body built beneath
- *  it. Head, body, and each arm are separate groups so they animate independently.
- *  idPrefix keeps the hero and floating copies apart. */
+ *  it. Head, body, and each arm are separate groups so they animate independently. */
 function RobotSVG({ idPrefix }: { idPrefix: string }) {
   const p = idPrefix;
   return (
     <svg className="bot-svg" viewBox="94 40 192 264" aria-hidden="true">
-      {/* ===== arms — both swing from the shoulders ===== */}
       <g className="bot-arm-l">
         <rect x="124" y="200" width="15" height="48" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
       </g>
       <g className="bot-arm-r">
         <rect x="241" y="200" width="15" height="48" rx="7.5" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
       </g>
-      {/* ===== body (its own group, stays put while the head moves) ===== */}
       <g className="bot-torso">
         <rect x="146" y="190" width="88" height="82" rx="28" fill="#e4e9ef" stroke="#aab4c0" strokeWidth="3" />
         <circle cx="190" cy="226" r="10" fill="#2bc4e6" className="bot-core" />
         <rect x="173" y="250" width="34" height="7" rx="3.5" fill="#cbd3dc" />
       </g>
-      {/* ===== head — EXACT original logo; tilts on its own at the neck ===== */}
       <g className="bot-head">
         <rect x="104" y="104" width="14" height="40" rx="7" fill="#3a434f" />
         <rect x="262" y="104" width="14" height="40" rx="7" fill="#3a434f" />
@@ -32,7 +28,6 @@ function RobotSVG({ idPrefix }: { idPrefix: string }) {
         <rect id={`${p}-eye-l`} className="bot-eye" x="164" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
         <rect id={`${p}-eye-r`} className="bot-eye bot-eye-r" x="202" y="98" width="14" height="26" rx="7" fill="#2bc4e6" />
         <path id={`${p}-mouth`} className="bot-mouth" d="M164 130 Q190 160 216 130 Z" fill="#2bc4e6" />
-        {/* headset mic boom — EXACT original logo */}
         <path d="M112 146 C 116 186, 150 194, 182 176" fill="none" stroke="#3a434f" strokeWidth="8" strokeLinecap="round" />
         <ellipse cx="184" cy="176" rx="10" ry="7" fill="#3a434f" />
       </g>
@@ -105,27 +100,24 @@ export default function BrandBot() {
       } catch {}
     }
     function stopAudio() { if (curAudio) { try { curAudio.pause(); } catch {} curAudio = null; } }
+
     function setMouth(open: number) { if (MOUTH) MOUTH.style.transform = "scaleY(" + (1 + Math.max(0, Math.min(1, open)) * 0.55).toFixed(2) + ")"; }
+    let lipOn = false;
     function lipLoop() {
-      if (!speaking || !analyser) return;
+      if (!speaking || !analyser) { lipOn = false; return; }
       const data = new Uint8Array(analyser.frequencyBinCount);
       analyser.getByteFrequencyData(data);
       let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i];
-      const avg = sum / data.length;
-      setMouth((avg - 6) / 70);
+      setMouth((sum / data.length - 6) / 70);
       requestAnimationFrame(lipLoop);
     }
+    function startLip() { if (lipOn) return; lipOn = true; lipLoop(); }
     function loopMouth() {
       if (!speaking) { setMouth(0); return; }
       setMouth(0.15 + Math.random() * 0.7);
       window.setTimeout(loopMouth, 70 + Math.random() * 70);
     }
-    function talk(on: boolean) {
-      if (on) { speaking = true; BODY?.classList.add("bot-talking"); }
-      else { speaking = false; BODY?.classList.remove("bot-talking"); setMouth(0); relisten(); }
-    }
     function nod() { BODY?.classList.remove("bot-nodding"); void BODY?.offsetWidth; BODY?.classList.add("bot-nodding"); window.setTimeout(() => BODY?.classList.remove("bot-nodding"), 620); }
-    function flapFor(t: string) { talk(true); loopMouth(); window.setTimeout(() => talk(false), Math.max(700, t.length * 34)); }
 
     let voice: SpeechSynthesisVoice | null = null;
     function pickVoice() {
@@ -135,39 +127,82 @@ export default function BrandBot() {
       return vs.find((v) => v.lang.startsWith("en")) || vs[0];
     }
     if (window.speechSynthesis) { voice = pickVoice(); speechSynthesis.onvoiceschanged = () => { voice = pickVoice(); }; }
-    function speakBrowser(text: string) {
-      if (!window.speechSynthesis) { flapFor(text); return; }
-      try {
-        speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        if (voice) u.voice = voice; u.rate = 1.2; u.pitch = 1.1;
-        u.onstart = () => { talk(true); loopMouth(); }; u.onend = () => talk(false); u.onerror = () => talk(false);
-        speechSynthesis.speak(u);
-      } catch { flapFor(text); }
-    }
 
-    async function say(text: string) {
-      if (SAY) SAY.textContent = text; nod();
-      if (muted) { flapFor(text); return; }
-      ensureCtx();
-      try {
-        const res = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, speed: 1.2 }) });
-        if (!res.ok || res.status === 204) { speakBrowser(text); return; }
-        const buf = await res.arrayBuffer();
-        if (!buf || buf.byteLength < 200) { speakBrowser(text); return; }
-        stopAudio();
+    // ===== streaming speech engine =====
+    // Each enqueued sentence kicks off its own TTS fetch immediately (parallel), and a
+    // single worker plays them strictly in order — so Robo starts on sentence 1 while the
+    // rest are still being rendered. spkSeq lets a new turn cancel an in-flight one.
+    let spkItems: { text: string; buf: Promise<ArrayBuffer | null> }[] = [];
+    let spkRunning = false;
+    let spkSeq = 0;
+    function resetSpeak() {
+      spkSeq++; spkItems = []; stopAudio();
+      if (window.speechSynthesis) { try { speechSynthesis.cancel(); } catch {} }
+      speaking = false; BODY?.classList.remove("bot-talking"); setMouth(0);
+    }
+    function fetchTTS(text: string): Promise<ArrayBuffer | null> {
+      if (muted) return Promise.resolve(null);
+      return fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, speed: 1.2 }) })
+        .then((res) => (!res.ok || res.status === 204) ? null : res.arrayBuffer())
+        .then((b) => (b && b.byteLength >= 200) ? b : null)
+        .catch(() => null);
+    }
+    function flapAwait(text: string) {
+      return new Promise<void>((res) => { loopMouth(); window.setTimeout(res, Math.max(500, text.length * 32)); });
+    }
+    function speakBrowserAwait(text: string) {
+      return new Promise<void>((res) => {
+        if (!window.speechSynthesis) { flapAwait(text).then(res); return; }
+        try {
+          const u = new SpeechSynthesisUtterance(text);
+          if (voice) u.voice = voice; u.rate = 1.2; u.pitch = 1.1;
+          u.onstart = () => loopMouth(); u.onend = () => res(); u.onerror = () => res();
+          speechSynthesis.speak(u);
+        } catch { flapAwait(text).then(res); }
+      });
+    }
+    function playBuf(buf: ArrayBuffer, seq: number) {
+      return new Promise<void>((resolve) => {
+        if (seq !== spkSeq) { resolve(); return; }
         const url = URL.createObjectURL(new Blob([buf], { type: "audio/mpeg" }));
         const a = new Audio(url); curAudio = a; a.crossOrigin = "anonymous";
         try {
           ensureCtx();
           if (audioCtx) { const src = audioCtx.createMediaElementSource(a); analyser = audioCtx.createAnalyser(); analyser.fftSize = 256; src.connect(analyser); analyser.connect(audioCtx.destination); }
         } catch { analyser = null; }
-        a.onplay = () => { speaking = true; BODY?.classList.add("bot-talking"); if (analyser) lipLoop(); else loopMouth(); };
-        a.onended = () => { talk(false); URL.revokeObjectURL(url); };
-        a.onerror = () => { talk(false); speakBrowser(text); };
-        await a.play();
-      } catch { speakBrowser(text); }
+        a.onplay = () => { BODY?.classList.add("bot-talking"); if (analyser) startLip(); else loopMouth(); };
+        a.onended = () => { URL.revokeObjectURL(url); resolve(); };
+        a.onerror = () => { resolve(); };
+        a.play().catch(() => resolve());
+      });
     }
+    async function runSpeak(seq: number) {
+      spkRunning = true;
+      speaking = true; BODY?.classList.add("bot-talking");
+      while (spkItems.length) {
+        if (seq !== spkSeq) break;
+        const it = spkItems.shift()!;
+        let buf: ArrayBuffer | null = null;
+        try { buf = await it.buf; } catch { buf = null; }
+        if (seq !== spkSeq) break;
+        if (buf) await playBuf(buf, seq);
+        else if (muted) await flapAwait(it.text);
+        else await speakBrowserAwait(it.text);
+      }
+      spkRunning = false;
+      if (seq === spkSeq) { speaking = false; BODY?.classList.remove("bot-talking"); setMouth(0); relisten(); }
+    }
+    function enqueueSpeak(text: string) {
+      text = (text || "").trim(); if (!text) return;
+      spkItems.push({ text, buf: fetchTTS(text) });
+      if (!spkRunning) runSpeak(spkSeq);
+    }
+    function speakAll(text: string) {
+      resetSpeak();
+      const parts = String(text).match(/[^.!?\n]+[.!?\n]*/g) || [String(text)];
+      parts.forEach((p) => enqueueSpeak(p));
+    }
+    function say(text: string) { if (SAY) SAY.textContent = text; nod(); speakAll(text); }
 
     function open() {
       if (W.getAttribute("data-state") === "open") return;
@@ -179,7 +214,7 @@ export default function BrandBot() {
       if (!started) { started = true; renderQuick(); window.setTimeout(() => say(CFG.greeting), 380); }
       window.setTimeout(() => TEXT?.focus(), 360);
     }
-    function close() { W.setAttribute("data-state", "idle"); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); talk(false); }
+    function close() { W.setAttribute("data-state", "idle"); resetSpeak(); }
 
     function renderQuick() {
       if (!QUICK) return; QUICK.innerHTML = "";
@@ -196,19 +231,54 @@ export default function BrandBot() {
       for (const s of CFG.answers) for (const k of s.k) if (q.includes(" " + k + " ")) return s.a;
       return CFG.fallback;
     }
+
+    // pull complete sentences out of the streaming buffer and queue them for speech
+    let sayBuf = "";
+    function pumpSentences(end: boolean) {
+      for (;;) {
+        let cut = -1;
+        for (let i = 0; i < sayBuf.length; i++) {
+          const c = sayBuf[i], nxt = sayBuf[i + 1];
+          if (c === "\n" || ((c === "." || c === "!" || c === "?") && (nxt === undefined || nxt === " " || nxt === "\n"))) { cut = i + 1; break; }
+        }
+        if (cut === -1) break;
+        let j = cut; while (j < sayBuf.length && (sayBuf[j] === " " || sayBuf[j] === "\n")) j++;
+        const sent = sayBuf.slice(0, j).trim();
+        sayBuf = sayBuf.slice(j);
+        if (sent) enqueueSpeak(sent);
+      }
+      if (end) { const rest = sayBuf.trim(); sayBuf = ""; if (rest) enqueueSpeak(rest); }
+    }
+
     async function send(text: string) {
       text = (text || "").trim(); if (!text) return;
       if (YOU) YOU.textContent = "You: " + text; if (SAY) SAY.textContent = "…"; if (TEXT) TEXT.value = "";
       history.push({ role: "user", content: text });
-      ensureCtx();
+      ensureCtx(); resetSpeak(); nod(); sayBuf = "";
+      let full = "";
       try {
-        const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history, persona: "brand" }) });
-        if (!res.ok) throw new Error("bad");
-        const data = await res.json();
-        const reply = data && data.reply ? String(data.reply) : offlineReply(text);
-        history.push({ role: "assistant", content: reply });
-        say(reply);
-      } catch { say(offlineReply(text)); }
+        const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history, persona: "brand", stream: true }) });
+        if (!res.ok || !res.body) throw new Error("bad");
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        let first = true;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = dec.decode(value, { stream: true });
+          if (!chunk) continue;
+          if (first) { first = false; if (SAY) SAY.textContent = ""; }
+          full += chunk; sayBuf += chunk;
+          if (SAY) SAY.textContent = full;
+          pumpSentences(false);
+        }
+        pumpSentences(true);
+        if (!full.trim()) { const off = offlineReply(text); if (SAY) SAY.textContent = off; speakAll(off); full = off; }
+        history.push({ role: "assistant", content: full });
+      } catch {
+        const off = offlineReply(text); if (SAY) SAY.textContent = off; nod(); speakAll(off);
+        history.push({ role: "assistant", content: off });
+      }
     }
 
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -234,7 +304,7 @@ export default function BrandBot() {
     function toggleMic() {
       if (!SR) { say("Voice input isn't supported in this browser — just type to me instead!"); return; }
       if (listening) { convo = false; try { recog && recog.stop(); } catch {} return; }
-      convo = true; // tapping the mic turns on hands-free conversation mode
+      convo = true;
       startListening();
     }
 
@@ -244,7 +314,7 @@ export default function BrandBot() {
     MIC?.addEventListener("click", toggleMic);
     MUTE?.addEventListener("click", () => {
       muted = !muted; MUTE.classList.toggle("bot-off", muted); MUTE.innerHTML = muted ? "&#128263;" : "&#128266;";
-      if (muted) { if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); talk(false); }
+      if (muted) resetSpeak();
     });
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
     document.addEventListener("keydown", onKey);
@@ -267,7 +337,7 @@ export default function BrandBot() {
       BODY?.classList.remove("bot-attn"); void BODY?.offsetWidth; BODY?.classList.add("bot-attn");
       window.setTimeout(() => BODY?.classList.remove("bot-attn"), 1600);
     }, 6500);
-    return () => { window.clearTimeout(greetTimer); window.clearInterval(attnTimer); document.removeEventListener("keydown", onKey); if (window.speechSynthesis) speechSynthesis.cancel(); stopAudio(); };
+    return () => { window.clearTimeout(greetTimer); window.clearInterval(attnTimer); document.removeEventListener("keydown", onKey); resetSpeak(); };
   }, []);
 
   return (
