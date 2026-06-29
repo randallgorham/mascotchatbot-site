@@ -17,9 +17,9 @@ function abBeacon(event: string, variant: string) {
 type Plan = { id: string; name: string; monthly: number; annual: number; featured?: boolean; label: string; feats: string[] };
 
 const PLANS: Plan[] = [
-  { id: "starter", name: "Starter", monthly: 99, annual: 79, label: "Get started", feats: ["Animated talking mascot on your site", "FAQ brain trained on your business", "Text chat + lead capture to email/CRM", "Fully hosted & maintained", "1 website"] },
-  { id: "pro", name: "Pro", monthly: 249, annual: 199, featured: true, label: "Most popular", feats: ["Everything in Starter", "Talking voice mascot (natural voice + lip-sync)", "Booking + calendar", "CRM / SMS routing", "Monthly tuning + performance report", "Priority build"] },
-  { id: "premium", name: "Premium", monthly: 499, annual: 399, label: "Premium", feats: ["Everything in Pro", "Multi-page knowledge + custom integrations", "Special mascot animations", "A/B tuning", "Priority support"] },
+  { id: "starter", name: "Starter", monthly: 99, annual: 79, label: "The essentials", feats: ["Animated talking mascot on your website", "FAQ brain trained on your business", "Unlimited conversations, 24/7", "Lead capture straight to your email", "Appointment requests captured & emailed", "Conversation history + basic analytics", "1 website · fully hosted & maintained"] },
+  { id: "pro", name: "Pro", monthly: 249, annual: 199, featured: true, label: "Most popular · capture & convert", feats: ["Everything in Starter", "Talking voice mascot — natural voice, lip-sync & hands-free mic", "CRM integration — leads auto-added (HubSpot, GoHighLevel & more)", "Instant SMS lead alerts + team routing", "Multilingual — replies in each visitor's language", "Remove \"Powered by MascotChatbot\" branding", "Monthly tuning + performance report · priority build"] },
+  { id: "premium", name: "Premium", monthly: 499, annual: 399, label: "Automate & optimize", feats: ["Everything in Pro", "Two-way calendar booking — books real appointments (Google / Outlook / Calendly)", "Special mascot moves & interactive animations", "Multi-page / multi-site knowledge + custom integrations (API & webhooks)", "A/B tuning of greeting, voice & prompts to lift conversions", "Advanced analytics — response times, top questions, conversion funnels", "Dedicated success manager + priority SLA"] },
 ];
 
 // One-time setup packages — the design + rigging + animation work to bring a mascot to life.
@@ -153,7 +153,7 @@ export default function Pricing() {
 
         {/* THNK add-ons */}
         <div className="mt-8">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-smoke">Add a website service · by THNK.biz</div>
+          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-smoke">3 · Add a website (optional) · by THNK.biz</div>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex flex-col rounded-3xl border-2 border-ink bg-paper p-7">
               <h3 className="text-xl font-bold tracking-tight">Website update</h3>
