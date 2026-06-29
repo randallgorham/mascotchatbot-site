@@ -208,21 +208,23 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* MARQUEE — mascot faces + the industries they work in */}
-      <section className="overflow-hidden border-y-2 border-ink bg-ink py-6 text-paper">
+      {/* MARQUEE — mascot faces (white) over a black name bar */}
+      <section className="relative overflow-hidden border-t-2 border-ink bg-paper">
         <style>{`
           @keyframes mcbBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
           @keyframes mcbWiggle{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
           @keyframes mcbSway{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}
           @keyframes mcbNod{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.06)}}
         `}</style>
-        <div className="flex w-max animate-marquee items-end">
+        {/* solid black bar that runs the full width behind the names */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-11 border-t-2 border-ink bg-ink" />
+        <div className="relative flex w-max animate-marquee items-end pt-6" style={{ animationDuration: "56s" }}>
           {[...CHARACTERS, ...CHARACTERS].map((c, i) => {
             const anims = ["mcbBob", "mcbWiggle", "mcbSway", "mcbNod"];
             const a = anims[i % anims.length];
             return (
-              <div key={i} className="mx-4 flex w-24 shrink-0 flex-col items-center sm:w-28">
-                <span className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-paper/25 bg-paper sm:h-24 sm:w-24">
+              <div key={i} className="mx-4 flex w-28 shrink-0 flex-col items-center sm:w-36">
+                <span className="mb-2 flex h-[100px] w-[100px] items-center justify-center overflow-hidden sm:h-[120px] sm:w-[120px]">
                   <img
                     src={`/mascots/${c.img}.${c.ext || "jpg"}`}
                     alt={`${c.name} — ${c.niche} mascot`}
@@ -231,7 +233,7 @@ export default async function Home() {
                     style={{ animation: `${a} ${(2.4 + (i % 5) * 0.35).toFixed(2)}s ease-in-out infinite`, animationDelay: `${((i % 7) * 0.2).toFixed(2)}s`, willChange: "transform" }}
                   />
                 </span>
-                <span className="mt-2 whitespace-nowrap text-sm font-bold tracking-tight">{c.niche}</span>
+                <span className="relative z-10 flex h-11 items-center justify-center whitespace-nowrap text-sm font-bold tracking-tight text-paper">{c.niche}</span>
               </div>
             );
           })}
