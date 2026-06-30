@@ -28,6 +28,10 @@ export default function SiteFooter() {
             <FooterLogo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-smoke">Animated AI mascots that talk to your visitors — answering questions, capturing leads, and booking appointments 24/7.</p>
             <a href="/#pricing" className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-paper px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5">Get your mascot <span aria-hidden="true">→</span></a>
+            <div className="mt-5 space-y-1.5 text-sm text-paper/80">
+              <a href="tel:+18014337000" className="block transition hover:text-paper">Call us: (801) 433-7000</a>
+              <a href="mailto:hello@mascotchatbot.com" className="block transition hover:text-paper">hello@mascotchatbot.com</a>
+            </div>
           </div>
           <div>
             <div className="text-xs font-bold uppercase tracking-widest text-smoke">Product</div>
