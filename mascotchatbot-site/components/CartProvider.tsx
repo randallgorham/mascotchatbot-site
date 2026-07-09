@@ -5,16 +5,18 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 export type CartItem = {
   id: string;
   name: string;
-  kind: "plan" | "addon";
+  kind: "plan" | "addon" | "mascot";
   monthly: number; // recurring per month (0 for one-time items)
   oneTime: number; // setup / one-time fee
-  billing?: string; // "monthly" | "annual" | "prepay3"
+  billing?: string; // "monthly" | "annual"
   detail?: string;
+  tier?: string; // for the mascot line: "predesigned" | "rigged" | "custom"
+  img?: string; // picked character image slug (predesigned)
 };
 
 type Ctx = {
   items: CartItem[];
-  add: (i: CartItem) => void;
+  add: (i: CartItem, openDrawer?: boolean) => void;
   remove: (id: string) => void;
   clear: () => void;
   open: boolean;
@@ -51,13 +53,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items]);
 
-  function add(i: CartItem) {
+  // openDrawer defaults to false so stepped selections update the cart badge
+  // without interrupting the flow. Pass true to pop the drawer open.
+  function add(i: CartItem, openDrawer = false) {
     setItems((prev) => {
-      // one plan at a time; add-ons stack but no duplicates
-      const base = i.kind === "plan" ? prev.filter((p) => p.kind !== "plan") : prev.filter((p) => p.id !== i.id);
+      // one plan and one mascot at a time; add-ons stack but no duplicates
+      let base = prev;
+      if (i.kind === "plan") base = prev.filter((p) => p.kind !== "plan");
+      else if (i.kind === "mascot") base = prev.filter((p) => p.kind !== "mascot");
+      else base = prev.filter((p) => p.id !== i.id);
       return [...base, i];
     });
-    setOpen(true);
+    if (openDrawer) setOpen(true);
   }
   function remove(id: string) {
     setItems((prev) => prev.filter((p) => p.id !== id));

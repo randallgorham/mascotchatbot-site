@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useCart } from "@/components/CartProvider";
 
 export type Mascot = { img: string; name: string; niche: string; say?: string; ext?: string };
 
@@ -21,26 +22,15 @@ const MODAL_CSS = `
 @media (prefers-reduced-motion:reduce){.mc-modal-card{animation:none}}
 `;
 
+// Price of the "predesigned mascot" tier (Step 1 option 1).
+const PREDESIGNED_PRICE = 499;
+
 function srcOf(m: Mascot) {
   return `/mascots/${m.img}.${m.ext || "png"}`;
 }
 
-function pickMascot(m: Mascot) {
-  try {
-    localStorage.setItem("mcb_pick", JSON.stringify({ img: m.img, niche: m.niche, name: m.name }));
-    window.dispatchEvent(new Event("mcb_pick"));
-  } catch {
-    /* ignore */
-  }
-}
-
-// Scroll to the pricing section reliably. Two things fought us here:
-//   1) Setting location.hash to a value it already holds is a no-op (no scroll),
-//      so the button appeared dead after the first use.
-//   2) For ~half a second after the modal closes, scroll is pinned to the top,
-//      so a single early scroll gets swallowed.
-// Fix: compute the absolute offset and fire window.scrollTo a few times, past that
-// dead zone, so it always lands.
+// Scroll to the pricing section reliably. Fire a few times to clear the brief
+// scroll-lock that happens right after the modal closes.
 function goToPricing() {
   const doScroll = () => {
     const el = document.getElementById("pricing");
@@ -59,6 +49,8 @@ function goToPricing() {
 }
 
 function MascotModal({ mascot, onClose }: { mascot: Mascot | null; onClose: () => void }) {
+  const { add } = useCart();
+
   useEffect(() => {
     if (!mascot) return;
     const onKey = (e: KeyboardEvent) => {
@@ -75,7 +67,19 @@ function MascotModal({ mascot, onClose }: { mascot: Mascot | null; onClose: () =
   if (!mascot) return null;
 
   function buy() {
-    if (mascot) pickMascot(mascot);
+    if (mascot) {
+      // Picking a ready-made character = Step 1, option 1 (predesigned, $499).
+      add({
+        id: "mascot",
+        kind: "mascot",
+        name: "Predesigned mascot",
+        detail: mascot.niche + " — ready-made character",
+        monthly: 0,
+        oneTime: PREDESIGNED_PRICE,
+        tier: "predesigned",
+        img: mascot.img,
+      });
+    }
     onClose();
     goToPricing();
   }
@@ -101,10 +105,10 @@ function MascotModal({ mascot, onClose }: { mascot: Mascot | null; onClose: () =
           <img src={srcOf(mascot)} alt={`${mascot.niche} mascot`} className="h-52 w-52 object-contain mix-blend-multiply" />
         </div>
         <div className="p-6">
-          <div className="text-[11px] font-bold uppercase tracking-widest text-smoke">Custom AI mascot</div>
+          <div className="text-[11px] font-bold uppercase tracking-widest text-smoke">Predesigned mascot</div>
           <h3 className="mt-1 text-2xl font-bold tracking-tight">The {mascot.niche} mascot</h3>
           <p className="mt-3 text-sm leading-relaxed text-smoke">
-            A custom animated {mascot.niche.toLowerCase()} character that lives on your site, greets every visitor, answers their
+            A ready-made animated {mascot.niche.toLowerCase()} character that lives on your site, greets every visitor, answers their
             questions in your voice, and books the job — 24/7, hosted and maintained by us.
           </p>
           <ul className="mt-4 space-y-2 text-sm">
@@ -116,13 +120,13 @@ function MascotModal({ mascot, onClose }: { mascot: Mascot | null; onClose: () =
             ))}
           </ul>
           <p className="mt-4 rounded-2xl border border-ink/15 bg-paper px-4 py-3 text-sm text-smoke">
-            <b className="text-ink">$500 one-time setup</b> builds it — then pick your monthly plan on the next step.
+            <b className="text-ink">$499 one-time</b> for a predesigned mascot — then pick your monthly plan on the next step.
           </p>
           <button
             onClick={buy}
             className="mt-5 w-full rounded-full bg-ink px-6 py-3.5 text-center font-semibold text-paper shadow-[0_8px_22px_rgba(10,10,10,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(10,10,10,0.35)]"
           >
-            Purchase this mascot →
+            Pick this mascot →
           </button>
           <button onClick={onClose} className="mt-2 w-full rounded-full px-6 py-2.5 text-center text-sm font-semibold text-smoke transition hover:text-ink">
             Keep looking
