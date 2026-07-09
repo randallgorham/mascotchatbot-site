@@ -207,7 +207,7 @@ const PROOF_BAND = [
 ];
 
 const FAQS = [
-  { q: "How much does it cost?", a: "Plans start at $99/mo, flat — no per-message credits or surprise overage bills. A one-time $500 setup covers the build (waived when you prepay 3 years). We host it, monitor it, and keep it sharp. Cancel anytime." },
+  { q: "How much does it cost?", a: "Your mascot is a one-time build: $499 for a predesigned character, $999 to rig a mascot you already have, or $1,499 for a full custom mascot — including one made to look like you from a few photos. Then a flat monthly plan from $99/mo — no per-message credits or surprise bills. We host it, monitor it, and keep it sharp. Cancel anytime." },
   { q: "How long until it's live on my site?", a: "About a week. We design the mascot, train it on your business, and hand you one line of code to drop in — or we add it for you." },
   { q: "Do I have to do anything?", a: "No. It's fully done-for-you. We build it, host it, monitor it, and tune it every month. You just collect the leads." },
   { q: "Can it use my own mascot or logo?", a: "Yes — bring your own character, or we design one that fits your brand. Either way it's uniquely yours." },
@@ -287,6 +287,16 @@ export default async function Home() {
           </div>
         </div>
       </header>
+
+      {/* LOOKS-LIKE-YOU CALLOUT */}
+      <a href="#pricing" className="group block border-b-2 border-ink bg-ink text-paper">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 py-2.5 text-center text-sm">
+          <span className="rounded-full bg-[#e3342b] px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest">New</span>
+          <span className="font-semibold">Want a mascot that looks like <span className="italic">you</span>?</span>
+          <span className="text-paper/70">Send a few photos and we&apos;ll design one in your likeness.</span>
+          <span className="font-semibold underline underline-offset-4 transition group-hover:opacity-80">See options →</span>
+        </div>
+      </a>
 
       {/* HERO */}
       <section id="top" className="relative overflow-hidden">
