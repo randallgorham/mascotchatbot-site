@@ -34,23 +34,28 @@ function pickMascot(m: Mascot) {
   }
 }
 
-// Scroll to the pricing section reliably. We do NOT rely on location.hash because
-// setting it to a value it already holds is a no-op (no scroll) — which made the
-// Purchase button appear to "do nothing" after the first use.
+// Scroll to the pricing section reliably. Two things fought us here:
+//   1) Setting location.hash to a value it already holds is a no-op (no scroll),
+//      so the button appeared dead after the first use.
+//   2) For ~half a second after the modal closes, scroll is pinned to the top,
+//      so a single early scroll gets swallowed.
+// Fix: compute the absolute offset and fire window.scrollTo a few times, past that
+// dead zone, so it always lands.
 function goToPricing() {
-  window.setTimeout(() => {
+  const doScroll = () => {
     const el = document.getElementById("pricing");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      try {
-        history.replaceState(null, "", "#pricing");
-      } catch {
-        /* ignore */
-      }
-    } else {
-      window.location.hash = "#pricing";
-    }
-  }, 140);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.pageYOffset - 8;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  };
+  window.setTimeout(doScroll, 200);
+  window.setTimeout(doScroll, 550);
+  window.setTimeout(doScroll, 850);
+  try {
+    history.replaceState(null, "", "#pricing");
+  } catch {
+    /* ignore */
+  }
 }
 
 function MascotModal({ mascot, onClose }: { mascot: Mascot | null; onClose: () => void }) {
