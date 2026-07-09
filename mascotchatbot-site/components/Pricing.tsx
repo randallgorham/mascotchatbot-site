@@ -103,7 +103,7 @@ export default function Pricing() {
 
   function addPlan(p: Plan) {
     const detail = billing === "annual" ? "Billed yearly (save 20%)" : "Billed monthly";
-    add({ id: "plan-" + p.id, kind: "plan", monthly: perMonth(p), oneTime: 0, billing, detail });
+    add({ id: "plan-" + p.id, name: p.name + " plan", kind: "plan", monthly: perMonth(p), oneTime: 0, billing, detail });
     if (abVariant) abBeacon("cart", abVariant);
   }
   function addService(id: string, name: string, price: number, detail: string) {
