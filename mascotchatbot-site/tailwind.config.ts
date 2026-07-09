@@ -37,7 +37,7 @@ const config: Config = {
       animation: {
         floaty: "floaty 4s ease-in-out infinite",
         blink: "blink 5s ease-in-out infinite",
-        marquee: "marquee 28s linear infinite",
+        marquee: "marquee 140s linear infinite",
         talk: "talk 0.4s ease-in-out infinite",
       },
     },
