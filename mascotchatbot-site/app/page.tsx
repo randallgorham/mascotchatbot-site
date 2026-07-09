@@ -5,6 +5,7 @@ import MobileNav from "@/components/MobileNav";
 import NavActions from "@/components/NavActions";
 import Pricing from "@/components/Pricing";
 import SiteFooter from "@/components/SiteFooter";
+import { MascotMarquee, MascotRoster } from "@/components/MascotShowcase";
 import { getSetting } from "@/lib/vault";
 
 export const dynamic = "force-dynamic";
@@ -337,37 +338,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* MARQUEE — mascot faces (white) over a black name bar; hover to pause, click to jump to the card below */}
-      <section className="relative overflow-hidden border-t-2 border-ink bg-paper">
-        <style>{`
-          @keyframes mcbBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-          @keyframes mcbWiggle{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
-          @keyframes mcbSway{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}
-          @keyframes mcbNod{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.06)}}
-        `}</style>
-        {/* solid black bar that runs the full width behind the names */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-11 border-t-2 border-ink bg-ink" />
-        <div className="relative flex w-max animate-marquee items-end pt-9 hover:[animation-play-state:paused]" style={{ animationDuration: "56s" }}>
-          {[...CHARACTERS, ...CHARACTERS].map((c, i) => {
-            const anims = ["mcbBob", "mcbWiggle", "mcbSway", "mcbNod"];
-            const a = anims[i % anims.length];
-            return (
-              <a key={i} href={`#mascot-${c.img}`} title={`${c.name} — ${c.niche}`} className="group mx-4 flex w-28 shrink-0 flex-col items-center sm:w-36">
-                <span className="mb-2 flex h-[100px] w-[100px] items-center justify-center transition-transform duration-200 group-hover:scale-110 sm:h-[120px] sm:w-[120px]">
-                  <img
-                    src={`/mascots/${c.img}.${c.ext || "jpg"}`}
-                    alt={`${c.name} — ${c.niche} mascot`}
-                    loading="lazy"
-                    className="h-full w-full object-contain mix-blend-multiply"
-                    style={{ animation: `${a} ${(2.4 + (i % 5) * 0.35).toFixed(2)}s ease-in-out infinite`, animationDelay: `${((i % 7) * 0.2).toFixed(2)}s`, willChange: "transform" }}
-                  />
-                </span>
-                <span className="relative z-10 flex h-11 items-center justify-center whitespace-nowrap text-sm font-bold tracking-tight text-paper group-hover:underline">{c.niche}</span>
-              </a>
-            );
-          })}
-        </div>
-      </section>
+      {/* MARQUEE — mascot faces over a black name bar; slow, pause on hover, click to pick */}
+      <MascotMarquee mascots={CHARACTERS} />
 
       {/* HOW IT WORKS */}
       <section id="how" className="mx-auto max-w-7xl scroll-mt-24 px-5 py-24">
@@ -435,7 +407,7 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-5 py-24">
           <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
             <h2 className="text-4xl font-bold tracking-tightest md:text-6xl">Meet the family.</h2>
-            <p className="max-w-sm text-smoke"><b className="text-ink">Robo is live right now</b> — click him in the bottom-right corner (turn your sound on), or tap his card. Every mascot below is custom to a brand, voice, and business.</p>
+            <p className="max-w-sm text-smoke"><b className="text-ink">Robo is live right now</b> — click him in the bottom-right corner (turn your sound on), or tap his card. Tap any mascot to pick it and get started.</p>
           </div>
 
           {/* Robo — live demo */}
@@ -463,30 +435,8 @@ export default async function Home() {
             <span className="hidden shrink-0 text-lg font-semibold md:block">talk to Robo →</span>
           </OpenMascot>
 
-          {/* Full roster */}
-          <div className="grid grid-cols-2 gap-px border-2 border-ink bg-ink sm:grid-cols-3 lg:grid-cols-6">
-            {CHARACTERS.map((c) => (
-              <div key={c.img} id={`mascot-${c.img}`} className="group relative flex aspect-[3/4] scroll-mt-28 flex-col overflow-hidden bg-paper p-3 text-left">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-smoke">{c.niche}</span>
-                <span className="pointer-events-none absolute left-1/2 top-1 z-20 -translate-x-1/2 translate-y-1 opacity-0 transition-all duration-200 ease-out group-hover:-translate-y-1 group-hover:opacity-100">
-                  <span className="relative block whitespace-nowrap rounded-2xl border-2 border-ink bg-paper px-3 py-1.5 text-xs font-extrabold text-ink shadow-[3px_3px_0_0_#e3342b]">
-                    {c.say}
-                    <span className="absolute -bottom-1.5 left-4 h-2 w-2 rounded-full border-2 border-ink bg-paper" />
-                    <span className="absolute -bottom-[11px] left-2 h-1.5 w-1.5 rounded-full border-2 border-ink bg-paper" />
-                  </span>
-                </span>
-                <span className="flex flex-1 items-center justify-center overflow-hidden py-1">
-                  <img
-                    src={`/mascots/${c.img}.${c.ext || "jpg"}`}
-                    alt={`${c.name} — ${c.niche} mascot`}
-                    loading="lazy"
-                    className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 ease-out group-hover:scale-110"
-                  />
-                </span>
-                <span className="text-base font-bold">{c.name}</span>
-              </div>
-            ))}
-          </div>
+          {/* Full roster — click any to pick + go to checkout */}
+          <MascotRoster mascots={CHARACTERS} />
           <p className="mt-6 text-sm text-smoke">Don&apos;t see your industry? We build any character for any business — that&apos;s the whole point.</p>
         </div>
       </section>
