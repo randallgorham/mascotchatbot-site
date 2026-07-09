@@ -34,6 +34,25 @@ function pickMascot(m: Mascot) {
   }
 }
 
+// Scroll to the pricing section reliably. We do NOT rely on location.hash because
+// setting it to a value it already holds is a no-op (no scroll) — which made the
+// Purchase button appear to "do nothing" after the first use.
+function goToPricing() {
+  window.setTimeout(() => {
+    const el = document.getElementById("pricing");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      try {
+        history.replaceState(null, "", "#pricing");
+      } catch {
+        /* ignore */
+      }
+    } else {
+      window.location.hash = "#pricing";
+    }
+  }, 140);
+}
+
 function MascotModal({ mascot, onClose }: { mascot: Mascot | null; onClose: () => void }) {
   useEffect(() => {
     if (!mascot) return;
@@ -53,7 +72,7 @@ function MascotModal({ mascot, onClose }: { mascot: Mascot | null; onClose: () =
   function buy() {
     if (mascot) pickMascot(mascot);
     onClose();
-    if (typeof window !== "undefined") window.location.hash = "#pricing";
+    goToPricing();
   }
 
   return (
