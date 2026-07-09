@@ -120,7 +120,7 @@ export default function Checkout() {
                         </div>
                         <p className="mt-1 text-sm text-smoke">
                           {subLabel}
-                          {term === "prepay3" ? " · setup waived" : oneTimeTotal > 0 ? " · " + money(oneTimeTotal) + " setup" : ""}
+                          {term === "prepay3" ? " · setup waived" : oneTimeTotal > 0 ? " + " + money(oneTimeTotal) + " one-time setup" : ""}
                         </p>
                       </div>
                       <div className="mt-4 space-y-1.5 text-sm">
