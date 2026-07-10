@@ -17,11 +17,32 @@ const FooterLogo = () => (
   </a>
 );
 
+/** "Powered by THNK" lockup — the THNK wordmark (Anton) under a small caption,
+ *  matching THNK's brand. Used across our sites for consistent branding. */
+const PoweredByThnk = () => (
+  <a
+    href="https://thnk.biz"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Powered by THNK"
+    className="group flex flex-col items-center leading-none"
+  >
+    <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-smoke transition group-hover:text-paper/80">Powered by</span>
+    <span
+      className="mt-1.5 text-[26px] leading-none text-paper transition group-hover:opacity-90"
+      style={{ fontFamily: "'Anton', system-ui, sans-serif", letterSpacing: "-0.03em" }}
+    >
+      THNK
+    </span>
+  </a>
+);
+
 /** One footer used on every page so the site stays consistent. */
 export default function SiteFooter() {
   const inds = Object.values(INDUSTRIES);
   return (
     <footer className="border-t-2 border-paper bg-ink text-paper">
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');`}</style>
       <div className="mx-auto max-w-7xl px-5 py-14">
         <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1.7fr]">
           <div>
@@ -52,9 +73,10 @@ export default function SiteFooter() {
             </div>
           </div>
         </div>
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-paper/15 pt-6 text-sm text-smoke sm:flex-row">
-          <span>© {new Date().getFullYear()} MascotChatbot · a THNK company.</span>
-          <a href="#top" className="hover:text-paper">Back to top ↑</a>
+        <div className="mt-12 flex flex-col items-center justify-between gap-6 border-t border-paper/15 pt-6 text-sm text-smoke sm:flex-row">
+          <span className="order-2 sm:order-1">© {new Date().getFullYear()} MascotChatbot</span>
+          <div className="order-1 sm:order-2"><PoweredByThnk /></div>
+          <a href="#top" className="order-3 hover:text-paper">Back to top ↑</a>
         </div>
       </div>
     </footer>
