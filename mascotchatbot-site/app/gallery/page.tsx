@@ -170,6 +170,7 @@ const MASCOTS: Mascot[] = [
   { img: "176-veterinarian-female", niche: "Veterinarian" },
   { img: "192-chiropractor", niche: "Chiropractor" },
   { img: "193-chimney-sweep", niche: "Chimney Sweep" },
+  { img: "194-interior-designer", niche: "Interior Designer" },
 ];
 
 export default function GalleryPage() {
