@@ -190,6 +190,22 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "192-chiropractor", name: "Chiropractor", niche: "Chiropractor", say: "Pick me!", ext: "png" },
   { img: "193-chimney-sweep", name: "Chimney Sweep", niche: "Chimney Sweep", say: "Pick me!", ext: "png" },
   { img: "194-interior-designer", name: "Interior Designer", niche: "Interior Designer", say: "Pick me!", ext: "png" },
+  { img: "195-music-teacher", name: "Music Teacher", niche: "Music Teacher", say: "Pick me!", ext: "png" },
+  { img: "196-dance-instructor", name: "Dance Instructor", niche: "Dance Instructor", say: "Pick me!", ext: "png" },
+  { img: "197-swim-instructor", name: "Swim Instructor", niche: "Swim Instructor", say: "Pick me!", ext: "png" },
+  { img: "198-martial-arts-instructor", name: "Martial Arts Instructor", niche: "Martial Arts Instructor", say: "Pick me!", ext: "png" },
+  { img: "199-social-media-manager", name: "Social Media Manager", niche: "Social Media Manager", say: "Pick me!", ext: "png" },
+  { img: "200-copywriter", name: "Copywriter", niche: "Copywriter", say: "Pick me!", ext: "png" },
+  { img: "201-podcast-producer", name: "Podcast Producer", niche: "Podcast Producer", say: "Pick me!", ext: "png" },
+  { img: "202-virtual-assistant", name: "Virtual Assistant", niche: "Virtual Assistant", say: "Pick me!", ext: "png" },
+  { img: "203-yoga-instructor", name: "Yoga Instructor", niche: "Yoga Instructor", say: "Pick me!", ext: "png" },
+  { img: "204-pilates-instructor", name: "Pilates Instructor", niche: "Pilates Instructor", say: "Pick me!", ext: "png" },
+  { img: "205-life-coach", name: "Life Coach", niche: "Life Coach", say: "Pick me!", ext: "png" },
+  { img: "206-acupuncturist", name: "Acupuncturist", niche: "Acupuncturist", say: "Pick me!", ext: "png" },
+  { img: "207-home-stager", name: "Home Stager", niche: "Home Stager", say: "Pick me!", ext: "png" },
+  { img: "208-water-treatment-tech", name: "Water Treatment Tech", niche: "Water Treatment Tech", say: "Pick me!", ext: "png" },
+  { img: "209-fireplace-specialist", name: "Fireplace Specialist", niche: "Fireplace Specialist", say: "Pick me!", ext: "png" },
+  { img: "210-awning-installer", name: "Awning Installer", niche: "Awning Installer", say: "Pick me!", ext: "png" },
 ];
 
 const STATS = [
