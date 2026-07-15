@@ -186,6 +186,126 @@ export const INDUSTRIES: Record<string, Ind> = {
       { t: "Protect your time", d: "It screens fit and routes the right clients to your calendar." },
     ],
   },
+  roofers: {
+    slug: "roofers", label: "Roofers", role: "roofing company", img: "32-roofer.png", name: "Rocky",
+    headline: "Your roofing business, talking.",
+    sub: "A dependable mascot that answers storm-damage questions, qualifies jobs, and books free inspections 24/7.",
+    pains: [
+      { t: "Catch storm-damage leads", d: "After a hailstorm everyone searches at once — your mascot books the inspection before the competition." },
+      { t: "Qualify the roof", d: "It gathers roof age, issue, and address so your crew rolls up ready to quote." },
+      { t: "Book inspections around the clock", d: "Turns 'is my roof leaking?' visitors into booked free inspections, day or night." },
+    ],
+  },
+  "auto-repair": {
+    slug: "auto-repair", label: "Auto repair shops", role: "auto repair shop", img: "19-mechanic-male.png", name: "Gus",
+    headline: "Your auto shop, talking.",
+    sub: "A friendly mascot that answers repair questions, gives ballpark estimates, and books drop-offs 24/7.",
+    pains: [
+      { t: "Book drop-offs anytime", d: "Cars break down at the worst times — your mascot books the appointment before they call the shop down the street." },
+      { t: "Answer the common ones", d: "Check-engine lights, brakes, diagnostics, and pricing ranges — handled instantly." },
+      { t: "Keep the bays full", d: "Turns website traffic into booked services and estimates while you're under a hood." },
+    ],
+  },
+  chiropractors: {
+    slug: "chiropractors", label: "Chiropractors", role: "chiropractic clinic", img: "192-chiropractor.png", name: "Dr. Ace",
+    headline: "Your chiropractic clinic, talking.",
+    sub: "A reassuring mascot that answers questions about pain and treatment and books new-patient visits 24/7.",
+    pains: [
+      { t: "Book new patients 24/7", d: "Back pain doesn't keep office hours — your mascot books the visit the moment they land." },
+      { t: "Answer the essentials", d: "Insurance, first-visit specials, what to expect — handled instantly and warmly." },
+      { t: "Fill the schedule", d: "Turns late-night pain searches into booked adjustments and consultations." },
+    ],
+  },
+  "personal-trainers": {
+    slug: "personal-trainers", label: "Personal trainers", role: "personal training studio", img: "119-personal-trainer.png", name: "Blaze",
+    headline: "Your training business, talking.",
+    sub: "An energetic mascot that answers questions, explains packages, and books free sessions around the clock.",
+    pains: [
+      { t: "Book free sessions 24/7", d: "Motivation strikes at odd hours — your mascot books the intro session before it fades." },
+      { t: "Explain your packages", d: "One-on-one, small group, pricing, and availability — answered instantly." },
+      { t: "Grow your client base", d: "Turns every website visit into a booked consult or trial workout." },
+    ],
+  },
+  "yoga-studios": {
+    slug: "yoga-studios", label: "Yoga studios", role: "yoga studio", img: "203-yoga-instructor.png", name: "Luna",
+    headline: "Your yoga studio, talking.",
+    sub: "A calm, welcoming mascot that answers class questions and books new students 24/7.",
+    pains: [
+      { t: "Book new students anytime", d: "People commit to a practice on a quiet evening — your mascot books the intro class right then." },
+      { t: "Answer class questions", d: "Styles, levels, schedule, and pricing — handled instantly and on-brand." },
+      { t: "Fill your classes", d: "Promotes intro offers and memberships to every visitor automatically." },
+    ],
+  },
+  "pilates-studios": {
+    slug: "pilates-studios", label: "Pilates studios", role: "pilates studio", img: "204-pilates-instructor.png", name: "Cora",
+    headline: "Your pilates studio, talking.",
+    sub: "A poised mascot that answers questions about reformer and mat classes and books intro sessions 24/7.",
+    pains: [
+      { t: "Book intro sessions 24/7", d: "New clients decide after hours — your mascot books the first class on the spot." },
+      { t: "Answer class questions", d: "Reformer vs. mat, levels, pricing, and schedule — answered instantly." },
+      { t: "Fill your reformers", d: "Turns curious visitors into booked intro packages and memberships." },
+    ],
+  },
+  "swim-schools": {
+    slug: "swim-schools", label: "Swim schools", role: "swim school", img: "197-swim-instructor.png", name: "Finn",
+    headline: "Your swim school, talking.",
+    sub: "A friendly mascot that answers parents' questions and books lessons and evaluations 24/7.",
+    pains: [
+      { t: "Book lessons anytime", d: "Parents plan the schedule at night — your mascot books the evaluation before they look elsewhere." },
+      { t: "Answer parent questions", d: "Levels, ages, class times, and pricing — handled instantly and reassuringly." },
+      { t: "Fill every session", d: "Turns website visits into booked lessons and swim evaluations year-round." },
+    ],
+  },
+  "martial-arts": {
+    slug: "martial-arts", label: "Martial arts schools", role: "martial arts school", img: "198-martial-arts-instructor.png", name: "Kai",
+    headline: "Your dojo, talking.",
+    sub: "A confident mascot that answers questions and books free trial classes for kids and adults 24/7.",
+    pains: [
+      { t: "Book free trials 24/7", d: "Parents and adults sign up on impulse — your mascot books the trial class before the moment passes." },
+      { t: "Answer program questions", d: "Ages, styles, belt programs, and pricing — answered instantly." },
+      { t: "Grow your school", d: "Turns every visit into a booked trial or intro-program sign-up." },
+    ],
+  },
+  "music-lessons": {
+    slug: "music-lessons", label: "Music teachers", role: "music lesson studio", img: "195-music-teacher.png", name: "Melody",
+    headline: "Your music studio, talking.",
+    sub: "A cheerful mascot that answers questions about lessons and instruments and books trial lessons 24/7.",
+    pains: [
+      { t: "Book trial lessons anytime", d: "Parents and students decide in the evening — your mascot books the first lesson right away." },
+      { t: "Answer lesson questions", d: "Instruments, ages, in-person vs. online, and pricing — handled instantly." },
+      { t: "Fill your calendar", d: "Turns website visits into booked trial lessons and enrollments." },
+    ],
+  },
+  "interior-designers": {
+    slug: "interior-designers", label: "Interior designers", role: "interior design studio", img: "194-interior-designer.png", name: "Vivi",
+    headline: "Your design studio, talking.",
+    sub: "A stylish mascot that qualifies projects, answers questions, and books discovery calls 24/7.",
+    pains: [
+      { t: "Book discovery calls 24/7", d: "Clients dream up projects late at night — your mascot books the consult while inspiration is fresh." },
+      { t: "Qualify the project", d: "It gathers scope, rooms, style, and budget so you only take the right calls." },
+      { t: "Win better clients", d: "Turns browsers into booked design consultations and project inquiries." },
+    ],
+  },
+  "home-staging": {
+    slug: "home-staging", label: "Home stagers", role: "home staging company", img: "207-home-stager.png", name: "Stella",
+    headline: "Your staging business, talking.",
+    sub: "A polished mascot that answers agents' and sellers' questions and books staging consultations 24/7.",
+    pains: [
+      { t: "Book consultations 24/7", d: "Agents line up staging on tight timelines — your mascot books the walk-through immediately." },
+      { t: "Qualify the listing", d: "It gathers square footage, occupancy, and timeline so you quote fast." },
+      { t: "Win more listings", d: "Turns agent and seller traffic into booked staging consultations." },
+    ],
+  },
+  caterers: {
+    slug: "caterers", label: "Caterers", role: "catering company", img: "124-caterer-female.png", name: "Gia",
+    headline: "Your catering business, talking.",
+    sub: "A warm mascot that qualifies events, answers menu questions, and captures catering leads 24/7.",
+    pains: [
+      { t: "Capture event leads anytime", d: "People plan weddings and parties after hours — your mascot books the tasting before they move on." },
+      { t: "Qualify the event", d: "It gathers date, headcount, budget, and menu style so you quote accurately." },
+      { t: "Fill your calendar", d: "Turns website visits into booked tastings and catering inquiries." },
+    ],
+  },
 };
 
 export function industryMeta(slug: string): Metadata {
