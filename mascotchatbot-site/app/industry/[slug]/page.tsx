@@ -2,10 +2,8 @@ import { notFound } from "next/navigation";
 import IndustryLanding from "@/components/IndustryLanding";
 import { INDUSTRIES, industryMeta } from "@/lib/industries";
 
-const NEW_SLUGS = ["barbershops", "restaurants", "florists", "landscapers", "massage", "nail-salons", "tattoo-studios", "therapists"];
-
 export function generateStaticParams() {
-  return NEW_SLUGS.map((slug) => ({ slug }));
+  return Object.keys(INDUSTRIES).map((slug) => ({ slug }));
 }
 
 export function generateMetadata({ params }: { params: { slug: string } }) {
