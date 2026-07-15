@@ -164,6 +164,7 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "148-driving-instructor", name: "Driving Instructor", niche: "Driving Instructor", say: "Pick me!", ext: "png" },
   { img: "151-smart-home-installer", name: "Smart Home Installer", niche: "Smart Home Installer", say: "Pick me!", ext: "png" },
   { img: "151-smart-home-installer-white", name: "Smart Home Installer White", niche: "Smart Home Installer White", say: "Pick me!", ext: "png" },
+  { img: "152-ev-charger-installer", name: "EV Charger Installer", niche: "EV Charger Installer", say: "Pick me!", ext: "png" },
   { img: "154-low-voltage-tech", name: "Low Voltage Tech", niche: "Low Voltage Tech", say: "Pick me!", ext: "png" },
   { img: "155-holiday-lighting", name: "Holiday Lighting", niche: "Holiday Lighting", say: "Pick me!", ext: "png" },
   { img: "156-turf-installer", name: "Turf Installer", niche: "Turf Installer", say: "Pick me!", ext: "png" },
