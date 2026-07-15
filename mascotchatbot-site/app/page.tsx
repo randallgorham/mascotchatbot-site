@@ -189,6 +189,7 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "176-veterinarian-female", name: "Veterinarian", niche: "Veterinarian", say: "Pick me!", ext: "png" },
   { img: "192-chiropractor", name: "Chiropractor", niche: "Chiropractor", say: "Pick me!", ext: "png" },
   { img: "193-chimney-sweep", name: "Chimney Sweep", niche: "Chimney Sweep", say: "Pick me!", ext: "png" },
+  { img: "194-interior-designer", name: "Interior Designer", niche: "Interior Designer", say: "Pick me!", ext: "png" },
 ];
 
 const STATS = [
