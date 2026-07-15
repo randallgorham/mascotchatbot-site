@@ -1,4 +1,5 @@
 import Link from "next/link";
+import GalleryBrowser from "@/components/GalleryBrowser";
 
 export const metadata = {
   title: "Mascot Gallery — 150+ ready-made characters | MascotChatbot",
@@ -216,23 +217,7 @@ export default function GalleryPage() {
           A friendly face for every trade. Pick one you love or we&apos;ll design a custom character for your brand.
         </p>
 
-        <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {MASCOTS.map((m) => (
-            <div
-              key={m.img}
-              className="group flex flex-col items-center rounded-2xl border border-ink/10 bg-white p-4 transition hover:-translate-y-1 hover:border-ink/30 hover:shadow-xl"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`/mascots/${m.img}.png`}
-                alt={m.niche + " mascot"}
-                loading="lazy"
-                className="h-40 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
-              />
-              <span className="mt-3 text-center text-sm font-medium text-ink">{m.niche}</span>
-            </div>
-          ))}
-        </div>
+        <GalleryBrowser mascots={MASCOTS} />
 
         <div className="mt-16 text-center">
           <Link href="/#pricing" className="inline-flex items-center gap-1.5 rounded-full bg-ink px-7 py-3.5 text-base font-semibold text-paper transition hover:-translate-y-0.5">
