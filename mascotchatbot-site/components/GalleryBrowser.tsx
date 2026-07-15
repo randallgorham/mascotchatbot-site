@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Mascot = { img: string; niche: string };
 
@@ -77,9 +77,68 @@ function categoryOf(m: Mascot): string {
   return "Other";
 }
 
+const PREDESIGNED_PRICE = 499;
+
+// Add this ready-made character to the cart as a $499 "Predesigned mascot" (Step 1,
+// option 1) — same shape the homepage modal uses — then jump to pricing.
+function pickMascot(m: Mascot) {
+  try {
+    const raw = localStorage.getItem("mcb_cart");
+    const items: { kind?: string }[] = raw ? JSON.parse(raw) : [];
+    const base = items.filter((p) => p.kind !== "mascot");
+    base.push({
+      id: "mascot",
+      name: "Predesigned mascot",
+      kind: "mascot",
+      detail: m.niche + " — ready-made character",
+      monthly: 0,
+      oneTime: PREDESIGNED_PRICE,
+      tier: "predesigned",
+      img: m.img,
+    } as { kind?: string });
+    localStorage.setItem("mcb_cart", JSON.stringify(base));
+  } catch {
+    /* ignore */
+  }
+  window.location.href = "/#pricing";
+}
+
+function Heart({ filled }: { filled: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+    </svg>
+  );
+}
+
 export default function GalleryBrowser({ mascots }: { mascots: Mascot[] }) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState("All");
+  const [favs, setFavs] = useState<string[]>([]);
+
+  // Load favorites once.
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem("mcb_favorites");
+      if (s) setFavs(JSON.parse(s));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  function toggleFav(img: string) {
+    setFavs((prev) => {
+      const next = prev.includes(img) ? prev.filter((f) => f !== img) : [...prev, img];
+      try {
+        localStorage.setItem("mcb_favorites", JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }
+
+  const favSet = useMemo(() => new Set(favs), [favs]);
 
   const tagged = useMemo(
     () => mascots.map((m) => ({ ...m, cat: categoryOf(m) })),
@@ -90,17 +149,26 @@ export default function GalleryBrowser({ mascots }: { mascots: Mascot[] }) {
     const counts: Record<string, number> = {};
     tagged.forEach((m) => (counts[m.cat] = (counts[m.cat] || 0) + 1));
     const ordered = [...CATEGORIES.map((c) => c.label), "Other"].filter((l) => counts[l]);
-    return [{ label: "All", count: tagged.length }, ...ordered.map((l) => ({ label: l, count: counts[l] }))];
-  }, [tagged]);
+    return [
+      { label: "All", count: tagged.length },
+      { label: "★ Favorites", count: favs.length },
+      ...ordered.map((l) => ({ label: l, count: counts[l] })),
+    ];
+  }, [tagged, favs.length]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return tagged.filter((m) => {
-      const matchCat = active === "All" || m.cat === active;
+      const matchCat =
+        active === "All"
+          ? true
+          : active === "★ Favorites"
+          ? favSet.has(m.img)
+          : m.cat === active;
       const matchQ = !q || m.niche.toLowerCase().includes(q) || m.img.toLowerCase().includes(q);
       return matchCat && matchQ;
     });
-  }, [tagged, active, query]);
+  }, [tagged, active, query, favSet]);
 
   return (
     <div>
@@ -152,27 +220,58 @@ export default function GalleryBrowser({ mascots }: { mascots: Mascot[] }) {
       {/* Grid */}
       {filtered.length > 0 ? (
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {filtered.map((m) => (
-            <div
-              key={m.img}
-              className="group flex flex-col items-center rounded-2xl border border-ink/10 bg-white p-4 transition hover:-translate-y-1 hover:border-ink/30 hover:shadow-xl"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`/mascots/${m.img}.png`}
-                alt={m.niche + " mascot"}
-                loading="lazy"
-                className="h-40 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
-              />
-              <span className="mt-3 text-center text-sm font-medium text-ink">{m.niche}</span>
-            </div>
-          ))}
+          {filtered.map((m) => {
+            const isFav = favSet.has(m.img);
+            return (
+              <div
+                key={m.img}
+                className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-ink/10 bg-white p-4 transition hover:-translate-y-1 hover:border-ink/30 hover:shadow-xl"
+              >
+                {/* Favorite heart */}
+                <button
+                  onClick={() => toggleFav(m.img)}
+                  aria-label={isFav ? "Remove from favorites" : "Save to favorites"}
+                  aria-pressed={isFav}
+                  className={`absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full border transition ${
+                    isFav
+                      ? "border-transparent bg-[#e3342b] text-white"
+                      : "border-ink/15 bg-white/90 text-smoke opacity-0 hover:text-ink group-hover:opacity-100"
+                  }`}
+                >
+                  <Heart filled={isFav} />
+                </button>
+
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/mascots/${m.img}.png`}
+                  alt={m.niche + " mascot"}
+                  loading="lazy"
+                  className="h-40 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+                />
+                <span className="mt-3 text-center text-sm font-medium text-ink">{m.niche}</span>
+
+                {/* Hover action bar */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full bg-ink/95 p-2.5 opacity-0 backdrop-blur-sm transition-all duration-200 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+                  <button
+                    onClick={() => pickMascot(m)}
+                    className="w-full rounded-full bg-paper px-3 py-2 text-xs font-bold text-ink transition hover:bg-white"
+                  >
+                    Pick this →
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="mt-16 text-center">
-          <p className="text-lg font-semibold text-ink">No mascots match that search.</p>
+          <p className="text-lg font-semibold text-ink">
+            {active === "★ Favorites" ? "No favorites yet." : "No mascots match that search."}
+          </p>
           <p className="mt-2 text-smoke">
-            Don&apos;t see your trade? We&apos;ll design a custom character for your brand.
+            {active === "★ Favorites"
+              ? "Tap the ♥ on any mascot to save it here."
+              : "Don’t see your trade? We’ll design a custom character for your brand."}
           </p>
           <button
             onClick={() => { setQuery(""); setActive("All"); }}
