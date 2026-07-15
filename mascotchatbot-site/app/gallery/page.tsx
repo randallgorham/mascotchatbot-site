@@ -171,6 +171,22 @@ const MASCOTS: Mascot[] = [
   { img: "192-chiropractor", niche: "Chiropractor" },
   { img: "193-chimney-sweep", niche: "Chimney Sweep" },
   { img: "194-interior-designer", niche: "Interior Designer" },
+  { img: "195-music-teacher", niche: "Music Teacher" },
+  { img: "196-dance-instructor", niche: "Dance Instructor" },
+  { img: "197-swim-instructor", niche: "Swim Instructor" },
+  { img: "198-martial-arts-instructor", niche: "Martial Arts Instructor" },
+  { img: "199-social-media-manager", niche: "Social Media Manager" },
+  { img: "200-copywriter", niche: "Copywriter" },
+  { img: "201-podcast-producer", niche: "Podcast Producer" },
+  { img: "202-virtual-assistant", niche: "Virtual Assistant" },
+  { img: "203-yoga-instructor", niche: "Yoga Instructor" },
+  { img: "204-pilates-instructor", niche: "Pilates Instructor" },
+  { img: "205-life-coach", niche: "Life Coach" },
+  { img: "206-acupuncturist", niche: "Acupuncturist" },
+  { img: "207-home-stager", niche: "Home Stager" },
+  { img: "208-water-treatment-tech", niche: "Water Treatment Tech" },
+  { img: "209-fireplace-specialist", niche: "Fireplace Specialist" },
+  { img: "210-awning-installer", niche: "Awning Installer" },
 ];
 
 export default function GalleryPage() {
