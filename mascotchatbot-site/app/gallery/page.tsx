@@ -145,6 +145,7 @@ const MASCOTS: Mascot[] = [
   { img: "148-driving-instructor", niche: "Driving Instructor" },
   { img: "151-smart-home-installer", niche: "Smart Home Installer" },
   { img: "151-smart-home-installer-white", niche: "Smart Home Installer White" },
+  { img: "152-ev-charger-installer", niche: "EV Charger Installer" },
   { img: "154-low-voltage-tech", niche: "Low Voltage Tech" },
   { img: "155-holiday-lighting", niche: "Holiday Lighting" },
   { img: "156-turf-installer", niche: "Turf Installer" },
