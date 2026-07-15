@@ -206,6 +206,14 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "208-water-treatment-tech", name: "Water Treatment Tech", niche: "Water Treatment Tech", say: "Pick me!", ext: "png" },
   { img: "209-fireplace-specialist", name: "Fireplace Specialist", niche: "Fireplace Specialist", say: "Pick me!", ext: "png" },
   { img: "210-awning-installer", name: "Awning Installer", niche: "Awning Installer", say: "Pick me!", ext: "png" },
+  { img: "211-garage-door-tech", name: "Garage Door Tech", niche: "Garage Door Tech", say: "Pick me!", ext: "png" },
+  { img: "212-gutter-installer", name: "Gutter Installer", niche: "Gutter Installer", say: "Pick me!", ext: "png" },
+  { img: "213-mobile-detailer", name: "Mobile Detailer", niche: "Mobile Detailer", say: "Pick me!", ext: "png" },
+  { img: "214-pool-builder", name: "Pool Builder", niche: "Pool Builder", say: "Pick me!", ext: "png" },
+  { img: "215-solar-sales-rep", name: "Solar Sales Rep", niche: "Solar Sales Rep", say: "Pick me!", ext: "png" },
+  { img: "216-pressure-wash-pro", name: "Pressure Wash Pro", niche: "Pressure Wash Pro", say: "Pick me!", ext: "png" },
+  { img: "217-handyman-female", name: "Handyman", niche: "Handyman", say: "Pick me!", ext: "png" },
+  { img: "218-irrigation-tech", name: "Irrigation Tech", niche: "Irrigation Tech", say: "Pick me!", ext: "png" },
 ];
 
 const STATS = [
