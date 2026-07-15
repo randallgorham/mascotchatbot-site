@@ -127,6 +127,7 @@ const MASCOTS: Mascot[] = [
   { img: "128-financial-advisor", niche: "Financial Advisor" },
   { img: "129-bookkeeper", niche: "Bookkeeper" },
   { img: "130-notary", niche: "Notary" },
+  { img: "131-it-technician", niche: "IT Technician" },
   { img: "132-marketing-creative", niche: "Marketing Creative" },
   { img: "133-recruiter", niche: "Recruiter" },
   { img: "134-business-consultant", niche: "Business Consultant" },
