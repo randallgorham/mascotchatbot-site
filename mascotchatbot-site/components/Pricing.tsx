@@ -53,6 +53,13 @@ function StepHeader({ n, title, sub, done }: { n: number; title: string; sub?: s
   );
 }
 
+const TRUST = [
+  "No long contracts — cancel anytime",
+  "Live in about 5 days",
+  "Built, hosted & maintained by us",
+  "Real human support",
+];
+
 export default function Pricing() {
   const [billing, setBilling] = useState<Billing>("annual");
   const [abVariant, setAbVariant] = useState<"monthly" | "annual" | "">("");
@@ -60,6 +67,9 @@ export default function Pricing() {
 
   const mascot = items.find((i) => i.kind === "mascot");
   const plan = items.find((i) => i.kind === "plan");
+  const addons = items.filter((i) => i.kind === "addon");
+  const oneTimeTotal = items.reduce((s, i) => s + (i.oneTime || 0), 0);
+  const monthlyTotal = items.reduce((s, i) => s + (i.monthly || 0), 0);
 
   // Assign (or re-read) the visitor's billing-default variant once.
   useEffect(() => {
@@ -110,11 +120,27 @@ export default function Pricing() {
     add({ id, name, kind: "addon", monthly: 0, oneTime: price, detail });
   }
 
+  const hasItems = items.length > 0;
+  const nextHint = !mascot ? "Pick a mascot in Step 1 to get started." : !plan ? "Choose a monthly plan in Step 2." : "You're all set — review and check out.";
+
   return (
     <section id="pricing" className="scroll-mt-24 border-t-2 border-ink">
       <div className="mx-auto max-w-7xl px-5 py-24">
         <h2 className="mb-3 text-4xl font-bold tracking-tightest md:text-6xl">Simple, honest pricing.</h2>
-        <p className="mb-12 max-w-xl text-smoke">Three quick steps: pick your mascot, choose your monthly plan, and add a website if you need one. Flat monthly — no per-message credits or surprise bills. Cancel anytime.</p>
+        <p className="mb-6 max-w-xl text-smoke">Three quick steps: pick your mascot, choose your monthly plan, and add a website if you need one. Flat monthly — no per-message credits or surprise bills. Cancel anytime.</p>
+
+        {/* Trust bar */}
+        <div className="mb-12 flex flex-wrap gap-x-5 gap-y-2">
+          {TRUST.map((t) => (
+            <span key={t} className="inline-flex items-center gap-1.5 text-sm font-medium text-ink">
+              <svg width="16" height="16" viewBox="0 0 20 20" className="shrink-0" aria-hidden="true">
+                <circle cx="10" cy="10" r="10" fill="#0A0A0A" />
+                <path d="M5.5 10.5l2.8 2.8 6-6.4" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {t}
+            </span>
+          ))}
+        </div>
 
         {/* ───── STEP 1 · MASCOT ───── */}
         <StepHeader n={1} title="Pick your mascot" sub="A one-time build. Choose how you want your character made." done={!!mascot} />
@@ -213,9 +239,65 @@ export default function Pricing() {
           </div>
         </div>
 
-        <p className="mt-10 text-center text-sm text-smoke">
-          Your picks show in the cart, top-right. <button onClick={() => setOpen(true)} className="font-semibold text-ink underline">View cart &amp; checkout →</button>
-        </p>
+        {/* ───── ORDER SUMMARY ───── */}
+        <div id="order-summary" className="mt-16 scroll-mt-24">
+          <div className="mx-auto max-w-2xl overflow-hidden rounded-3xl border-2 border-ink bg-paper shadow-xl">
+            <div className="border-b-2 border-ink bg-ink px-6 py-4">
+              <h3 className="text-lg font-bold tracking-tight text-paper">Your order</h3>
+            </div>
+            <div className="px-6 py-5">
+              {hasItems ? (
+                <ul className="space-y-3">
+                  {items.map((i) => (
+                    <li key={i.id} className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="text-sm font-semibold text-ink">{i.name}</div>
+                        {i.detail ? <div className="text-xs text-smoke">{i.detail}</div> : null}
+                      </div>
+                      <div className="shrink-0 text-right text-sm font-semibold text-ink">
+                        {i.monthly ? money(i.monthly) + "/mo" : money(i.oneTime)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="py-2 text-sm text-smoke">{nextHint}</p>
+              )}
+
+              {hasItems ? (
+                <div className="mt-5 space-y-1.5 border-t border-ink/10 pt-4">
+                  {oneTimeTotal > 0 ? (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-smoke">One-time total</span>
+                      <span className="font-bold text-ink">{money(oneTimeTotal)}</span>
+                    </div>
+                  ) : null}
+                  {monthlyTotal > 0 ? (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-smoke">Then {billing === "annual" ? "yearly" : "monthly"}</span>
+                      <span className="font-bold text-ink">{money(monthlyTotal)}/mo</span>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
+              <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+                <a
+                  href="/checkout"
+                  aria-disabled={!plan}
+                  onClick={(e) => { if (!plan) { e.preventDefault(); setOpen(true); } }}
+                  className={"flex-1 rounded-full px-6 py-3.5 text-center font-semibold transition-all duration-300 " + (plan ? "bg-ink text-paper shadow-[0_8px_22px_rgba(10,10,10,0.28)] hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(10,10,10,0.35)]" : "cursor-not-allowed bg-ink/40 text-paper")}
+                >
+                  {plan ? "Checkout →" : "Pick a plan to check out"}
+                </a>
+                <button onClick={() => setOpen(true)} className="rounded-full border-2 border-ink px-6 py-3.5 text-center font-semibold text-ink transition hover:bg-ink hover:text-paper">
+                  View cart
+                </button>
+              </div>
+              <p className="mt-3 text-center text-xs text-smoke">Secure checkout · No long contracts · Cancel anytime</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
