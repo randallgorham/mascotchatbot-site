@@ -141,6 +141,7 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "125-bartender-male", name: "Bartender", niche: "Bartender", say: "Pick me!", ext: "png" },
   { img: "125-bartender-female", name: "Bartender", niche: "Bartender", say: "Pick me!", ext: "png" },
   { img: "125-bartender-female-edgy", name: "Bartender", niche: "Bartender", say: "Pick me!", ext: "png" },
+  { img: "126-butcher", name: "Butcher", niche: "Butcher", say: "Pick me!", ext: "png" },
   { img: "127-brewer", name: "Brewer", niche: "Brewer", say: "Pick me!", ext: "png" },
   { img: "128-financial-advisor", name: "Financial Advisor", niche: "Financial Advisor", say: "Pick me!", ext: "png" },
   { img: "129-bookkeeper", name: "Bookkeeper", niche: "Bookkeeper", say: "Pick me!", ext: "png" },
