@@ -152,6 +152,7 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "134-business-consultant", name: "Business Consultant", niche: "Business Consultant", say: "Pick me!", ext: "png" },
   { img: "135-web-designer", name: "Web Designer", niche: "Web Designer", say: "Pick me!", ext: "png" },
   { img: "136-property-manager-female", name: "Property Manager", niche: "Property Manager", say: "Pick me!", ext: "png" },
+  { img: "137-appraiser", name: "Appraiser", niche: "Appraiser", say: "Pick me!", ext: "png" },
   { img: "139-escrow-officer", name: "Escrow Officer", niche: "Escrow Officer", say: "Pick me!", ext: "png" },
   { img: "141-event-planner-female", name: "Event Planner", niche: "Event Planner", say: "Pick me!", ext: "png" },
   { img: "142-dj", name: "Dj", niche: "Dj", say: "Pick me!", ext: "png" },
