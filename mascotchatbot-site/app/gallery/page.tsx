@@ -188,6 +188,14 @@ const MASCOTS: Mascot[] = [
   { img: "208-water-treatment-tech", niche: "Water Treatment Tech" },
   { img: "209-fireplace-specialist", niche: "Fireplace Specialist" },
   { img: "210-awning-installer", niche: "Awning Installer" },
+  { img: "211-garage-door-tech", niche: "Garage Door Tech" },
+  { img: "212-gutter-installer", niche: "Gutter Installer" },
+  { img: "213-mobile-detailer", niche: "Mobile Detailer" },
+  { img: "214-pool-builder", niche: "Pool Builder" },
+  { img: "215-solar-sales-rep", niche: "Solar Sales Rep" },
+  { img: "216-pressure-wash-pro", niche: "Pressure Wash Pro" },
+  { img: "217-handyman-female", niche: "Handyman" },
+  { img: "218-irrigation-tech", niche: "Irrigation Tech" },
 ];
 
 export default function GalleryPage() {
