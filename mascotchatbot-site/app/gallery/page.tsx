@@ -206,6 +206,11 @@ const MASCOTS: Mascot[] = [
   { img: "226-home-health-nurse", niche: "Home Health Nurse" },
   { img: "227-mobile-iv-nurse", niche: "Mobile IV Nurse" },
   { img: "228-coffee-shop-owner", niche: "Coffee Shop Owner" },
+  { img: "229-boutique-owner", niche: "Boutique Owner" },
+  { img: "230-bookstore-owner", niche: "Bookstore Owner" },
+  { img: "231-pet-store-owner", niche: "Pet Store Owner" },
+  { img: "232-hardware-store-owner", niche: "Hardware Store Owner" },
+  { img: "233-bakery-owner", niche: "Bakery Owner" },
   { img: "234-consignment-shop-owner", niche: "Consignment Shop Owner" },
   { img: "235-florist", niche: "Florist" },
 ];
