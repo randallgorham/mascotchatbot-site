@@ -204,6 +204,7 @@ const MASCOTS: Mascot[] = [
   { img: "224-pharmacist-male", niche: "Pharmacist" },
   { img: "225-speech-therapist", niche: "Speech Therapist" },
   { img: "226-home-health-nurse", niche: "Home Health Nurse" },
+  { img: "227-mobile-iv-nurse", niche: "Mobile IV Nurse" },
 ];
 
 export default function GalleryPage() {
