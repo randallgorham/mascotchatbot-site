@@ -181,14 +181,14 @@ export function MascotRoster({ mascots }: { mascots: Mascot[] }) {
   const [sel, setSel] = useState<Mascot | null>(null);
   return (
     <>
-      <div className="grid grid-cols-2 gap-px border-2 border-ink bg-ink sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
         {mascots.map((c) => (
           <button
             type="button"
             key={c.img}
             id={`mascot-${c.img}`}
             onClick={() => setSel(c)}
-            className="group relative flex scroll-mt-28 cursor-pointer flex-col bg-paper p-3 text-left"
+            className="group relative flex scroll-mt-28 cursor-pointer flex-col rounded-2xl p-3 text-left transition hover:bg-ink/[0.04]"
           >
             <span className="text-[10px] font-semibold uppercase tracking-widest text-smoke">{c.niche}</span>
             <span className="pointer-events-none absolute left-1/2 top-1 z-20 -translate-x-1/2 translate-y-1 opacity-0 transition-all duration-200 ease-out group-hover:-translate-y-1 group-hover:opacity-100">
