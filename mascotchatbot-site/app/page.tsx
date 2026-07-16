@@ -224,6 +224,11 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "226-home-health-nurse", name: "Home Health Nurse", niche: "Home Health Nurse", say: "Pick me!", ext: "png" },
   { img: "227-mobile-iv-nurse", name: "Mobile IV Nurse", niche: "Mobile IV Nurse", say: "Pick me!", ext: "png" },
   { img: "228-coffee-shop-owner", name: "Coffee Shop Owner", niche: "Coffee Shop Owner", say: "Pick me!", ext: "png" },
+  { img: "229-boutique-owner", name: "Boutique Owner", niche: "Boutique Owner", say: "Pick me!", ext: "png" },
+  { img: "230-bookstore-owner", name: "Bookstore Owner", niche: "Bookstore Owner", say: "Pick me!", ext: "png" },
+  { img: "231-pet-store-owner", name: "Pet Store Owner", niche: "Pet Store Owner", say: "Pick me!", ext: "png" },
+  { img: "232-hardware-store-owner", name: "Hardware Store Owner", niche: "Hardware Store Owner", say: "Pick me!", ext: "png" },
+  { img: "233-bakery-owner", name: "Bakery Owner", niche: "Bakery Owner", say: "Pick me!", ext: "png" },
   { img: "234-consignment-shop-owner", name: "Consignment Shop Owner", niche: "Consignment Shop Owner", say: "Pick me!", ext: "png" },
   { img: "235-florist", name: "Florist", niche: "Florist", say: "Pick me!", ext: "png" },
 ];
