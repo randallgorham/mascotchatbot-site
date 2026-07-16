@@ -222,6 +222,7 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "224-pharmacist-male", name: "Pharmacist", niche: "Pharmacist", say: "Pick me!", ext: "png" },
   { img: "225-speech-therapist", name: "Speech Therapist", niche: "Speech Therapist", say: "Pick me!", ext: "png" },
   { img: "226-home-health-nurse", name: "Home Health Nurse", niche: "Home Health Nurse", say: "Pick me!", ext: "png" },
+  { img: "227-mobile-iv-nurse", name: "Mobile IV Nurse", niche: "Mobile IV Nurse", say: "Pick me!", ext: "png" },
 ];
 
 const STATS = [
