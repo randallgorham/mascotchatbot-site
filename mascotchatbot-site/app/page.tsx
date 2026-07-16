@@ -247,6 +247,14 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "249-real-estate-investor", name: "Real Estate Investor", niche: "Real Estate Investor", say: "Pick me!", ext: "png" },
   { img: "250-notary", name: "Notary Public", niche: "Notary Public", say: "Pick me!", ext: "png" },
   { img: "251-bookkeeper", name: "Bookkeeper", niche: "Bookkeeper", say: "Pick me!", ext: "png" },
+  { img: "252-shark", name: "Shark", niche: "Shark mascot", say: "Pick me!", ext: "png" },
+  { img: "253-gorilla", name: "Gorilla", niche: "Gorilla mascot", say: "Pick me!", ext: "png" },
+  { img: "254-ram", name: "Ram", niche: "Ram mascot", say: "Pick me!", ext: "png" },
+  { img: "255-panther", name: "Panther", niche: "Panther mascot", say: "Pick me!", ext: "png" },
+  { img: "256-bull", name: "Bull", niche: "Bull mascot", say: "Pick me!", ext: "png" },
+  { img: "257-husky", name: "Husky", niche: "Husky mascot", say: "Pick me!", ext: "png" },
+  { img: "258-hawk", name: "Hawk", niche: "Hawk mascot", say: "Pick me!", ext: "png" },
+  { img: "259-mustang", name: "Mustang", niche: "Mustang mascot", say: "Pick me!", ext: "png" },
 ];
 
 const STATS = [
