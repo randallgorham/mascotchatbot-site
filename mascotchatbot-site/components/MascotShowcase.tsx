@@ -102,7 +102,7 @@ function MascotModal({ mascot, onClose }: { mascot: Mascot | null; onClose: () =
           ✕
         </button>
         <div className="flex items-center justify-center border-b-2 border-ink bg-[#f3f4f6] px-6 pb-4 pt-8">
-          <img src={srcOf(mascot)} alt={`${mascot.niche} mascot`} className="h-52 w-52 object-contain mix-blend-multiply" />
+          <img src={srcOf(mascot)} alt={`${mascot.niche} mascot`} className="h-60 w-auto max-w-full object-contain" />
         </div>
         <div className="p-6">
           <div className="text-[11px] font-bold uppercase tracking-widest text-smoke">Predesigned mascot</div>
@@ -157,12 +157,12 @@ export function MascotMarquee({ mascots }: { mascots: Mascot[] }) {
                 title={`${c.niche} — click to pick`}
                 className="group mx-4 flex w-28 shrink-0 cursor-pointer flex-col items-center sm:w-36"
               >
-                <span className="mb-2 flex h-[100px] w-[100px] items-center justify-center transition-transform duration-200 group-hover:scale-[1.08] sm:h-[120px] sm:w-[120px]">
+                <span className="mb-2 flex h-[120px] w-[120px] items-center justify-center transition-transform duration-200 group-hover:scale-[1.08] sm:h-[140px] sm:w-[140px]">
                   <img
                     src={srcOf(c)}
                     alt={`${c.niche} mascot`}
                     loading="lazy"
-                    className="h-full w-full object-contain mix-blend-multiply"
+                    className="h-full w-full object-contain"
                     style={{ animation: `${a} ${(2.4 + (i % 5) * 0.35).toFixed(2)}s ease-in-out infinite`, animationDelay: `${((i % 7) * 0.2).toFixed(2)}s`, willChange: "transform" }}
                   />
                 </span>
@@ -188,7 +188,7 @@ export function MascotRoster({ mascots }: { mascots: Mascot[] }) {
             key={c.img}
             id={`mascot-${c.img}`}
             onClick={() => setSel(c)}
-            className="group relative flex aspect-[3/4] scroll-mt-28 cursor-pointer flex-col overflow-hidden bg-paper p-3 text-left"
+            className="group relative flex scroll-mt-28 cursor-pointer flex-col bg-paper p-3 text-left"
           >
             <span className="text-[10px] font-semibold uppercase tracking-widest text-smoke">{c.niche}</span>
             <span className="pointer-events-none absolute left-1/2 top-1 z-20 -translate-x-1/2 translate-y-1 opacity-0 transition-all duration-200 ease-out group-hover:-translate-y-1 group-hover:opacity-100">
@@ -198,15 +198,15 @@ export function MascotRoster({ mascots }: { mascots: Mascot[] }) {
                 <span className="absolute -bottom-[11px] left-2 h-1.5 w-1.5 rounded-full border-2 border-ink bg-paper" />
               </span>
             </span>
-            <span className="flex flex-1 items-center justify-center overflow-hidden py-1">
+            <span className="flex h-44 w-full items-center justify-center py-2 sm:h-52">
               <img
                 src={srcOf(c)}
                 alt={`${c.niche} mascot`}
                 loading="lazy"
-                className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 ease-out group-hover:scale-[1.08]"
+                className="max-h-full max-w-full object-contain transition-transform duration-300 ease-out group-hover:scale-[1.06]"
               />
             </span>
-            <span className="text-base font-bold">{c.name}</span>
+            <span className="mt-1 text-base font-bold">{c.name}</span>
           </button>
         ))}
       </div>
