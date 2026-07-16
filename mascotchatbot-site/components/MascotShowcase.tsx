@@ -198,7 +198,7 @@ export function MascotRoster({ mascots }: { mascots: Mascot[] }) {
                 <span className="absolute -bottom-[11px] left-2 h-1.5 w-1.5 rounded-full border-2 border-ink bg-paper" />
               </span>
             </span>
-            <span className="flex h-44 w-full items-center justify-center py-2 sm:h-52">
+            <span className="flex h-52 w-full items-center justify-center px-2 pb-5 pt-2 sm:h-60">
               <img
                 src={srcOf(c)}
                 alt={`${c.niche} mascot`}
