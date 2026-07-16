@@ -213,6 +213,14 @@ const MASCOTS: Mascot[] = [
   { img: "233-bakery-owner", niche: "Bakery Owner" },
   { img: "234-consignment-shop-owner", niche: "Consignment Shop Owner" },
   { img: "235-florist", niche: "Florist" },
+  { img: "236-bulldog", niche: "Bulldog mascot" },
+  { img: "237-lion", niche: "Lion mascot" },
+  { img: "238-eagle", niche: "Eagle mascot" },
+  { img: "239-bear", niche: "Bear mascot" },
+  { img: "240-fox", niche: "Fox mascot" },
+  { img: "241-owl", niche: "Owl mascot" },
+  { img: "242-tiger", niche: "Tiger mascot" },
+  { img: "243-wolf", niche: "Wolf mascot" },
 ];
 
 export default function GalleryPage() {
