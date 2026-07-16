@@ -198,12 +198,12 @@ export function MascotRoster({ mascots }: { mascots: Mascot[] }) {
                 <span className="absolute -bottom-[11px] left-2 h-1.5 w-1.5 rounded-full border-2 border-ink bg-paper" />
               </span>
             </span>
-            <span className="flex h-44 w-full items-center justify-center sm:h-52">
+            <span className="flex h-52 w-full items-center justify-center p-2 sm:h-60">
               <img
                 src={srcOf(c)}
                 alt={`${c.niche} mascot`}
                 loading="lazy"
-                className="max-h-full max-w-full object-contain transition-transform duration-300 ease-out group-hover:scale-[1.06]"
+                className="max-h-[80%] max-w-[88%] object-contain transition-transform duration-300 ease-out group-hover:scale-[1.06]"
               />
             </span>
             <span className="mt-1 text-base font-bold">{c.name}</span>
