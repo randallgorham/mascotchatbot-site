@@ -214,6 +214,14 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "216-pressure-wash-pro", name: "Pressure Wash Pro", niche: "Pressure Wash Pro", say: "Pick me!", ext: "png" },
   { img: "217-handyman-female", name: "Handyman", niche: "Handyman", say: "Pick me!", ext: "png" },
   { img: "218-irrigation-tech", name: "Irrigation Tech", niche: "Irrigation Tech", say: "Pick me!", ext: "png" },
+  { img: "219-optometrist", name: "Optometrist", niche: "Optometrist", say: "Pick me!", ext: "png" },
+  { img: "220-orthodontist", name: "Orthodontist", niche: "Orthodontist", say: "Pick me!", ext: "png" },
+  { img: "221-obgyn", name: "OB-GYN", niche: "OB-GYN", say: "Pick me!", ext: "png" },
+  { img: "222-phlebotomist", name: "Phlebotomist", niche: "Phlebotomist", say: "Pick me!", ext: "png" },
+  { img: "223-physical-therapist-male", name: "Physical Therapist", niche: "Physical Therapist", say: "Pick me!", ext: "png" },
+  { img: "224-pharmacist-male", name: "Pharmacist", niche: "Pharmacist", say: "Pick me!", ext: "png" },
+  { img: "225-speech-therapist", name: "Speech Therapist", niche: "Speech Therapist", say: "Pick me!", ext: "png" },
+  { img: "226-home-health-nurse", name: "Home Health Nurse", niche: "Home Health Nurse", say: "Pick me!", ext: "png" },
 ];
 
 const STATS = [
