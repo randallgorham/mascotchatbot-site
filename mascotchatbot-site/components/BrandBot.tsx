@@ -142,7 +142,7 @@ export default function BrandBot() {
     }
     function fetchTTS(text: string): Promise<ArrayBuffer | null> {
       if (muted) return Promise.resolve(null);
-      return fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, speed: 1.1 }) })
+      return fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, speed: 1.0 }) })
         .then((res) => (!res.ok || res.status === 204) ? null : res.arrayBuffer())
         .then((b) => (b && b.byteLength >= 200) ? b : null)
         .catch(() => null);
@@ -155,7 +155,7 @@ export default function BrandBot() {
         if (!window.speechSynthesis) { flapAwait(text).then(res); return; }
         try {
           const u = new SpeechSynthesisUtterance(text);
-          if (voice) u.voice = voice; u.rate = 1.1; u.pitch = 1.1;
+          if (voice) u.voice = voice; u.rate = 1.0; u.pitch = 1.1;
           u.onstart = () => loopMouth(); u.onend = () => res(); u.onerror = () => res();
           speechSynthesis.speak(u);
         } catch { flapAwait(text).then(res); }
@@ -248,16 +248,17 @@ export default function BrandBot() {
 
     // pull complete sentences out of the streaming buffer and queue them for speech
     let sayBuf = "";
-    let spokeFirst = false; // the very first chunk breaks early (clause/~5 words) so Robo starts talking fast
+    let spokeFirst = false; // the very first chunk breaks a little early so Robo starts talking promptly — but only on a natural clause/sentence boundary so it never sounds clipped or rushed
     function pumpSentences(end: boolean) {
       for (;;) {
         let cut = -1;
         for (let i = 0; i < sayBuf.length; i++) {
           const c = sayBuf[i], nxt = sayBuf[i + 1];
           const hard = c === "\n" || ((c === "." || c === "!" || c === "?") && (nxt === undefined || nxt === " " || nxt === "\n"));
-          // Until the first chunk is out, also break at a clause boundary or after ~a few words so audio starts fast.
-          const soft = !spokeFirst && (c === "," || c === ";" || c === ":") && (nxt === undefined || nxt === " ");
-          const lenBreak = !spokeFirst && i >= 24 && c === " ";
+          // For the first chunk, allow an early break ONLY at a real clause boundary once
+          // there's enough said (>=32 chars) so the opening line is a smooth, complete phrase.
+          const soft = !spokeFirst && i >= 32 && (c === "," || c === ";" || c === ":") && (nxt === undefined || nxt === " ");
+          const lenBreak = !spokeFirst && i >= 60 && c === " ";
           if (hard || soft || lenBreak) { cut = i + 1; break; }
         }
         if (cut === -1) break;
