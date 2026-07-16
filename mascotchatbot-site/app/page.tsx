@@ -231,6 +231,14 @@ const CHARACTERS: { img: string; name: string; niche: string; say: string; ext?:
   { img: "233-bakery-owner", name: "Bakery Owner", niche: "Bakery Owner", say: "Pick me!", ext: "png" },
   { img: "234-consignment-shop-owner", name: "Consignment Shop Owner", niche: "Consignment Shop Owner", say: "Pick me!", ext: "png" },
   { img: "235-florist", name: "Florist", niche: "Florist", say: "Pick me!", ext: "png" },
+  { img: "236-bulldog", name: "Bulldog", niche: "Bulldog mascot", say: "Pick me!", ext: "png" },
+  { img: "237-lion", name: "Lion", niche: "Lion mascot", say: "Pick me!", ext: "png" },
+  { img: "238-eagle", name: "Eagle", niche: "Eagle mascot", say: "Pick me!", ext: "png" },
+  { img: "239-bear", name: "Bear", niche: "Bear mascot", say: "Pick me!", ext: "png" },
+  { img: "240-fox", name: "Fox", niche: "Fox mascot", say: "Pick me!", ext: "png" },
+  { img: "241-owl", name: "Owl", niche: "Owl mascot", say: "Pick me!", ext: "png" },
+  { img: "242-tiger", name: "Tiger", niche: "Tiger mascot", say: "Pick me!", ext: "png" },
+  { img: "243-wolf", name: "Wolf", niche: "Wolf mascot", say: "Pick me!", ext: "png" },
 ];
 
 const STATS = [
