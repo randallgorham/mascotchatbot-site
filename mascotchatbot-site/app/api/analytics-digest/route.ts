@@ -233,7 +233,38 @@ export async function GET(req: Request) {
   const html = wrap("Daily traffic snapshot", body);
 
   const to = process.env.DIGEST_TO || (await getSetting("digest_email", "")) || (await getSetting("alert_email", "")) || "randallgorham@gmail.com";
-  const ok = await sendEmail(to, `📈 MascotChatbot daily — ${int(users)} visitors, ${int(sessions)} sessions`, html);
+  const subject = `📈 MascotChatbot daily — ${int(users)} visitors, ${int(sessions)} sessions`;
 
-  return json({ ok, to, sessions, users, sent: ok });
+  // Send via Resend directly so we can surface the exact error when it fails.
+  const debug = new URL(req.url).searchParams.get("debug") === "1";
+  const key = (await getSecret("RESEND_API_KEY")) || process.env.RESEND_API_KEY || "";
+  const from = process.env.DIGEST_FROM || (await getSetting("digest_from", "")) || "MascotChatbot <onboarding@resend.dev>";
+  let sent = false;
+  let mailStatus = 0;
+  let mailError = "";
+  if (!key) {
+    mailError = "no RESEND_API_KEY configured";
+  } else {
+    try {
+      const r = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+        body: JSON.stringify({ from, to: [to], subject, html }),
+      });
+      mailStatus = r.status;
+      sent = r.ok;
+      if (!r.ok) mailError = (await r.text()).slice(0, 300);
+    } catch (e) {
+      mailError = String(e).slice(0, 300);
+    }
+  }
+
+  const out: Record<string, unknown> = { ok: sent, to, sessions, users, sent };
+  if (debug) {
+    out.from = from;
+    out.mailStatus = mailStatus;
+    out.mailError = mailError;
+    out.hasKey = !!key;
+  }
+  return json(out);
 }
