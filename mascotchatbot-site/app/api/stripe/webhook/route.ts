@@ -1,7 +1,8 @@
 // Stripe webhook: on a completed checkout we auto-provision the buyer —
 // create their account record (if new) and their bot, then send a welcome email.
 // Signature is verified against STRIPE_WEBHOOK_SECRET using Web Crypto (Edge-safe).
-import { getSecret, kvSet } from "@/lib/vault";
+import { getSecret, getSetting, kvSet } from "@/lib/vault";
+import { sendEmail, wrap } from "@/lib/notify";
 import { getUser, saveUser } from "@/lib/auth";
 import { getOrCreateBot, saveBot } from "@/lib/botcfg";
 import { markReferralPaid } from "@/lib/referrals";
@@ -86,12 +87,10 @@ export async function POST(req: Request) {
     const email = String((details && details.email) || s.customer_email || (meta && meta.email) || "").toLowerCase();
     if (email) {
       const origin = new URL(req.url).origin;
-      // Provision account record if new (so login + dashboard work).
       const existing = await getUser(email);
       if (!existing) {
         await saveUser({ email, name: email.split("@")[0], createdAt: new Date().toISOString() });
       }
-      // Provision their bot and clear any free-trial state now that they've paid.
       const provisioned = await getOrCreateBot(email);
       try {
         provisioned.plan = "active";
@@ -101,7 +100,6 @@ export async function POST(req: Request) {
         if (pm && pm.setup) provisioned.setup = String(pm.setup);
         await saveBot(provisioned);
       } catch { /* best effort */ }
-      // Record the paid order for the admin.
       const orderId = String(s.id || Date.now().toString(36));
       const amount = Number(s.amount_total || 0) / 100;
       await kvSet("order:" + orderId, JSON.stringify({
@@ -109,8 +107,23 @@ export async function POST(req: Request) {
         amount,
         createdAt: new Date().toISOString(),
       }));
-      // Book affiliate commission if this buyer was referred.
       try { await markReferralPaid(email, amount); } catch { /* best effort */ }
+      // Alert the owner of the new paid order (email + Resend).
+      try {
+        const ownerTo = await getSetting("alert_email", "randallgorham@gmail.com");
+        const pmeta = (s.metadata as { plan?: string; term?: string } | undefined) || undefined;
+        const plan = (pmeta && pmeta.plan) || "";
+        const term = (pmeta && pmeta.term) || "";
+        await sendEmail(
+          ownerTo,
+          `New paid order — $${amount} · ${email}`,
+          wrap("New paid order \ud83c\udf89",
+            `<p style="margin:0 0 10px;font-size:17px"><b>${email}</b> just paid <b>$${amount}</b>.</p>` +
+            (plan ? `<p style="margin:0 0 6px">Plan: <b>${plan}</b>${term ? " (" + term + ")" : ""}</p>` : "") +
+            `<p style="margin:0 0 6px">Order ID: ${orderId}</p>` +
+            `<p style="margin:12px 0 0"><a href="${origin}/admin/customers">View in admin →</a></p>`)
+        );
+      } catch { /* best effort */ }
       await sendWelcome(email, origin, provisioned.id);
     }
   }
