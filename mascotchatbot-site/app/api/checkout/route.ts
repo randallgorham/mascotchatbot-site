@@ -21,6 +21,11 @@ export async function POST(req: Request) {
     const key = await getSecret("STRIPE_SECRET_KEY");
     if (!key) return json({ ok: false, stripe: false }); // caller falls back to invoice flow
 
+    // If a publishable key is configured we render Stripe's form embedded inside our
+    // own /checkout page; otherwise we fall back to the hosted Stripe Checkout page.
+    const pk = await getSecret("STRIPE_PUBLISHABLE_KEY");
+    const embedded = !!pk;
+
     // Term-aware totals. The plan item carries its billing term; the recurring
     // portion is prepaid for that term (1 / 12 / 36 months).
     const plan = items.find((it) => (Number(it.monthly) || 0) > 0);
@@ -33,8 +38,13 @@ export async function POST(req: Request) {
 
     const params = new URLSearchParams();
     params.set("mode", "payment");
-    params.set("success_url", origin + "/checkout?paid=1");
-    params.set("cancel_url", origin + "/checkout?canceled=1");
+    if (embedded) {
+      params.set("ui_mode", "embedded");
+      params.set("return_url", origin + "/checkout/complete?session_id={CHECKOUT_SESSION_ID}");
+    } else {
+      params.set("success_url", origin + "/checkout/complete?session_id={CHECKOUT_SESSION_ID}");
+      params.set("cancel_url", origin + "/checkout?canceled=1");
+    }
     if (email) params.set("customer_email", email);
     params.set("metadata[monthly_total]", String(monthly));
     params.set("metadata[term]", term);
@@ -62,12 +72,12 @@ export async function POST(req: Request) {
     }
     // Recurring portion, prepaid for the chosen term.
     if (prepaid > 0) {
-      const planName = (plan && plan.name) || "Plan";
+      const pName = (plan && plan.name) || "Plan";
       const label = term === "prepay3"
-        ? `${planName} — 3 years prepaid (${months} × $${monthly}/mo)`
+        ? `${pName} — 3 years prepaid (${months} × $${monthly}/mo)`
         : term === "annual"
-        ? `${planName} — 1 year prepaid (12 × $${monthly}/mo)`
-        : `${planName} — first month`;
+        ? `${pName} — 1 year prepaid (12 × $${monthly}/mo)`
+        : `${pName} — first month`;
       params.set(`line_items[${li}][price_data][currency]`, "usd");
       params.set(`line_items[${li}][price_data][product_data][name]`, label);
       params.set(`line_items[${li}][price_data][unit_amount]`, String(Math.round(prepaid * 100)));
@@ -82,7 +92,8 @@ export async function POST(req: Request) {
       body: params,
     });
     const s = await r.json();
-    if (s && s.url) return json({ ok: true, stripe: true, url: s.url });
+    if (embedded && s && s.client_secret) return json({ ok: true, stripe: true, embedded: true, clientSecret: s.client_secret, pk });
+    if (!embedded && s && s.url) return json({ ok: true, stripe: true, embedded: false, url: s.url });
     return json({ ok: false, stripe: true, error: (s && s.error && s.error.message) || "Stripe error" });
   } catch {
     return json({ ok: false, error: "Checkout error." }, 500);
