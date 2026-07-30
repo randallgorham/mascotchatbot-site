@@ -5,7 +5,7 @@ import { INDUSTRIES, industryMeta } from "@/lib/industries";
 
 export { INDUSTRIES, industryMeta };
 
-const BOOKING = "https://api.leadconnectorhq.com/widget/booking/bYPWHLo2QmfN4WVHqVr1";
+const BOOKING = "https://calendly.com/randallgorham/new-meeting";
 
 const TALK_CSS = `
 @keyframes mcShine{0%{background-position:120% 0}100%{background-position:-120% 0}}

@@ -1,12 +1,16 @@
 "use client";
 
 import SiteHeader from "@/components/SiteHeader";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/components/CartProvider";
 
 function money(n: number) {
   return "$" + n.toLocaleString();
 }
+
+// Minimal shape of the Stripe embedded-checkout API we use.
+type EmbeddedCheckout = { mount: (sel: string) => void; destroy: () => void };
+type StripeLike = { initEmbeddedCheckout: (o: { clientSecret: string }) => Promise<EmbeddedCheckout> };
 
 export default function Checkout() {
   const { items, monthlyTotal, oneTimeTotal, remove, clear } = useCart();
@@ -14,6 +18,36 @@ export default function Checkout() {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [orderId, setOrderId] = useState("");
   const [err, setErr] = useState("");
+  const [pay, setPay] = useState<{ clientSecret: string; pk: string } | null>(null);
+
+  // Mount Stripe's embedded checkout once we have a client secret.
+  useEffect(() => {
+    if (!pay) return;
+    let cancelled = false;
+    let ec: EmbeddedCheckout | null = null;
+    (async () => {
+      try {
+        const w = window as unknown as { Stripe?: (k: string) => StripeLike };
+        if (!w.Stripe) {
+          await new Promise<void>((res, rej) => {
+            const el = document.createElement("script");
+            el.src = "https://js.stripe.com/v3/";
+            el.onload = () => res();
+            el.onerror = () => rej(new Error("stripe.js failed"));
+            document.head.appendChild(el);
+          });
+        }
+        if (cancelled || !w.Stripe) return;
+        const stripe = w.Stripe(pay.pk);
+        ec = await stripe.initEmbeddedCheckout({ clientSecret: pay.clientSecret });
+        if (cancelled) { try { ec.destroy(); } catch { /* noop */ } return; }
+        ec.mount("#stripe-embed");
+      } catch {
+        if (!cancelled) setErr("Couldn't load the payment form — please refresh and try again.");
+      }
+    })();
+    return () => { cancelled = true; try { ec && ec.destroy(); } catch { /* noop */ } };
+  }, [pay]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,10 +60,11 @@ export default function Checkout() {
       });
       const d = await r.json();
       if (d.ok) {
-        // If Stripe is connected, send them straight to secure payment; otherwise confirm + invoice.
+        // Ask for a Stripe session. Embedded → render inline; hosted url → redirect; else invoice.
         try {
           const cs = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items, email: form.email }) });
           const cd = await cs.json();
+          if (cd && cd.ok && cd.embedded && cd.clientSecret && cd.pk) { setPay({ clientSecret: cd.clientSecret, pk: cd.pk }); setStatus("idle"); return; }
           if (cd && cd.ok && cd.url) { clear(); window.location.href = cd.url; return; }
         } catch {
           /* fall through to invoice flow */
@@ -48,7 +83,21 @@ export default function Checkout() {
       <div className="mx-auto max-w-5xl px-5 py-12">
         <h1 className="mb-8 text-4xl font-bold tracking-tightest">Checkout</h1>
 
-        {status === "done" ? (
+        {pay ? (
+          /* Embedded Stripe payment — rendered inside our own page. */
+          <div className="grid gap-8 md:grid-cols-[1fr_0.9fr]">
+            <div className="order-2 md:order-1">
+              <div className="rounded-3xl border border-ink/15 bg-white p-3 shadow-sm">
+                <div id="stripe-embed" />
+              </div>
+              {err && <p className="mt-3 text-center text-sm font-medium text-red-600">{err}</p>}
+              <button onClick={() => { setPay(null); }} className="mt-4 text-sm text-smoke underline hover:text-ink">← Back to order details</button>
+            </div>
+            <div className="order-1 md:order-2">
+              <OrderSummary items={items} monthlyTotal={monthlyTotal} oneTimeTotal={oneTimeTotal} readOnly />
+            </div>
+          </div>
+        ) : status === "done" ? (
           <div className="rounded-3xl border-2 border-ink bg-paper p-10 text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-ink">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 6.5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -78,81 +127,82 @@ export default function Checkout() {
                 </label>
               </div>
               <button disabled={status === "sending"} className="mt-5 w-full rounded-full bg-ink px-6 py-4 font-semibold text-paper transition hover:opacity-90 disabled:opacity-60">
-                {status === "sending" ? "Placing order…" : "Place order"}
+                {status === "sending" ? "Loading secure payment…" : "Continue to payment"}
               </button>
               {err && <p className="mt-3 text-center text-sm font-medium text-red-600">{err}</p>}
-              <p className="mt-3 text-center text-xs text-smoke">No charge today. We confirm details and email a secure payment link.</p>
+              <p className="mt-3 text-center text-xs text-smoke">Secure payment by Stripe — you&apos;ll pay on the next step, right here on our site.</p>
             </form>
 
             {/* Summary */}
             <div className="order-1 md:order-2">
-              <div className="rounded-3xl border-2 border-ink bg-paper p-6">
-                <h2 className="mb-4 text-lg font-bold">Order summary</h2>
-                <ul className="space-y-3">
-                  {items.map((it) => (
-                    <li key={it.id} className="flex items-start justify-between gap-2 border-b border-ink/10 pb-3">
-                      <div>
-                        <div className="font-semibold">{it.name}</div>
-                        {it.detail && <div className="text-xs text-smoke">{it.detail}</div>}
-                      </div>
-                      <div className="shrink-0 text-right text-sm">
-                        {it.monthly > 0 && <div className="font-semibold">{money(it.monthly)}/mo</div>}
-                        {it.oneTime > 0 && <div className={it.monthly > 0 ? "text-smoke" : "font-semibold"}>{money(it.oneTime)} once</div>}
-                        <button onClick={() => remove(it.id)} className="mt-0.5 text-xs text-smoke underline hover:text-ink">remove</button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                {(() => {
-                  const plan = items.find((i) => i.kind === "plan");
-                  const term = (plan && plan.billing) || "monthly";
-                  const months = term === "annual" ? 12 : term === "prepay3" ? 36 : 1;
-                  const subLabel = term === "annual" ? "Billed yearly" : term === "prepay3" ? "Billed once for 3 years" : "Billed monthly";
-                  const prepaid = monthlyTotal * months;
-                  const total = prepaid + oneTimeTotal;
-                  return (
-                    <>
-                      {/* Lead with the monthly rate; the total is the secondary line. */}
-                      <div className="mt-4 border-t border-ink/10 pt-4">
-                        <div className="flex items-end gap-1.5">
-                          <span className="text-4xl font-bold tracking-tightest">{money(monthlyTotal)}</span>
-                          <span className="mb-1.5 text-smoke">/mo</span>
-                        </div>
-                        <p className="mt-1 text-sm text-smoke">
-                          {subLabel}
-                          {term === "prepay3" ? " · setup waived" : oneTimeTotal > 0 ? " + " + money(oneTimeTotal) + " one-time setup" : ""}
-                        </p>
-                      </div>
-                      <div className="mt-4 space-y-1.5 text-sm">
-                        {months > 1 ? (
-                          <div className="flex justify-between"><span className="text-smoke">{months} months prepaid ({months} &times; {money(monthlyTotal)})</span><span className="font-medium">{money(prepaid)}</span></div>
-                        ) : (
-                          <div className="flex justify-between"><span className="text-smoke">First month</span><span className="font-medium">{money(monthlyTotal)}</span></div>
-                        )}
-                        {oneTimeTotal > 0 && (
-                          <div className="flex justify-between"><span className="text-smoke">Setup &amp; one-time</span><span className="font-medium">{money(oneTimeTotal)}</span></div>
-                        )}
-                      </div>
-                      <div className="mt-3 flex items-center justify-between border-t border-ink/10 pt-3 text-sm">
-                        <span className="text-smoke">Total billed today</span>
-                        <span className="font-bold">{money(total)}</span>
-                      </div>
-                      <p className="mt-1.5 text-xs text-smoke">
-                        {term === "prepay3"
-                          ? "One payment covers 3 full years, then renews at " + money(monthlyTotal) + "/mo."
-                          : term === "annual"
-                          ? "Renews yearly at " + money(monthlyTotal * 12) + "/yr."
-                          : "Then " + money(monthlyTotal) + "/mo — cancel anytime."}
-                      </p>
-                    </>
-                  );
-                })()}
-              </div>
+              <OrderSummary items={items} monthlyTotal={monthlyTotal} oneTimeTotal={oneTimeTotal} remove={remove} />
             </div>
           </div>
         )}
       </div>
     </main>
+  );
+}
+
+type CartItem = { id: string; name: string; detail?: string; monthly: number; oneTime: number; kind?: string; billing?: string };
+
+function OrderSummary({ items, monthlyTotal, oneTimeTotal, remove, readOnly = false }: { items: CartItem[]; monthlyTotal: number; oneTimeTotal: number; remove?: (id: string) => void; readOnly?: boolean }) {
+  const plan = items.find((i) => i.kind === "plan");
+  const term = (plan && plan.billing) || "monthly";
+  const months = term === "annual" ? 12 : term === "prepay3" ? 36 : 1;
+  const subLabel = term === "annual" ? "Billed yearly" : term === "prepay3" ? "Billed once for 3 years" : "Billed monthly";
+  const prepaid = monthlyTotal * months;
+  const total = prepaid + oneTimeTotal;
+  return (
+    <div className="rounded-3xl border-2 border-ink bg-paper p-6">
+      <h2 className="mb-4 text-lg font-bold">Order summary</h2>
+      <ul className="space-y-3">
+        {items.map((it) => (
+          <li key={it.id} className="flex items-start justify-between gap-2 border-b border-ink/10 pb-3">
+            <div>
+              <div className="font-semibold">{it.name}</div>
+              {it.detail && <div className="text-xs text-smoke">{it.detail}</div>}
+            </div>
+            <div className="shrink-0 text-right text-sm">
+              {it.monthly > 0 && <div className="font-semibold">{money(it.monthly)}/mo</div>}
+              {it.oneTime > 0 && <div className={it.monthly > 0 ? "text-smoke" : "font-semibold"}>{money(it.oneTime)} once</div>}
+              {!readOnly && remove && <button onClick={() => remove(it.id)} className="mt-0.5 text-xs text-smoke underline hover:text-ink">remove</button>}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 border-t border-ink/10 pt-4">
+        <div className="flex items-end gap-1.5">
+          <span className="text-4xl font-bold tracking-tightest">{money(monthlyTotal)}</span>
+          <span className="mb-1.5 text-smoke">/mo</span>
+        </div>
+        <p className="mt-1 text-sm text-smoke">
+          {subLabel}
+          {term === "prepay3" ? " · setup waived" : oneTimeTotal > 0 ? " + " + money(oneTimeTotal) + " one-time setup" : ""}
+        </p>
+      </div>
+      <div className="mt-4 space-y-1.5 text-sm">
+        {months > 1 ? (
+          <div className="flex justify-between"><span className="text-smoke">{months} months prepaid ({months} &times; {money(monthlyTotal)})</span><span className="font-medium">{money(prepaid)}</span></div>
+        ) : (
+          <div className="flex justify-between"><span className="text-smoke">First month</span><span className="font-medium">{money(monthlyTotal)}</span></div>
+        )}
+        {oneTimeTotal > 0 && (
+          <div className="flex justify-between"><span className="text-smoke">Setup &amp; one-time</span><span className="font-medium">{money(oneTimeTotal)}</span></div>
+        )}
+      </div>
+      <div className="mt-3 flex items-center justify-between border-t border-ink/10 pt-3 text-sm">
+        <span className="text-smoke">Total billed today</span>
+        <span className="font-bold">{money(total)}</span>
+      </div>
+      <p className="mt-1.5 text-xs text-smoke">
+        {term === "prepay3"
+          ? "One payment covers 3 full years, then renews at " + money(monthlyTotal) + "/mo."
+          : term === "annual"
+          ? "Renews yearly at " + money(monthlyTotal * 12) + "/yr."
+          : "Then " + money(monthlyTotal) + "/mo — cancel anytime."}
+      </p>
+    </div>
   );
 }
 

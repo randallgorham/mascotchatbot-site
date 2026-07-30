@@ -288,7 +288,7 @@ const FAQS = [
 ];
 
 export default async function Home() {
-  const bookingUrl = await getSetting("ghl_calendar_url", "https://api.leadconnectorhq.com/widget/booking/bYPWHLo2QmfN4WVHqVr1");
+  const bookingUrl = await getSetting("ghl_calendar_url", "https://calendly.com/randallgorham/new-meeting");
   return (
     <main className="min-h-screen bg-paper text-ink">
       <script
