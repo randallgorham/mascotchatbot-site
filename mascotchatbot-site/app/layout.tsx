@@ -60,6 +60,8 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-JX2ET1Q1HL');`}
         </Script>
+        {/* THNK lead-capture widget */}
+        <Script src="/lead-widget.js" strategy="afterInteractive" />
         <CartProvider>
           <RefCapture />
           {children}
